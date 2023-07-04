@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Compresse_pdf</title>
+
+    </head>
+
+    <body>
+        <div id="app">
+            <h1>compresser des fichiers PDF</h1>
+            <p>Compresser deux fichiers PDF pour trouver les différences. Cliquez sur le bouton suivant pour charger vos
+                fichiers.
+            </p>
+            <form enctype="multipart/form-data" method="post">
+                {% csrf_token %}
+                    <input type="file" name="pdf_file" accept="application/pdf" />
+                <div id="compareDiv">
+                    <button type="submit" name="filename" id="compressButton">Compresser le fichier</button>
+                </div>
+            </form>
+
+        </div>
+    </body>
+
+</html>
