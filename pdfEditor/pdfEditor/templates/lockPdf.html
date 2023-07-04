@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head></head>
+    <body>
+        <div id="app">
+            <h1>Verrouiller vos fichiers PDFs en un click</h1>
+            <p>Verrouiller votre fichier PDF. Cliquez sur le bouton suivant pour charger votre
+                fichier.
+            </p>
+             
+            <form enctype="multipart/form-data" method="post" >
+                {% csrf_token %}
+                <label for="password">Entrer votre mot de passe:</label>
+                <input type="password" id="pass" name="password" placeholder="password" required> <br/><br/>
+                <input type="file" name="input_file" accept="application/pdf" /><br /><br />
+                <div id="lockDiv">
+                    <button type="submit" name="filename" id="lockButton">verrouiller le fichier</button>
+                </div>
+            </form>
+            <p>Votre fichier a été verrouiller avec succes,et il est pret à etre téléchargé!</p> <br/>
+            <div>
+                <a href="{% url 'download_locked_file' %}">Télécharger le fichier verrouiller</a>
+            </div>
+        </div>
+    </body>
+</html>

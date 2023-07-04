@@ -21,6 +21,12 @@
                 </div>
             </form>
 
+            {% if compressedFileSize %}
+                <div>
+                    <a href="{% url 'download_compressed' %}">Télécharger le fichier compressé</a>
+                </div>
+            {% endif %}
+
         </div>
     </body>
 
