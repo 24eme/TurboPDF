@@ -13,13 +13,19 @@
             <p>Compresser deux fichiers PDF pour trouver les différences. Cliquez sur le bouton suivant pour charger vos
                 fichiers.
             </p>
-            <form enctype="multipart/form-data" method="post">
+            <form enctype="multipart/form-data" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                     <input type="file" name="pdf_file" accept="application/pdf" />
                 <div id="compareDiv">
                     <button type="submit" name="filename" id="compressButton">Compresser le fichier</button>
                 </div>
             </form>
+
+            {% if compressedFileSize %}
+                <div>
+               <a href="{% url 'download_compressed' %}">Télécharger le fichier compressé</a>
+                </div>
+            {% endif %}
 
         </div>
     </body>

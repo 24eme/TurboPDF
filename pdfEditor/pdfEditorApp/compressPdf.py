@@ -9,7 +9,7 @@ def compressPdfFunction(file):
     for page in reader.pages:
         page.compress_content_streams()  # This is CPU intensive!
         writer.add_page(page)
-
-    with open("compressedPDF.pdf", "wb") as f:
+    commpFile = "compressedPDF.pdf"
+    with open(commpFile, "wb") as f:
         writer.write(f)
     return os.path.getsize("compressedPDF.pdf")
