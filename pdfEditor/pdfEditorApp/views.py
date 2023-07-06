@@ -5,6 +5,7 @@ from django.shortcuts import render
 from pdfEditorApp.listing.forms import inputForm
 from pdfEditorApp.compressPdf import compressPdfFunction
 from pdfEditorApp.lockPdf import lock_pdf_file, save_input_file
+from pdfEditorApp.unlockPdf import unlock_pdf_file
 import os
 
 
@@ -43,6 +44,13 @@ def lockPdf(request):
     
     return render(request, 'lockPdf.html')
 
+def unlockPdf(request):
+    if request.method == 'POST':
+        password = request.POST['password']
+        unlock_pdf_file(request.FILES['input_file'], password)
+    
+    return render(request, 'unlockPdf.html')
+
 def download_locked_file(request):
     if os.path.exists("encrypted_lockedFile.pdf"):
         with open("encrypted_lockedFile.pdf", 'rb') as f:
@@ -50,6 +58,17 @@ def download_locked_file(request):
             response['Content-Disposition'] = 'attachment; filename="encrypted_lockedFile.pdf"'
             response['Content-Length'] = os.path.getsize("encrypted_lockedFile.pdf")
             response['Content-Disposition'] += 'attachment; filename*=UTF-8\'\'encrypted_lockedFile.pdf'
+            return response
+    else:
+        return HttpResponse("Error while downloading the file")
+
+def download_unlocked_file(request):
+    if os.path.exists("savedFile.pdf"):
+        with open("savedFile.pdf", 'rb') as f:
+            response = HttpResponse(f.read(), content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="savedFile.pdf"'
+            response['Content-Length'] = os.path.getsize("savedFile.pdf")
+            response['Content-Disposition'] += 'attachment; filename*=UTF-8\'\'savedFile.pdf'
             return response
     else:
         return HttpResponse("Error while downloading the file")
