@@ -1,7 +1,9 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Modification d'un PDF</title>
+   <title>Ajouter Image</title>
+    <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
   <style>
     #pdf-container {
       width: 100%;
@@ -10,11 +12,38 @@
   </style>
 </head>
 <body>
+       <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container">
+                <a class="navbar-brand" href="#">MyPDF</a>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Comparer PDFs</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="compressPdf/">Compresser PDF</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="addImage/">Ajouter une image</a>
+
+                        </li>
+                        <li>
+                            <a class="nav-link" href="lockPdf/">Verrouiller</a>
+                        </li>
+                        <li>
+                            <a class="nav-link" href="unlockPdf/">
+                                Deverrouiller
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
   <h1>Modification d'un PDF</h1>
 
   <form id="pdf-upload-form">
     <input type="file" id="pdf-upload" name="pdf-upload" accept=".pdf">
-    <button type="submit">Envoyer</button>
+    <button type="submit">Afficher</button>
   </form>
 
   <div id="pdf-container"></div>
@@ -56,7 +85,7 @@
           // Chargement du PDF avec PDF.js
           pdfjsLib.getDocument({ data: pdfData }).promise.then(function(pdf) {
             pdfDoc = pdf;
-            var pageNumber = 2; // Numéro de page à afficher
+            var pageNumber = 1; // Numéro de page à afficher
             numPage = pdfDoc.numPages;
             console.log("Numpage : ", numPage);
 
