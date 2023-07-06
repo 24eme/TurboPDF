@@ -9,6 +9,9 @@ import os
 
 
 # Create your views here.
+def addImage(request):
+
+    return render(request, 'addImage.html')
 def compressPdf(request):
     compressedFileSize = None
     form = inputForm()
@@ -18,7 +21,6 @@ def compressPdf(request):
     else:
         form = inputForm()
     return render(request, 'compressPdf.html', {'compressedFileSize': compressedFileSize})
-
 
 def download_compressed(request):
     if os.path.exists("compressedPDF.pdf"):
