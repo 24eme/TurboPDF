@@ -1,0 +1,30 @@
+{%load static%}
+<!DOCTYPE html>
+<html>
+
+<head></head>
+
+<body>
+    <div id="app">
+        <h1>Deverrouiller vos fichiers PDFs en un click</h1>
+        <p>Deverrouiller votre fichier PDF. Cliquez sur le bouton suivant pour charger votre
+            fichier.
+        </p>
+
+        <form enctype="multipart/form-data" method="post">
+            {% csrf_token %}
+            <label for="password">Entrer le mot de passe:</label>
+            <input type="password" id="pass" name="password" placeholder="password" required> <br /><br />
+            <input type="file" name="input_file" accept="application/pdf" /><br /><br />
+            <div id="unlockDiv">
+                <button type="submit" name="filename" id="unlockButton">deverrouiller le fichier</button>
+            </div>
+        </form>
+        <p>Votre fichier a été deverrouillé avec succes,et il est pret à etre téléchargé!</p> <br />
+        <div>
+            <a href="{% url 'download_file' '../../savedFile.pdf' %}">Télécharger le fichier deverrouiller</a>
+        </div>
+    </div>
+</body>
+
+</html>
