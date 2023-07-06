@@ -10,6 +10,9 @@ import os
 
 
 # Create your views here.
+def homePagePdf(request):
+    return render(request, 'homePagePdf.html')
+
 def addImage(request):
 
     return render(request, 'addImage.html')
