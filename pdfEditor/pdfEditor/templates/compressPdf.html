@@ -17,7 +17,8 @@
                 {% csrf_token %}
                     <input type="file" name="pdf_file" accept="application/pdf" />
                 <div id="compareDiv">
-                    <button type="submit" name="filename" id="compressButton">Compresser le fichier</button>
+                    <button type="submit" name="filename" id="compressButton">Compresser le fichier (lossless)</button>
+                    <button type="submit" name="high-compression" id="high-compression">Compresser le fichier (high compresssion)</button>
                 </div>
             </form>
 
