@@ -1,14 +1,43 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 
     <head>
         <meta charset="utf-8" />
         <title>Compresse_pdf</title>
+        <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
 
     </head>
 
     <body>
         <div id="app">
+                   <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container">
+                <a class="navbar-brand" href="#">MyPDF</a>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Comparer PDFs</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="compressPdf/">Compresser PDF</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="addImage/">Ajouter une image</a>
+
+                        </li>
+                        <li>
+                            <a class="nav-link" href="lockPdf/">Verrouiller</a>
+                        </li>
+                        <li>
+                            <a class="nav-link" href="unlockPdf/">
+                                Deverrouiller
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
             <h1>compresser des fichiers PDF</h1>
             <p>Compresser deux fichiers PDF pour trouver les différences. Cliquez sur le bouton suivant pour charger vos
                 fichiers.
@@ -25,6 +54,7 @@
             {% if compressedFileSize %}
                 <div>
                <a href="{% url 'download_compressed' %}">Télécharger le fichier compressé</a>
+
                 </div>
             {% endif %}
 
