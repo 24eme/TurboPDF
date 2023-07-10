@@ -1,60 +1,70 @@
 {% load static %}
-{%load static%}
 <!DOCTYPE html>
 <html>
 
-<head>
-    <title>Déverouiller</title>
-    <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}"></head>
+    <head>
+        <title>Déverouiller un pdf</title>
+        <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}"></head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <body>
+        <div id="app">
+                <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <div class="container">
+                    <a class="navbar-brand" href="/">MyPDF</a>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">Comparer PDFs</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/compressPdf/">Compresser PDF</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/addImage/">Ajouter une image</a>
 
-<body>
-    <div id="app">
-               <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container">
-                <a class="navbar-brand" href="/">MyPDF</a>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Comparer PDFs</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/compressPdf/">Compresser PDF</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/addImage/">Ajouter une image</a>
-
-                        </li>
-                        <li>
-                            <a class="nav-link" href="/lockPdf/">Verrouiller</a>
-                        </li>
-                        <li>
-                            <a class="nav-link" href="/unlockPdf/">
-                                Deverrouiller
-                            </a>
-                        </li>
-                    </ul>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="/lockPdf/">Verrouiller</a>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="/unlockPdf/">
+                                    Deverrouiller
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        </nav>
-        <h1>Deverrouiller vos fichiers PDFs en un click</h1>
-        <p>Deverrouiller votre fichier PDF. Cliquez sur le bouton suivant pour charger votre
-            fichier.
-        </p>
+            </nav>
+            <h1>Deverrouiller vos fichiers PDFs en un click</h1>
+            <p>Deverrouiller votre fichier PDF. Cliquez sur le bouton suivant pour charger votre
+                fichier.
+            </p>
 
-        <form enctype="multipart/form-data" method="post">
-            {% csrf_token %}
-            <label for="password">Entrer le mot de passe:</label>
-            <input type="password" id="pass" name="password" placeholder="password" required> <br /><br />
-            <input type="file" name="input_file" accept="application/pdf" /><br /><br />
-            <div id="unlockDiv">
-                <button type="submit" name="filename" id="unlockButton">deverrouiller le fichier</button>
+            <form enctype="multipart/form-data" method="post">
+                {% csrf_token %}
+                <label for="password">Entrer le mot de passe:</label>
+                <div class="password-container">
+                    <input type="password" id="pass" name="password" placeholder="password" required>
+                    <i class="fa-solid fa-eye" id="eye"></i><br /><br />
+                </div>
+                <input type="file" name="input_file" accept="application/pdf" /><br /><br />
+                <div id="unlockDiv">
+                    <button type="submit" name="filename" id="unlockButton">deverrouiller le fichier</button>
+                </div>
+            </form>
+            <div>
+                <a href="{% url 'download_unlocked_file' %}">Télécharger le fichier deverrouiller</a>
             </div>
-        </form>
-        <p>Votre fichier a été deverrouillé avec succes,et il est pret à etre téléchargé!</p> <br />
-        <div>
-            <a href="{% url 'download_unlocked_file' %}">Télécharger le fichier deverrouiller</a>
         </div>
-    </div>
-</body>
+    </body>
+     <script>
+        const passwordInput = document.querySelector("#pass")
+        const eye = document.querySelector("#eye")
+        eye.addEventListener("click", function () {
+                this.classList.toggle("fa-eye-slash")
+                const type = passwordInput.getAttribute("type") === "password" ? "text" : "password"
+                passwordInput.setAttribute("type", type)
+            })
+    </script>
 
 </html>
