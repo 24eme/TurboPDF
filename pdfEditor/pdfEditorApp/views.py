@@ -3,11 +3,10 @@ from django.shortcuts import render
 from django.http import HttpResponse, FileResponse, Http404
 from django.shortcuts import render
 from pdfEditorApp.listing.forms import inputForm
-from pdfEditorApp.compressPdf import compressPdfFunction
-from pdfEditorApp.compressPdf import highCompressionPdfFunction
 from pdfEditorApp.lockPdf import lock_pdf_file, save_input_file
 from pdfEditorApp.unlockPdf import unlock_pdf_file
 from pdfEditorApp.deletePagePdf import removePageFromPdf
+from pdfEditorApp.compressPdf import compress
 import os
 
 
@@ -21,18 +20,23 @@ def addImage(request):
 def deletepagePdf(request):
     return render(request, 'deletePage.html')
 
-def compressPdf(request):
-    compressedFileSize = None
+def compressPdf(request): 
     form = inputForm()
-    if 'filename' in request.POST:
-        compressedFileSize = compressPdfFunction(request.FILES['pdf_file'])
-    
-    elif 'high-compression' in request.POST:
-        compressedFileSize = highCompressionPdfFunction(request.FILES['pdf_file'])
+        
+    if 'small-compression' in request.POST:
+        compress(request.FILES['pdf_file'], 'smallCompressedPdf.pdf', power=2)
+        print('your file was small compressed')
 
-    else:
-        form = inputForm()
-    return render(request, 'compressPdf.html', {'compressedFileSize': compressedFileSize})
+    elif 'medium-compression' in request.POST: 
+        compress(request.FILES['pdf_file'], 'mediumCompressedPdf.pdf', power=3)
+        print('your file was medium compressed')
+
+    elif 'high-compression' in request.POST:
+        compress(request.FILES['pdf_file'], 'highlyCompressedPdf.pdf', power=4)
+        print('your file was highly compressed')
+
+    return render(request, 'compressPdf.html')
+
 
 def lockPdf(request):
     if request.method == 'POST':
@@ -91,26 +95,24 @@ def displayPdf(request):
     return render(request, 'displayPdf.html')
    
 
-def download_compressed(request):
-    if os.path.exists("compressedPDF.pdf"):
-        with open("compressedPDF.pdf", 'rb') as f:
-            response = HttpResponse(f.read(), content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; filename="compressedPDF.pdf"'
-            response['Content-Length'] = os.path.getsize("compressedPDF.pdf")
-            response['Content-Disposition'] += '; attachment; filename*=UTF-8\'\'compressedPDF.pdf'
-            os.remove("compressedPDF.pdf")
-        return response    
+# def download_compressed(request):
+#     if os.path.exists("compressedPDF.pdf"):
+#         with open("compressedPDF.pdf", 'rb') as f:
+#             response = HttpResponse(f.read(), content_type='application/pdf')
+#             response['Content-Disposition'] = 'attachment; filename="compressedPDF.pdf"'
+#             response['Content-Length'] = os.path.getsize("compressedPDF.pdf")
+#             response['Content-Disposition'] += '; attachment; filename*=UTF-8\'\'compressedPDF.pdf'
+#             os.remove("compressedPDF.pdf")
+#         return response    
 
-    elif os.path.exists("highCompressed.pdf"):
-        with open("highCompressed.pdf", 'rb') as fp:
-            response = HttpResponse(fp.read(), content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; filename="highCompressed.pdf"'
-            response['Content-Length'] = os.path.getsize("highCompressed.pdf")
-            response['Content-Disposition'] += '; attachment; filename*=UTF-8\'\'highCompressed.pdf'
-            os.remove("highCompressed.pdf")
-        return response    
+#     elif os.path.exists("highCompressed.pdf"):
+#         with open("highCompressed.pdf", 'rb') as fp:
+#             response = HttpResponse(fp.read(), content_type='application/pdf')
+#             response['Content-Disposition'] = 'attachment; filename="highCompressed.pdf"'
+#             response['Content-Length'] = os.path.getsize("highCompressed.pdf")
+#             response['Content-Disposition'] += '; attachment; filename*=UTF-8\'\'highCompressed.pdf'
+#             os.remove("highCompressed.pdf")
+#         return response    
 
-    else:
-        return HttpResponse("The compressed file does not exist.")
-
-
+#     else:
+#         return HttpResponse("The compressed file does not exist.")

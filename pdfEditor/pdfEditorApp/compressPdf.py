@@ -1,42 +1,10 @@
 from PyPDF2 import PdfReader, PdfWriter
-# from pypdf import PdfReader, PdfWriter
-# from PIL import Image
+import argparse
+import os.path
+import shutil
+import subprocess
+import sys
 import os
-
-
-# def compressPdfFunction(file):
-
-#     reader = PdfReader(file) 
-#     writer = PdfWriter()
-
-#     for page in reader.pages: 
-#         writer.add_page(page)
-
-#     for page in writer.pages: 
-#         for img in page.images:
-#             img.replace(img.image, quality=60) 
-
-#     compFile = "compressedPDF.pdf"
-#     with open(compFile, "wb") as f:
-#         writer.write(f)
-#     return os.path.getsize("compressedPDF.pdf")
-
-
-# def highCompressionPdfFunction(file):
-#     reader = PdfReader(file) 
-#     writer = PdfWriter()
-
-#     for page in reader.pages: 
-#         writer.add_page(page)
-
-#     for page in writer.pages: 
-#         for img in page.images:
-#             img.replace(img.image, quality=3)
-            
-#     highCompFile = "highCompressed.pdf"
-#     with open(highCompFile, "wb") as fp: 
-#         writer.write(fp)
-#     return os.path.getsize("highCompressed.pdf")
 
 #!/usr/bin/env python3
 # Author: Theeko74
@@ -58,19 +26,11 @@ Dependency: Ghostscript.
 On MacOSX install via command line `brew install ghostscript`.
 """
 
-import argparse
-import os.path
-import shutil
-import subprocess
-import sys
-
-
 def compress(input_file_path, output_file_path, power=0):
     """Function to compress PDF via Ghostscript command line interface"""
     quality = {0: "/default", 1: "/prepress", 2: "/printer", 3: "/ebook", 4: "/screen"}
 
-    # Basic controls
-    # Check if valid path
+   # Basic controls
     reader = PdfReader(input_file_path)
     writer = PdfWriter()
 
@@ -81,6 +41,7 @@ def compress(input_file_path, output_file_path, power=0):
     with open(file_path, "wb") as f:
         writer.write(f)
     
+    # Check if valid path
     if not os.path.isfile(file_path):
         print("Error: invalid path for input PDF file.", file_path)
         sys.exit(1)
@@ -89,6 +50,8 @@ def compress(input_file_path, output_file_path, power=0):
     if file_path.split('.')[-1].lower() != 'pdf':
         print(f"Error: input file is not a PDF.", file_path)
         sys.exit(1)
+
+    
 
     gs = get_ghostscript_path()
     print("Compress PDF...")
@@ -109,10 +72,9 @@ def compress(input_file_path, output_file_path, power=0):
     final_size = os.path.getsize(output_file_path)
     ratio = 1 - (final_size / initial_size)
     print("Compression by {0:.0%}.".format(ratio))
-    print("Final file size is {0:.5f}MB".format(final_size / 1000000))
+    infoText = print("Final file size is {0:.5f}MB".format(final_size / 1000000))
     print("Done.")
     os.remove(file_path)
-
 
 
 def get_ghostscript_path():
