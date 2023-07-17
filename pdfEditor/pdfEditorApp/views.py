@@ -17,8 +17,8 @@ def homePagePdf(request):
 def addImage(request):
     return render(request, 'addImage.html')
 
-def deletepagePdf(request):
-    return render(request, 'deletePage.html')
+def deletePagePdf(request):
+    return render(request, 'deletePagePdf.html')
 
 def compressPdf(request): 
     form = inputForm()
