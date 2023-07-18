@@ -7,7 +7,6 @@ def unlock_pdf_file(input_file, password):
 
     if reader.is_encrypted:
         if not reader.decrypt(password):
-            print("Wrong password.")
             exit()
 
     writer = PdfWriter()

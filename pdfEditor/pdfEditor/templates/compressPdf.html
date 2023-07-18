@@ -4,7 +4,7 @@
 
     <head>
         <meta charset="utf-8" />
-        <title>Compresse_pdf</title>
+        <title>Compresser un PDF</title>
         <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
 
     </head>
@@ -38,25 +38,26 @@
                 </div>
             </div>
         </nav>
-            <h1>compresser des fichiers PDF</h1>
-            <p>Compresser deux fichiers PDF pour trouver les différences. Cliquez sur le bouton suivant pour charger vos
-                fichiers.
+            <h1>Compresser des fichiers PDF</h1>
+            <p>Compresser des fichiers PDF, avec 3 niveaux de compression ! 
+            <p>Cliquez sur le bouton ci-dessous pour charger vos fichiers.</p>
             </p>
             <form enctype="multipart/form-data" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                     <input type="file" name="pdf_file" accept="application/pdf" />
                 <div id="compareDiv">
-                    <button type="submit" name="filename" id="compressButton">Compresser le fichier (lossless)</button>
-                    <button type="submit" name="high-compression" id="high-compression">Compresser le fichier (high compresssion)</button>
+                    <button type="submit" name="small-compression" id="compressButton">Compression basse</button>
+                    <button type="submit" name="medium-compression" id="compressButton">Compression moyenne</button>
+                    <button type="submit" name="high-compression" id="compressButton">Compression  haute</button>
                 </div>
             </form>
 
-            {% if compressedFileSize %}
+            <!-- {% if compressedFileSize %}
                 <div>
                <a href="{% url 'download_compressed' %}">Télécharger le fichier compressé</a>
 
                 </div>
-            {% endif %}
+            {% endif %} -->
 
         </div>
     </body>
