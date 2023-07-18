@@ -57,13 +57,20 @@
   <button class="btn btn-primary" id="add-image-btn">Ajouter une image</button>
 </div>
 <div>
-  <button class="btn btn-primary" id="download-pdf-btn">Télécharger le PDF</button>
+  
+  <button class="btn btn-primary" id="download-pdf-btn" >Télécharger le PDF</button>
 </div>
 
 <div id="pdf-container"></div>
 
+
 <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
 <script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc = '//mozilla.github.io/pdf.js/build/pdf.worker.js';
     var isDragging = false;
     var dragStartX = 0; // départ du déplacement
     var dragStartY = 0;
@@ -113,6 +120,7 @@
                     context = canvas.getContext('2d');
                     canvas.style.display = 'block';
                     canvas.style.margin = 'auto';
+                    canvas.setAttribute("id", "Mycanvas")
                     document.getElementById('pdf-container').innerHTML = '';
                     document.getElementById('pdf-container').appendChild(canvas);
 
@@ -177,38 +185,17 @@
         });
     });
 
-    document.getElementById('download-pdf-btn').addEventListener('click', function (e) {
-    if (pdfDoc) {
-        var imgDataUrl = canvas.toDataURL(); // Récupère les données de l'image du canvas
-        var imgWidth = canvas.width;
-        var imgHeight = canvas.height;
+    document.getElementById('download-pdf-btn').addEventListener('click', function () {
+      if (canvas) {
+        var pdf = new jsPDF();
+        var imageData = canvas.toDataURL('image/jpeg'); // Convertir le contenu du canvas en image
+        pdf.addImage(imageData, 'JPEG', 0, 0); 
 
-        pdfDoc.getPage(1).then(function (page) {
-            var viewport = page.getViewport({scale: 1});
-            var pdfCanvas = document.createElement('canvas');
-            var pdfContext = pdfCanvas.getContext('2d');
-            pdfCanvas.width = viewport.width;
-            pdfCanvas.height = viewport.height;
+        // Télécharger le PDF modifié
+        pdf.save('modified_pdf.pdf');
+    }
+});
 
-            pdfContext.drawImage(page, 0, 0, viewport.width, viewport.height, 0, 0, pdfCanvas.width, pdfCanvas.height);
-            pdfContext.drawImage(image, 0, 0, imgWidth, imgHeight); // Dessine l'image sur le canvas PDF
-
-            pdfCanvas.toBlob(function (blob) { // Utilise toBlob pour obtenir un objet Blob du canvas
-                var url = URL.createObjectURL(blob);
-
-                var a = document.createElement('a');
-                a.href = url;
-                a.download = 'modified.pdf';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }, 'application/pdf');
-        });
-    } else {
-        console.log('Veuillez charger un fichier PDF avant de le télécharger !');
-      }
-    });
 
 </script>
 </body>
