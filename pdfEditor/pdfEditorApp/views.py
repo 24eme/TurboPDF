@@ -94,7 +94,6 @@ def displayPdf(request):
             return render(request, 'error_template.html', {'message': "The requested PDF file doesn't exist."})
     return render(request, 'displayPdf.html')
    
-
 def download_compressed(request):
     if os.path.exists("compressedPDF.pdf"):
         with open("compressedPDF.pdf", 'rb') as f:
@@ -116,3 +115,4 @@ def download_compressed(request):
 
     else:
         return HttpResponse("The compressed file does not exist.")
+
