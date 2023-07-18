@@ -7,8 +7,9 @@
     
     <body>
         <form enctype="multipart/form-data" method="post" enctype="multipart/form-data">
+
             {% csrf_token %}
-                <input type="file" name="pdf_file" accept="application/pdf" />
+            <input type="file" name="pdf_file" accept="application/pdf" />
             <div id="compareDiv">
                 <button type="submit" name="filename" id="displayButton">Display PDF</button>
             </div>

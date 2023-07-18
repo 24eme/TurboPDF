@@ -19,6 +19,9 @@ def addImage(request):
 
 def deletePagePdf(request):
     return render(request, 'deletePagePdf.html')
+    
+def fillFormPdf(request):
+    return render(request, 'fillFormPdf.html')
 
 def compressPdf(request): 
     form = inputForm()
