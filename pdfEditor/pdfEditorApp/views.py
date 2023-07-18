@@ -95,24 +95,43 @@ def displayPdf(request):
     return render(request, 'displayPdf.html')
    
 
-# def download_compressed(request):
-#     if os.path.exists("compressedPDF.pdf"):
-#         with open("compressedPDF.pdf", 'rb') as f:
-#             response = HttpResponse(f.read(), content_type='application/pdf')
-#             response['Content-Disposition'] = 'attachment; filename="compressedPDF.pdf"'
-#             response['Content-Length'] = os.path.getsize("compressedPDF.pdf")
-#             response['Content-Disposition'] += '; attachment; filename*=UTF-8\'\'compressedPDF.pdf'
-#             os.remove("compressedPDF.pdf")
-#         return response    
+def displayPdf(request):
+    if request.method == 'POST':
+        pdf_file = request.FILES['pdf_file']
 
-#     elif os.path.exists("highCompressed.pdf"):
-#         with open("highCompressed.pdf", 'rb') as fp:
-#             response = HttpResponse(fp.read(), content_type='application/pdf')
-#             response['Content-Disposition'] = 'attachment; filename="highCompressed.pdf"'
-#             response['Content-Length'] = os.path.getsize("highCompressed.pdf")
-#             response['Content-Disposition'] += '; attachment; filename*=UTF-8\'\'highCompressed.pdf'
-#             os.remove("highCompressed.pdf")
-#         return response    
+        reader = PdfReader(pdf_file)
+        writer = PdfWriter()
 
-#     else:
-#         return HttpResponse("The compressed file does not exist.")
+        for page in reader.pages:
+            writer.add_page(page)
+        myFile = "myFile.pdf"
+        with open(myFile, "wb") as f:
+            writer.write(f)
+        if myFile:
+            return FileResponse(open(myFile, 'rb'), content_type='application/pdf')
+        else:
+            return render(request, 'error_template.html', {'message': "The requested PDF file doesn't exist."})
+    return render(request, 'displayPdf.html')
+   
+
+def download_compressed(request):
+    if os.path.exists("compressedPDF.pdf"):
+        with open("compressedPDF.pdf", 'rb') as f:
+            response = HttpResponse(f.read(), content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="compressedPDF.pdf"'
+            response['Content-Length'] = os.path.getsize("compressedPDF.pdf")
+            response['Content-Disposition'] += '; attachment; filename*=UTF-8\'\'compressedPDF.pdf'
+            os.remove("compressedPDF.pdf")
+        return response    
+
+    elif os.path.exists("highCompressed.pdf"):
+        with open("highCompressed.pdf", 'rb') as fp:
+            response = HttpResponse(fp.read(), content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="highCompressed.pdf"'
+            response['Content-Length'] = os.path.getsize("highCompressed.pdf")
+            response['Content-Disposition'] += '; attachment; filename*=UTF-8\'\'highCompressed.pdf'
+            os.remove("highCompressed.pdf")
+        return response    
+
+    else:
+        return HttpResponse("The compressed file does not exist.")
