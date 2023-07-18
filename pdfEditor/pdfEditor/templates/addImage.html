@@ -14,7 +14,7 @@
 <body>
        <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container">
-                <a class="navbar-brand" href="/">MyPDF</a>
+                <a class="navbar-brand" href="/">TurboPDF</a>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav">
                         <li class="nav-item">
@@ -51,26 +51,38 @@
   <button id="add-image-btn">Ajouter une image</button>
   <button id="download-pdf-btnn">Télécharger le PDF</button>
 
+  <!-- <div id="pdf-container">
+    <canvas id="canvas"></canvas>
+  </div> -->
+
   <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
   <script>
+    var isDragging = false;
+    var dragStartX = 0; // départ du déplacement
+    var dragStartY = 0;
+    var dragOffsetX = 0; 
+    var dragOffsetY = 0; 
     var pdfDoc = null;
     var canvas = null;
     var context = null;
     var image = null;
+    var pageNumber = 1;
 
     function renderPage(pageNumber) {
-      pdfDoc.getPage(pageNumber).then(function(page) {
-        var viewport = page.getViewport({ scale: 1 });
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
+  pdfDoc.getPage(pageNumber).then(function(page) {
+    var viewport = page.getViewport({ scale: 1 });
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
 
-        page.render({ canvasContext: context, viewport: viewport }).promise.then(function() {
-          if (image) {
-            context.drawImage(image, 0, 0); // Dessine l'image sur le canvas
-          }
-        });
-      });
-    }
+    page.render({ canvasContext: context, viewport: viewport }).promise.then(function() {
+      if (image) {
+        context.drawImage(image, dragOffsetX, dragOffsetY); // Dessine l'image en utilisant les coordonnées de décalage
+        
+      }
+    });
+  });
+}
+
 
     document.getElementById('pdf-upload-form').addEventListener('submit', function(e) {
       e.preventDefault();
@@ -84,6 +96,7 @@
 
           // Chargement du PDF avec PDF.js
           pdfjsLib.getDocument({ data: pdfData }).promise.then(function(pdf) {
+
             pdfDoc = pdf;
             var pageNumber = 1; // Numéro de page à afficher
             numPage = pdfDoc.numPages;
@@ -105,7 +118,6 @@
       }
     });
     
-
     document.getElementById('add-image-btn').addEventListener('click', function(e) {
       if (pdfDoc) {
         var imageInput = document.createElement('input');
@@ -119,7 +131,7 @@
             imageReader.onload = function(e) {
               image = new Image();
               image.onload = function() {
-                context.clearRect(0, 0, canvas.width, canvas.height); // Efface le contenu précédent du canvas
+                //context.clearRect(0, 0, canvas.width, canvas.height); // Efface le contenu précédent du canvas
                 renderPage(1);
               };
               image.src = e.target.result;
@@ -131,6 +143,31 @@
         });
         imageInput.click();
       }
+      canvas.addEventListener('mousedown', function(e) {
+  if (image) {
+    isDragging = true;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+  }
+});
+
+canvas.addEventListener('mousemove', function(e) {
+  if (isDragging) {
+  
+    var offsetX = e.clientX - dragStartX;
+    var offsetY = e.clientY - dragStartY;
+    dragOffsetX += offsetX;
+    dragOffsetY += offsetY;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+   // context.drawImage(image, dragOffsetX, dragOffsetY);
+    renderPage(numPage);
+  }
+});
+
+canvas.addEventListener('mouseup', function() {
+  isDragging = false;
+});
     });
 
     document.getElementById('download-pdf-btn').addEventListener('click', function(e) {
