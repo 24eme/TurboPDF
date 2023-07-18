@@ -97,26 +97,6 @@ def displayPdf(request):
             return render(request, 'error_template.html', {'message': "The requested PDF file doesn't exist."})
     return render(request, 'displayPdf.html')
    
-
-def displayPdf(request):
-    if request.method == 'POST':
-        pdf_file = request.FILES['pdf_file']
-
-        reader = PdfReader(pdf_file)
-        writer = PdfWriter()
-
-        for page in reader.pages:
-            writer.add_page(page)
-        myFile = "myFile.pdf"
-        with open(myFile, "wb") as f:
-            writer.write(f)
-        if myFile:
-            return FileResponse(open(myFile, 'rb'), content_type='application/pdf')
-        else:
-            return render(request, 'error_template.html', {'message': "The requested PDF file doesn't exist."})
-    return render(request, 'displayPdf.html')
-   
-
 def download_compressed(request):
     if os.path.exists("compressedPDF.pdf"):
         with open("compressedPDF.pdf", 'rb') as f:
@@ -138,3 +118,4 @@ def download_compressed(request):
 
     else:
         return HttpResponse("The compressed file does not exist.")
+
