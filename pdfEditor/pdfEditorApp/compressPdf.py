@@ -4,16 +4,15 @@ from PIL import Image
 import os
 
 def compressPdfFunction(file):
-
-    reader = PdfReader(file) 
+    reader = PdfReader(file)
     writer = PdfWriter()
 
-    for page in reader.pages: 
+    for page in reader.pages:
         writer.add_page(page)
 
-    for page in writer.pages: 
+    for page in writer.pages:
         for img in page.images:
-            img.replace(img.image, quality=60) 
+            img.replace(img.image, quality=60)
 
     compFile = "compressedPDF.pdf"
     with open(compFile, "wb") as f:
@@ -22,18 +21,17 @@ def compressPdfFunction(file):
 
 
 def highCompressionPdfFunction(file):
-    reader = PdfReader(file) 
+    reader = PdfReader(file)
     writer = PdfWriter()
 
-    for page in reader.pages: 
+    for page in reader.pages:
         writer.add_page(page)
 
-    for page in writer.pages: 
+    for page in writer.pages:
         for img in page.images:
             img.replace(img.image, quality=3)
-            
+
     highCompFile = "highCompressed.pdf"
-    with open(highCompFile, "wb") as fp: 
+    with open(highCompFile, "wb") as fp:
         writer.write(fp)
     return os.path.getsize("highCompressed.pdf")
-

@@ -1,5 +1,5 @@
 from PyPDF2 import PdfReader, PdfWriter
-from django.shortcuts import render
+#from django.shortcuts import render
 from django.http import HttpResponse, FileResponse, Http404
 from django.shortcuts import render
 from pdfEditorApp.listing.forms import inputForm
@@ -7,17 +7,20 @@ from pdfEditorApp.compressPdf import compressPdfFunction
 from pdfEditorApp.compressPdf import highCompressionPdfFunction
 from pdfEditorApp.lockPdf import lock_pdf_file, save_input_file
 from pdfEditorApp.unlockPdf import unlock_pdf_file
+from pdfEditorApp.appendPdf import append_pdf_file
 import os
 
 
 # Create your views here.
+
+
 def compressPdf(request):
     compressedFileSize = None
     form = inputForm()
     if 'filename' in request.POST:
         compressedFileSize = compressPdfFunction(request.FILES['pdf_file'])
         print('your file was compressed ', compressedFileSize)
-    
+
     elif 'high-compression' in request.POST:
         compressedFileSize = highCompressionPdfFunction(request.FILES['pdf_file'])
         print('your file was highly compressed', compressedFileSize)
@@ -26,31 +29,58 @@ def compressPdf(request):
         form = inputForm()
     return render(request, 'compressPdf.html', {'compressedFileSize': compressedFileSize})
 
-    
+
 def homePagePdf(request):
     return render(request, 'homePagePdf.html')
 
-def addImage(request):
 
+def addImage(request):
     return render(request, 'addImage.html')
 
 
+def appendPdf(request):
+    if request.method == 'POST':
+        uploaded_files = []
+        for file_name, file in request.FILES.items():
+            with open(file_name, 'wb') as destination:
+                for chunk in file.chunks():
+                    destination.write(chunk)
+
+            uploaded_files.append(file_name)
+
+        append_pdf_file(uploaded_files)
+
+    return render(request, 'appendPdf.html')
+
+def download_append_file(request):
+    if os.path.exists("output_file.pdf"):
+        with open("output_file.pdf", 'rb') as f:
+            response = HttpResponse(f.read(), content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="output_file.pdf"'
+            response['Content-Length'] = os.path.getsize("output_file.pdf")
+            response['Content-Disposition'] += 'attachment; filename*=UTF-8\'\'output_file.pdf'
+            return response
+    else:
+        return HttpResponse("Error while downloading the file")
+
 def lockPdf(request):
-    form = inputForm() #enlever cela ppour voir si ca va marcher
+    form = inputForm()  # enlever cela ppour voir si ca va marcher
     print(form)
     if request.method == 'POST':
         password = request.POST['password']
         input_path = save_input_file(request.FILES['input_file'])
         lock_pdf_file(input_path, password)
-    
+
     return render(request, 'lockPdf.html')
+
 
 def unlockPdf(request):
     if request.method == 'POST':
         password = request.POST['password']
         unlock_pdf_file(request.FILES['input_file'], password)
-    
+
     return render(request, 'unlockPdf.html')
+
 
 def download_locked_file(request):
     if os.path.exists("encrypted_lockedFile.pdf"):
@@ -62,6 +92,7 @@ def download_locked_file(request):
             return response
     else:
         return HttpResponse("Error while downloading the file")
+
 
 def download_unlocked_file(request):
     if os.path.exists("savedFile.pdf"):
@@ -92,7 +123,7 @@ def displayPdf(request):
         else:
             return render(request, 'error_template.html', {'message': "The requested PDF file doesn't exist."})
     return render(request, 'displayPdf.html')
-   
+
 
 def download_compressed(request):
     if os.path.exists("compressedPDF.pdf"):
@@ -103,9 +134,9 @@ def download_compressed(request):
             response['Content-Length'] = os.path.getsize("compressedPDF.pdf")
             response['Content-Disposition'] += '; attachment; filename*=UTF-8\'\'compressedPDF.pdf'
             os.remove("compressedPDF.pdf")
-        return response    
+        return response
 
-            
+
     elif os.path.exists("highCompressed.pdf"):
         print('exists high')
         with open("highCompressed.pdf", 'rb') as fp:
@@ -114,7 +145,7 @@ def download_compressed(request):
             response['Content-Length'] = os.path.getsize("highCompressed.pdf")
             response['Content-Disposition'] += '; attachment; filename*=UTF-8\'\'highCompressed.pdf'
             os.remove("highCompressed.pdf")
-        return response    
+        return response
 
     else:
         return HttpResponse("The compressed file does not exist.")
