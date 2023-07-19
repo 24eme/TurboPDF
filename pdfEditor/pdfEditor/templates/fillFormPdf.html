@@ -1,8 +1,10 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
     <title>Affichage de PDF</title>
 
     <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
@@ -18,6 +20,41 @@
 </head>
 
 <body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="/">TurboPDF</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/appendPdf">Joindre</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/compressPdf/">Compresser</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/fillFormPdf/">Remplir un formulaire</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/addImage/">Ajouter une image</a>
+
+                </li>
+                <li>
+                    <a class="nav-link" href="/lockPdf/">Verrouiller</a>
+                </li>
+                <li>
+                    <a class="nav-link" href="/unlockPdf/">
+                        Deverrouiller
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link" href="/deletePagePdf/">
+                        Supprimer
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
     <input type="file" id="pdf-input" accept=".pdf">
     <div id="pdf-viewer"></div>
     <button id="save-button" disabled>Enregistrer le PDF</button>
