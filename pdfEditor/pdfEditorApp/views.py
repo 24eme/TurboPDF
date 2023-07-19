@@ -1,16 +1,34 @@
 from PyPDF2 import PdfReader, PdfWriter
-from django.shortcuts import render
+#from django.shortcuts import render
 from django.http import HttpResponse, FileResponse, Http404
 from django.shortcuts import render
 from pdfEditorApp.listing.forms import inputForm
 from pdfEditorApp.lockPdf import lock_pdf_file, save_input_file
 from pdfEditorApp.unlockPdf import unlock_pdf_file
+from pdfEditorApp.appendPdf import append_pdf_file
 from pdfEditorApp.deletePagePdf import removePageFromPdf
 from pdfEditorApp.compressPdf import compress
 import os
 
 
 # Create your views here.
+
+def compressPdf(request):
+    compressedFileSize = None
+    form = inputForm()
+    if 'filename' in request.POST:
+        compressedFileSize = compressPdfFunction(request.FILES['pdf_file'])
+        print('your file was compressed ', compressedFileSize)
+
+    elif 'high-compression' in request.POST:
+        compressedFileSize = highCompressionPdfFunction(request.FILES['pdf_file'])
+        print('your file was highly compressed', compressedFileSize)
+
+    else:
+        form = inputForm()
+    return render(request, 'compressPdf.html', {'compressedFileSize': compressedFileSize})
+
+
 def homePagePdf(request):
     return render(request, 'homePagePdf.html')
 
@@ -41,6 +59,40 @@ def compressPdf(request):
     return render(request, 'compressPdf.html')
 
 
+def appendPdf(request):
+    download_status = 0
+    if request.method == 'POST':
+        download_status = 1
+        uploaded_files = []
+        for file_name, file in request.FILES.items():
+            with open(file_name, 'wb') as destination:
+                for chunk in file.chunks():
+                    destination.write(chunk)
+
+            uploaded_files.append(file_name)
+
+        append_pdf_file(uploaded_files)
+        os.remove('pdf-upload1')
+        os.remove('pdf-upload2')
+
+        return download_append_file(request)
+
+    return render(request, 'appendPdf.html', {'download_status': download_status})
+
+def download_append_file(request):
+    if os.path.exists("grouped_file.pdf"):
+        with open("grouped_file.pdf", 'rb') as f:
+            response = HttpResponse(f.read(), content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="grouped_file.pdf"'
+            response['Content-Length'] = os.path.getsize("grouped_file.pdf")
+            response['Content-Disposition'] += 'attachment; filename*=UTF-8\'\'grouped_file.pdf'
+
+            os.remove('grouped_file.pdf')
+            return response
+    else:
+        return HttpResponse("Error while downloading the file")
+
+
 def lockPdf(request):
     if request.method == 'POST':
         password = request.POST['password']
@@ -60,6 +112,7 @@ def lockPdf(request):
             return HttpResponse("Error while locking and downloading the file")
 
     return render(request, 'lockPdf.html')
+
 
 
 def unlockPdf(request):
@@ -99,7 +152,7 @@ def displayPdf(request):
         else:
             return render(request, 'error_template.html', {'message': "The requested PDF file doesn't exist."})
     return render(request, 'displayPdf.html')
-   
+
 def download_compressed(request):
     if os.path.exists("compressedPDF.pdf"):
         with open("compressedPDF.pdf", 'rb') as f:
@@ -108,7 +161,8 @@ def download_compressed(request):
             response['Content-Length'] = os.path.getsize("compressedPDF.pdf")
             response['Content-Disposition'] += '; attachment; filename*=UTF-8\'\'compressedPDF.pdf'
             os.remove("compressedPDF.pdf")
-        return response    
+        return response
+
 
     elif os.path.exists("highCompressed.pdf"):
         with open("highCompressed.pdf", 'rb') as fp:
@@ -117,7 +171,7 @@ def download_compressed(request):
             response['Content-Length'] = os.path.getsize("highCompressed.pdf")
             response['Content-Disposition'] += '; attachment; filename*=UTF-8\'\'highCompressed.pdf'
             os.remove("highCompressed.pdf")
-        return response    
+        return response
 
     else:
         return HttpResponse("The compressed file does not exist.")

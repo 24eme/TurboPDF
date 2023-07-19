@@ -40,7 +40,7 @@ def compress(input_file_path, output_file_path, power=0):
     file_path = "inputFile.pdf"
     with open(file_path, "wb") as f:
         writer.write(f)
-    
+
     # Check if valid path
     if not os.path.isfile(file_path):
         print("Error: invalid path for input PDF file.", file_path)
@@ -51,7 +51,7 @@ def compress(input_file_path, output_file_path, power=0):
         print(f"Error: input file is not a PDF.", file_path)
         sys.exit(1)
 
-    
+
 
     gs = get_ghostscript_path()
     print("Compress PDF...")

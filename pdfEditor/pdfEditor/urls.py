@@ -13,6 +13,10 @@ urlpatterns = [
 
     path('compressPdf/', compressPdf, name='compressPdf'),
     path('download-compressed/', download_compressed, name='download_compressed'),
+    path('appendPdf/', appendPdf, name='appendPdf'),
+    path('download_append_file', download_append_file, name='download_append_file'),
     path('unlockPdf/', unlockPdf, name='unlockPdf'),
     path('lockPdf/', lockPdf, name='lockPdf'),
 ]
+
+

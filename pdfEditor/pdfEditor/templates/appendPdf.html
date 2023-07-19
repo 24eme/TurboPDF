@@ -1,14 +1,12 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
-        <meta charset="UTF-8">
-        <title>Display PDF</title>
-        <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
-    </head>
-    
-    <body>
+<html>
+<head>
+    <title>Assembler des PDF</title>
+    <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
+</head>
+<body>
+<div id="app">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
             <a class="navbar-brand" href="/">TurboPDF</a>
@@ -44,15 +42,21 @@
             </div>
         </div>
     </nav>
+    <h1>Assembler des PDF</h1>
 
-    <form enctype="multipart/form-data" method="post" enctype="multipart/form-data">
+    <form enctype="multipart/form-data" id="upload-compare-pdf" method="post">
+        {% csrf_token %}
+        <input type="file" name="pdf-upload1" accept=".pdf">
+        <input type="file" name="pdf-upload2" accept=".pdf">
+        <button type="submit">Joindre les fichiers</button>
+    </form>
+    {% if download_status %}
+        <p>Votre fichier a été joint avec succes et il est pret à etre téléchargé!</p> <br/>
+        <div>
+            <a href="{% url 'download_append_file' %}">Télécharger le fichier joint</a>
+        </div>
+    {% endif %}
+</div>
 
-            {% csrf_token %}
-            <input type="file" name="pdf_file" accept="application/pdf" />
-            <div id="compareDiv">
-                <button type="submit" name="filename" id="displayButton">Display PDF</button>
-            </div>
-
-        </form>
-    </body>
+</body>
 </html>
