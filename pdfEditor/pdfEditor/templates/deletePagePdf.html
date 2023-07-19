@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Affichage de PDF éditable</title>
+
+    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"
+        integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+        </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"
+        integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+    </script>
+
+    <style>
+        .pdf-page {
+            position: relative;
+            width: 200px;
+            height: 300px;
+            margin: 10px;
+            border: 3px solid grey;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="file" id="pdf-input">
+    <div id="pdf-container"></div>
+    <button type="button" id="save-button" disabled>Enregistrer les modifications</button>
+
+
+    <script>
+        var file;
+        async function removePagesFromPDF(file, pageNumbers) {
+            try {
+                const typedArray = new Uint8Array(await file.arrayBuffer());
+                const pdfDoc = await PDFLib.PDFDocument.load(typedArray);
+                const pagesToDelete = new Set(pageNumbers);
+
+                for (let i = pdfDoc.getPageCount() - 1; i >= 0; i--) {
+                    if (pagesToDelete.has(i + 1)) {
+                        continue;
+                    }
+                    pdfDoc.removePage(i);
+                }
+
+                // Convertir le document PDF en tableau de bytes
+                const modifiedPdfBytes = await pdfDoc.save();
+
+                return modifiedPdfBytes;
+            } catch (error) {
+                console.error('Une erreur est survenue :', error);
+                return null;
+            }
+        }
+
+        $(document).ready(function () {
+            $('#pdf-input').change(function (e) {
+                file = e.target.files[0];
+                var fileReader = new FileReader();
+
+                fileReader.onload = function () {
+                    var typedarray = new Uint8Array(this.result);
+                    pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
+                        var numPages = pdf.numPages;
+
+                        var pages = [];
+                        for (var i = 1; i <= numPages; i++) {
+                            pages.push({ number: i, rendered: false });
+                        }
+
+                        function displayPages(index) {
+                            if (index >= pages.length) {
+                                return;
+                            }
+
+                            var page = pages[index];
+                            pdf.getPage(page.number).then(function (pdfPage) {
+                                var scale = 0.9;
+                                var viewport = pdfPage.getViewport({ scale: scale });
+
+                                var canvas = document.createElement('canvas');
+                                canvas.classList.add('pdf-page');
+                                canvas.width = viewport.width;
+                                canvas.height = viewport.height;
+                                canvas.dataset.pageNumber = page.number;
+
+                                var context = canvas.getContext('2d');
+                                var renderContext = {
+                                    canvasContext: context,
+                                    viewport: viewport
+                                };
+
+                                pdfPage.render(renderContext).promise.then(function () {
+                                    var crossSize = 30;
+                                    var crossLineWidth = 2;
+                                    var crossOffset = 10;
+
+                                    context.beginPath();
+                                    context.lineWidth = crossLineWidth;
+                                    context.strokeStyle = 'red';
+
+                                    context.moveTo(canvas.width - crossOffset - crossSize / 2, crossOffset - crossSize / 2);
+                                    context.lineTo(canvas.width - crossOffset + crossSize / 2, crossOffset + crossSize / 2);
+                                    context.moveTo(canvas.width - crossOffset - crossSize / 2, crossOffset + crossSize / 2);
+                                    context.lineTo(canvas.width - crossOffset + crossSize / 2, crossOffset - crossSize / 2);
+
+                                    context.stroke();
+
+                                    canvas.addEventListener('click', function () {
+                                        if ($('#save-button').prop('disabled')) {
+                                            $('#save-button').prop('disabled', false);
+                                        }
+                                        var pageNumber = this.dataset.pageNumber;
+                                        $(canvas).remove();
+                                        const index = pages.findIndex(page => page.number == pageNumber);
+                                        if (index > -1) {
+                                            pages.splice(index, 1);
+                                        }
+                                    });
+
+                                    $('#pdf-container').append(canvas);
+
+                                    page.rendered = true;
+
+                                    // Afficher la page suivante
+                                    displayPages(index + 1);
+                                });
+                            });
+                        }
+
+                        displayPages(0);
+                    });
+                };
+
+                fileReader.readAsArrayBuffer(file);
+            });
+        });
+
+        $('#save-button').click(async function () {
+            const pageNumbersToRemove = [];
+
+            $('.pdf-page').each(function () {
+                const pageNumber = $(this).data('pageNumber');
+                pageNumbersToRemove.push(pageNumber);
+            });
+
+            if (pageNumbersToRemove.length === 0) {
+                console.log('Aucune page sélectionnée pour suppression.');
+                return;
+            }
+
+            // Supprimer les pages 
+            const modifiedPdfBytes = await removePagesFromPDF(file, pageNumbersToRemove);
+
+            if (modifiedPdfBytes) {
+                const modifiedPdfBlob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
+
+                // Télécharger le fichier PDF modifié
+                saveAs(modifiedPdfBlob, 'modified.pdf');
+            }
+        });
+
+    </script>
+</body>
+
+</html>

@@ -1,6 +1,7 @@
 import sys
 import os
 import fitz
+from django.conf import settings
 from PyPDF2 import PdfReader, PdfWriter
 
 def lock_pdf_file(input_file, password):
@@ -21,9 +22,8 @@ def save_input_file(input_file):
     writer = PdfWriter()
 
     for page in reader.pages:
-        page.compress_content_streams()  # This is CPU intensive!
         writer.add_page(page)
-    file_path = "lockedFile.pdf"
+    file_path = "File.pdf"
     with open(file_path, "wb") as f:
         writer.write(f)
     return file_path

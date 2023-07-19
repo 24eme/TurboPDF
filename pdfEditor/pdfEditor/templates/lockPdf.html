@@ -1,37 +1,38 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
-    <head> <title>Verouiller</title>
+    <head> <title>Verouiller un pdf</title>
     <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}"></head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <body>
         <div id="app">
-                   <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container">
-                <a class="navbar-brand" href="/">MyPDF</a>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Comparer PDFs</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/compressPdf/">Compresser PDF</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/addImage/">Ajouter une image</a>
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <div class="container">
+                    <a class="navbar-brand" href="/">TurboPDF</a>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">Comparer PDFs</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/compressPdf/">Compresser PDF</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/addImage/">Ajouter une image</a>
 
-                        </li>
-                        <li>
-                            <a class="nav-link" href="/lockPdf/">Verrouiller</a>
-                        </li>
-                        <li>
-                            <a class="nav-link" href="/unlockPdf/">
-                                Deverrouiller
-                            </a>
-                        </li>
-                    </ul>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="/lockPdf/">Verrouiller</a>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="/unlockPdf/">
+                                    Deverrouiller
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        </nav>
+            </nav>
             <h1>Verrouiller vos fichiers PDFs en un click</h1>
             <p>Verrouiller votre fichier PDF. Cliquez sur le bouton suivant pour charger votre
                 fichier.
@@ -40,16 +41,27 @@
             <form enctype="multipart/form-data" method="post" >
                 {% csrf_token %}
                 <label for="password">Entrer votre mot de passe:</label>
-                <input type="password" id="pass" name="password" placeholder="password" required> <br/><br/>
+                <div class="password-container">
+                    <input type="password" id="pass" name="password" placeholder="password" required> 
+                    <i class="fa-solid fa-eye" id="eye"></i><br /><br />
+                </div>
                 <input type="file" name="input_file" accept="application/pdf" /><br /><br />
                 <div id="lockDiv">
                     <button type="submit" name="filename" id="lockButton">verrouiller le fichier</button>
                 </div>
             </form>
-            <p>Votre fichier a été verrouiller avec succes,et il est pret à etre téléchargé!</p> <br/>
             <div>
-                <a href="{% url 'download_locked_file' %}">Télécharger le fichier verrouiller</a>
+                <a href="{%url 'download_locked_file' %}">Télécharger le fichier verrouiller</a>
             </div>
         </div>
     </body>
+    <script>
+        const passwordInput = document.querySelector("#pass")
+        const eye = document.querySelector("#eye")
+        eye.addEventListener("click", function () {
+                this.classList.toggle("fa-eye-slash")
+                const type = passwordInput.getAttribute("type") === "password" ? "text" : "password"
+                passwordInput.setAttribute("type", type)
+            })
+    </script>
 </html>
