@@ -1777,7 +1777,7 @@ input[type="checkbox"]:checked~.modal-background {
     margin-top: 20px;
 }
 
-#save-button {
+#save-button{
     background-color: #2A3944ff;
     color: white;
     padding: 10px 20px;

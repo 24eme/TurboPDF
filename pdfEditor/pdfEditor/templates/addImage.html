@@ -1,211 +1,212 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Ajouter Image</title>
-    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
-    <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
-    <style>
-        #pdf-container {
-            width: 100%;
-            height: 600px;
-        }
-        .btn-primary{
-          margin-bottom: 5px;
-          background-color: #2d63b8;
-          border-color:black;
-          
-        }
-    </style>
-</head>
-<body>
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container">
-        <a class="navbar-brand" href="/">TurboPDF</a>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="/appendPdf">Joindre</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/compressPdf/">Compresser</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/fillFormPdf/">Remplir un formulaire</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/addImage/">Ajouter une image</a>
+    <head>
+        <title>Ajouter Image</title>
+        <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
+        <link rel="stylesheet" href="{%static 'css/style.css' %}">
+        <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
+        <style>
+            #pdf-container {
+                width: 100%;
+                height: 600px;
+            }
+            .btn-primary{
+            margin-bottom: 5px;
+            background-color: #2A3944ff;
+            border-color:black;
+            
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container">
+                <a class="navbar-brand" href="/">TurboPDF</a>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/appendPdf">Joindre</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/compressPdf/">Compresser</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/fillFormPdf/">Remplir un formulaire</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/addImage/">Ajouter une image</a>
 
-                </li>
-                <li>
-                    <a class="nav-link" href="/lockPdf/">Verrouiller</a>
-                </li>
-                <li>
-                    <a class="nav-link" href="/unlockPdf/">
-                        Deverrouiller
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link" href="/deletePagePdf/">
-                        Supprimer
-                    </a>
-                </li>
-            </ul>
+                        </li>
+                        <li>
+                            <a class="nav-link" href="/lockPdf/">Verrouiller</a>
+                        </li>
+                        <li>
+                            <a class="nav-link" href="/unlockPdf/">
+                                Deverrouiller
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link" href="/deletePagePdf/">
+                                Supprimer
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div id="app">
+            <h1>Ajouter une image</h1>
+            <p>Ajouter une image à votre fichier PDF. Cliquez sur les boutons ci-dessous pour charger votre
+                fichier et votre image.
+            </p>
+            <form id="pdf-upload-form">
+                <input class="" type="file" id="pdf-upload" name="pdf-upload" accept=".pdf" value="upload"><br/>
+                <button class="btn btn-primary" id="save-button" type="submit">Afficher</button>
+            </form>
+
+            <div>
+                <button class="btn btn-primary" id="add-image-btn">Ajouter une image</button>
+           
+                <button class="btn btn-primary" id="download-pdf-btn" >Télécharger le PDF</button>
+            </div>
+
+            <div id="pdf-container"></div>
         </div>
-    </div>
-</nav>
-<h1>Ajouter une image</h1>
 
-<div>
-<form id="pdf-upload-form">
-    <input class="" type="file" id="pdf-upload" name="pdf-upload" accept=".pdf" value="upload">
-    <button class="btn btn-primary" type="submit">Afficher</button>
-</form>
-</div>
-<div>
-  <button class="btn btn-primary" id="add-image-btn">Ajouter une image</button>
-</div>
-<div>
-  
-  <button class="btn btn-primary" id="download-pdf-btn" >Télécharger le PDF</button>
-</div>
+        <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 
-<div id="pdf-container"></div>
+        <script>
+            pdfjsLib.GlobalWorkerOptions.workerSrc = '//mozilla.github.io/pdf.js/build/pdf.worker.js';
+                var isDragging = false;
+                var dragStartX = 0; // départ du déplacement
+                var dragStartY = 0;
+                var dragOffsetX = 0;
+                var dragOffsetY = 0;
+                var pdfDoc = null;
+                var canvas = null;
+                var context = null;
+                var image = null;
+                var pageNumber = 1;
 
+                function renderPage(pageNumber) {
+                    pdfDoc.getPage(pageNumber).then(function (page) {
+                        var viewport = page.getViewport({scale: 1});
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
 
-<script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+                        page.render({canvasContext: context, viewport: viewport}).promise.then(function () {
+                            if (image) {
+                                context.drawImage(image, dragOffsetX, dragOffsetY); // Dessine l'image en utilisant les coordonnées de décalage
 
-<script>
-  pdfjsLib.GlobalWorkerOptions.workerSrc = '//mozilla.github.io/pdf.js/build/pdf.worker.js';
-    var isDragging = false;
-    var dragStartX = 0; // départ du déplacement
-    var dragStartY = 0;
-    var dragOffsetX = 0;
-    var dragOffsetY = 0;
-    var pdfDoc = null;
-    var canvas = null;
-    var context = null;
-    var image = null;
-    var pageNumber = 1;
-
-    function renderPage(pageNumber) {
-        pdfDoc.getPage(pageNumber).then(function (page) {
-            var viewport = page.getViewport({scale: 1});
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-
-            page.render({canvasContext: context, viewport: viewport}).promise.then(function () {
-                if (image) {
-                    context.drawImage(image, dragOffsetX, dragOffsetY); // Dessine l'image en utilisant les coordonnées de décalage
-
+                            }
+                        });
+                    });
                 }
-            });
-        });
-    }
 
+                document.getElementById('pdf-upload-form').addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    var fileInput = document.getElementById('pdf-upload');
+                    var file = fileInput.files[0];
 
-    document.getElementById('pdf-upload-form').addEventListener('submit', function (e) {
-        e.preventDefault();
-        var fileInput = document.getElementById('pdf-upload');
-        var file = fileInput.files[0];
+                    if (file && file.type === 'application/pdf') {
+                        var fileReader = new FileReader();
+                        fileReader.onload = function (e) {
+                            var pdfData = new Uint8Array(e.target.result);
 
-        if (file && file.type === 'application/pdf') {
-            var fileReader = new FileReader();
-            fileReader.onload = function (e) {
-                var pdfData = new Uint8Array(e.target.result);
+                            // Chargement du PDF avec PDF.js
+                            pdfjsLib.getDocument({data: pdfData}).promise.then(function (pdf) {
 
-                // Chargement du PDF avec PDF.js
-                pdfjsLib.getDocument({data: pdfData}).promise.then(function (pdf) {
+                                pdfDoc = pdf;
+                                var pageNumber = 1; // Numéro de page à afficher
+                                numPage = pdfDoc.numPages;
+                                console.log("Numpage : ", numPage);
 
-                    pdfDoc = pdf;
-                    var pageNumber = 1; // Numéro de page à afficher
-                    numPage = pdfDoc.numPages;
-                    console.log("Numpage : ", numPage);
+                                canvas = document.createElement('canvas');
+                                context = canvas.getContext('2d');
+                                canvas.style.display = 'block';
+                                canvas.style.margin = 'auto';
+                                canvas.setAttribute("id", "Mycanvas")
+                                document.getElementById('pdf-container').innerHTML = '';
+                                document.getElementById('pdf-container').appendChild(canvas);
 
-                    canvas = document.createElement('canvas');
-                    context = canvas.getContext('2d');
-                    canvas.style.display = 'block';
-                    canvas.style.margin = 'auto';
-                    canvas.setAttribute("id", "Mycanvas")
-                    document.getElementById('pdf-container').innerHTML = '';
-                    document.getElementById('pdf-container').appendChild(canvas);
-
-                    renderPage(pageNumber);
-                });
-            };
-            fileReader.readAsArrayBuffer(file);
-        } else {
-            console.log('Veuillez sélectionner un fichier PDF valide !');
-        }
-    });
-
-    document.getElementById('add-image-btn').addEventListener('click', function (e) {
-        if (pdfDoc) {
-            var imageInput = document.createElement('input');
-            imageInput.type = 'file';
-            imageInput.accept = 'image/*';
-            imageInput.addEventListener('change', function () {
-                var imageFile = imageInput.files[0];
-
-                if (imageFile && imageFile.type.includes('image/')) {
-                    var imageReader = new FileReader();
-                    imageReader.onload = function (e) {
-                        image = new Image();
-                        image.onload = function () {
-                            //context.clearRect(0, 0, canvas.width, canvas.height); // Efface le contenu précédent du canvas
-                            renderPage(1);
+                                renderPage(pageNumber);
+                            });
                         };
-                        image.src = e.target.result;
-                    };
-                    imageReader.readAsDataURL(imageFile);
-                } else {
-                    consoleconsole.log('Veuillez sélectionner un fichier image valide !');
+                        fileReader.readAsArrayBuffer(file);
+                    } else {
+                        console.log('Veuillez sélectionner un fichier PDF valide !');
+                    }
+                });
+
+                document.getElementById('add-image-btn').addEventListener('click', function (e) {
+                    if (pdfDoc) {
+                        var imageInput = document.createElement('input');
+                        imageInput.type = 'file';
+                        imageInput.accept = 'image/*';
+                        imageInput.addEventListener('change', function () {
+                            var imageFile = imageInput.files[0];
+
+                            if (imageFile && imageFile.type.includes('image/')) {
+                                var imageReader = new FileReader();
+                                imageReader.onload = function (e) {
+                                    image = new Image();
+                                    image.onload = function () {
+                                        //context.clearRect(0, 0, canvas.width, canvas.height); // Efface le contenu précédent du canvas
+                                        renderPage(1);
+                                    };
+                                    image.src = e.target.result;
+                                };
+                                imageReader.readAsDataURL(imageFile);
+                            } else {
+                                consoleconsole.log('Veuillez sélectionner un fichier image valide !');
+                            }
+                        });
+                        imageInput.click();
+                    }
+                    canvas.addEventListener('mousedown', function (e) {
+                        if (image) {
+                            isDragging = true;
+                            dragStartX = e.clientX;
+                            dragStartY = e.clientY;
+                        }
+                    });
+
+                    canvas.addEventListener('mousemove', function (e) {
+                        if (isDragging) {
+
+                            var offsetX = e.clientX - dragStartX;
+                            var offsetY = e.clientY - dragStartY;
+                            dragOffsetX += offsetX;
+                            dragOffsetY += offsetY;
+                            dragStartX = e.clientX;
+                            dragStartY = e.clientY;
+                            // context.drawImage(image, dragOffsetX, dragOffsetY);
+                            renderPage(numPage);
+                        }
+                    });
+
+                    canvas.addEventListener('mouseup', function () {
+                        isDragging = false;
+                    });
+                });
+
+                document.getElementById('download-pdf-btn').addEventListener('click', function () {
+                if (canvas) {
+                    var pdf = new jsPDF();
+                    var imageData = canvas.toDataURL('image/jpeg'); // Convertir le contenu du canvas en image
+                    pdf.addImage(imageData, 'JPEG', 0, 0); 
+
+                    // Télécharger le PDF modifié
+                    pdf.save('modified_pdf.pdf');
                 }
             });
-            imageInput.click();
-        }
-        canvas.addEventListener('mousedown', function (e) {
-            if (image) {
-                isDragging = true;
-                dragStartX = e.clientX;
-                dragStartY = e.clientY;
-            }
-        });
-
-        canvas.addEventListener('mousemove', function (e) {
-            if (isDragging) {
-
-                var offsetX = e.clientX - dragStartX;
-                var offsetY = e.clientY - dragStartY;
-                dragOffsetX += offsetX;
-                dragOffsetY += offsetY;
-                dragStartX = e.clientX;
-                dragStartY = e.clientY;
-                // context.drawImage(image, dragOffsetX, dragOffsetY);
-                renderPage(numPage);
-            }
-        });
-
-        canvas.addEventListener('mouseup', function () {
-            isDragging = false;
-        });
-    });
-
-    document.getElementById('download-pdf-btn').addEventListener('click', function () {
-      if (canvas) {
-        var pdf = new jsPDF();
-        var imageData = canvas.toDataURL('image/jpeg'); // Convertir le contenu du canvas en image
-        pdf.addImage(imageData, 'JPEG', 0, 0); 
-
-        // Télécharger le PDF modifié
-        pdf.save('modified_pdf.pdf');
-    }
-});
 
 
-</script>
-</body>
+        </script>
+    </body>
 </html>

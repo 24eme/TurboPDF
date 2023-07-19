@@ -38,7 +38,7 @@
 
 
     <script>
-        var file;
+        let file;
         async function removePagesFromPDF(file, pageNumbers) {
             try {
                 const typedArray = new Uint8Array(await file.arrayBuffer());
@@ -65,15 +65,15 @@
         $(document).ready(function () {
             $('#pdf-input').change(function (e) {
                 file = e.target.files[0];
-                var fileReader = new FileReader();
+                let fileReader = new FileReader();
 
                 fileReader.onload = function () {
-                    var typedarray = new Uint8Array(this.result);
+                    let typedarray = new Uint8Array(this.result);
                     pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
-                        var numPages = pdf.numPages;
+                        let numPages = pdf.numPages;
 
-                        var pages = [];
-                        for (var i = 1; i <= numPages; i++) {
+                        let pages = [];
+                        for (let i = 1; i <= numPages; i++) {
                             pages.push({ number: i, rendered: false });
                         }
 
@@ -82,19 +82,19 @@
                                 return;
                             }
 
-                            var page = pages[index];
+                            let page = pages[index];
                             pdf.getPage(page.number).then(function (pdfPage) {
-                                var scale = 0.9;
-                                var viewport = pdfPage.getViewport({ scale: scale });
+                                let scale = 0.9;
+                                let viewport = pdfPage.getViewport({ scale: scale });
 
-                                var canvas = document.createElement('canvas');
+                                let canvas = document.createElement('canvas');
                                 canvas.classList.add('pdf-page');
                                 canvas.width = viewport.width;
                                 canvas.height = viewport.height;
                                 canvas.dataset.pageNumber = page.number;
 
-                                var context = canvas.getContext('2d');
-                                var renderContext = {
+                                let context = canvas.getContext('2d');
+                                let renderContext = {
                                     canvasContext: context,
                                     viewport: viewport
                                 };
@@ -105,7 +105,7 @@
                                         if ($('#save-button').prop('disabled')) {
                                             $('#save-button').prop('disabled', false);
                                         }
-                                        var pageNumber = this.dataset.pageNumber;
+                                        let pageNumber = this.dataset.pageNumber;
                                         $(canvas).remove();
                                         const index = pages.findIndex(page => page.number == pageNumber);
                                         if (index > -1) {
