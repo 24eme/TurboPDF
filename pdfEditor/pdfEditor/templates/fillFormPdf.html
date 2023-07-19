@@ -1,9 +1,13 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <title>Affichage de PDF</title>
+
+    <link rel="stylesheet" href="{%static 'css/style.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
 
     <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -14,14 +18,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"
         integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer">
-        </script>
+    </script>
 </head>
 
 <body>
-    <input type="file" id="pdf-input" accept=".pdf">
-    <div id="pdf-viewer"></div>
-    <button id="save-button" disabled>Enregistrer le PDF</button>
-
+    <div id="app">
+        <h2>Remplissez votre formulaire PDF en un click</h1>
+        <p>Remplissez votre formulaire PDF. Cliquez sur le bouton ci-dessous pour charger votre
+            fichier.
+        </p>
+        <input type="file" id="pdf-input" accept=".pdf">
+        <div id="pdf-viewer"></div>
+        <button id="save-button" disabled>Enregistrer le PDF</button>
+    </div>
     <script>
         let pdfDoc;
 

@@ -1,8 +1,12 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 
 <head>
-    <title>Affichage de PDF éditable</title>
+    <title>Suppression de pages</title>
+
+    <link rel="stylesheet" href="{%static 'css/style.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
 
     <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -16,20 +20,20 @@
     </script>
 
     <style>
-        .pdf-page {
-            position: relative;
-            width: 200px;
-            height: 300px;
-            margin: 10px;
-            border: 3px solid grey;
-        }
+        
     </style>
 </head>
 
 <body>
-    <input type="file" id="pdf-input">
-    <div id="pdf-container"></div>
-    <button type="button" id="save-button" disabled>Enregistrer les modifications</button>
+    <div id="app">
+        <h2>Supprimez des pages de votre fichier PDF</h1>
+        <p>Supprimez des pages de votre fichier PDF. Cliquez sur le bouton ci-dessous pour charger vos fichiers, 
+            ensuite cliquez sur une page pour la supprimer.
+        </p>
+        <input type="file" id="pdf-input">
+        <div id="pdf-container"></div>
+        <button type="button" id="save-button" disabled>Enregistrer vos modifications</button>
+    </div>
 
 
     <script>
@@ -95,20 +99,6 @@
                                 };
 
                                 pdfPage.render(renderContext).promise.then(function () {
-                                    var crossSize = 30;
-                                    var crossLineWidth = 2;
-                                    var crossOffset = 10;
-
-                                    context.beginPath();
-                                    context.lineWidth = crossLineWidth;
-                                    context.strokeStyle = 'red';
-
-                                    context.moveTo(canvas.width - crossOffset - crossSize / 2, crossOffset - crossSize / 2);
-                                    context.lineTo(canvas.width - crossOffset + crossSize / 2, crossOffset + crossSize / 2);
-                                    context.moveTo(canvas.width - crossOffset - crossSize / 2, crossOffset + crossSize / 2);
-                                    context.lineTo(canvas.width - crossOffset + crossSize / 2, crossOffset - crossSize / 2);
-
-                                    context.stroke();
 
                                     canvas.addEventListener('click', function () {
                                         if ($('#save-button').prop('disabled')) {
