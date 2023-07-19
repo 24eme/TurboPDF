@@ -50,15 +50,13 @@
         <input type="file" name="pdf-upload2" accept=".pdf">
         <button type="submit">Joindre les fichiers</button>
     </form>
-    <p>Votre fichier a été joint avec succes,et il est pret à etre téléchargé!</p> <br/>
-    <div>
-        <a href="{% url 'download_append_file' %}">Télécharger le fichier joint</a>
-    </div>
+    {% if download_status %}
+        <p>Votre fichier a été joint avec succes et il est pret à etre téléchargé!</p> <br/>
+        <div>
+            <a href="{% url 'download_append_file' %}">Télécharger le fichier joint</a>
+        </div>
+    {% endif %}
 </div>
 
-<script>
-
-
-</script>
 </body>
 </html>

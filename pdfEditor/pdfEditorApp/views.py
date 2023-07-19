@@ -60,7 +60,9 @@ def compressPdf(request):
 
 
 def appendPdf(request):
+    download_status = 0
     if request.method == 'POST':
+        download_status = 1
         uploaded_files = []
         for file_name, file in request.FILES.items():
             with open(file_name, 'wb') as destination:
@@ -70,19 +72,26 @@ def appendPdf(request):
             uploaded_files.append(file_name)
 
         append_pdf_file(uploaded_files)
+        os.remove('pdf-upload1')
+        os.remove('pdf-upload2')
 
-    return render(request, 'appendPdf.html')
+        return download_append_file(request)
+
+    return render(request, 'appendPdf.html', {'download_status': download_status})
 
 def download_append_file(request):
-    if os.path.exists("output_file.pdf"):
-        with open("output_file.pdf", 'rb') as f:
+    if os.path.exists("grouped_file.pdf"):
+        with open("grouped_file.pdf", 'rb') as f:
             response = HttpResponse(f.read(), content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; filename="output_file.pdf"'
-            response['Content-Length'] = os.path.getsize("output_file.pdf")
-            response['Content-Disposition'] += 'attachment; filename*=UTF-8\'\'output_file.pdf'
+            response['Content-Disposition'] = 'attachment; filename="grouped_file.pdf"'
+            response['Content-Length'] = os.path.getsize("grouped_file.pdf")
+            response['Content-Disposition'] += 'attachment; filename*=UTF-8\'\'grouped_file.pdf'
+
+            os.remove('grouped_file.pdf')
             return response
     else:
         return HttpResponse("Error while downloading the file")
+
 
 def lockPdf(request):
     if request.method == 'POST':

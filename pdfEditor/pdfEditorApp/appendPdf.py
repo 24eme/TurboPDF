@@ -9,7 +9,7 @@ def append_pdf_file(file_list):
         with open(file_path, 'rb') as pdf:
             merger.append(pdf)
 
-    with open("output_file.pdf", 'wb') as output:
+    with open("grouped_file.pdf", 'wb') as output:
         merger.write(output)
 
     print("function done in ", os.getcwd())
