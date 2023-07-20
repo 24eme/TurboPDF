@@ -176,3 +176,5 @@ def download_compressed(request):
     else:
         return HttpResponse("The compressed file does not exist.")
 
+def splitPdf(request):
+    return render(request, 'splitPdf.html')
