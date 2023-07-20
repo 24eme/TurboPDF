@@ -1,19 +1,74 @@
-.password-container {
-    width: 400px;
+
+/*css for deletePage page*/
+#app {
+    font-size: 25px;
+    text-align: center;
+    margin-top: 100px;
+}
+
+.pdf-page {
     position: relative;
+    width: 200px;
+    height: 300px;
+    margin: 10px;
+    border: 3px solid gray;
 }
 
-.password-container input[type="password"],
-.password-container input[type="text"] {
-    width: 100%;
-    padding: 12px 36px 12px 12px;
-    box-sizing: border-box;
+.pdf-page:hover {
+    /*transform: scale(1.2);*/
+    border-color: red;
 }
 
-.fa-eye {
+.popup {
+    position: fixed;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #ffffff;
+    width: 400px;
+    height: 150px;
+    /*padding: 20px;*/
+    border: 1px solid #000000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+.popup-close {
     position: absolute;
-    top: 28%;
-    right: 4%;
+    top: 5px;
+    right: 5px;
     cursor: pointer;
-    color: lightgray;
+    font-weight: bold;
+    font-size: 40px;
+}
+
+.popup-content {
+    margin-top: 40px;
+    margin-bottom: 10px;
+}
+
+#compareDiv {
+    margin-top: 20px;
+}
+
+#save-button{
+    background-color: #2A3944ff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    margin-top: 40px;
+    font-size: 20px;
+}
+
+#pdf-input {
+    font-size: 25px;
+}
+
+.downloader__info__content {
+    margin: 20px;
+}
+
+#percent-saved{
+    color: salmon;
 }

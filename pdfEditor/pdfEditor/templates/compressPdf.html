@@ -2,33 +2,33 @@
 <!DOCTYPE html>
 <html>
 
-    <head>
-        <meta charset="utf-8" />
-        <title>TurboPDF</title>
-        <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
-        <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
-        <link rel="stylesheet" href="{%static 'css/style.css' %}">
+<head>
+    <meta charset="utf-8" />
+    <title>TurboPDF</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
+    <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{%static 'css/style.css' %}">
 
-    </head>
+</head>
 
-    <body>
-        
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container">
-                <a class="navbar-brand" href="/">TurboPDF</a>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/appendPdf">Joindre</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/compressPdf/">Compresser</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/fillFormPdf/">Remplir un formulaire</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/addImage/">Ajouter une image</a>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">TurboPDF</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/appendPdf">Joindre</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/compressPdf/">Compresser</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/fillFormPdf/">Remplir un formulaire</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/addImage/">Ajouter une image</a>
 
                     </li>
                     <li>
@@ -39,25 +39,72 @@
                             Deverrouiller
                         </a>
                     </li>
+                    <li>
+                        <a class="nav-link" href="/deletePagePdf/">
+                            Supprimer
+                        </a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="/splitPdf/">
+                            Extraire
+                        </a>
+                    </li>
                 </ul>
             </div>
-        </nav>
-        <div id="app">
-            <h2>Compresser des fichiers PDF</h1>
-            <p>Compresser des fichiers PDF, avec 3 niveaux de compression ! 
-                Cliquez sur le bouton ci-dessous pour charger vos fichiers.
-            </p>
-            
-            <form enctype="multipart/form-data" method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                    <input type="file" name="pdf_file" accept="application/pdf" />
-                <div id="compareDiv">
-                    <button type="submit" name="small-compression" id="save-button">Compression basse</button>
-                    <button type="submit" name="medium-compression" id="save-button">Compression moyenne</button>
-                    <button type="submit" name="high-compression" id="save-button">Compression  haute</button>
-                </div>
-            </form>
         </div>
-    </body>
+    </nav>
+    <div id="app">
+        <h2>Compresser des fichiers PDF</h2>
+        <p>Compresser des fichiers PDF, avec 3 niveaux de compression !
+            Cliquez sur le bouton ci-dessous pour charger vos fichiers.
+        </p>
+
+        <form id="compressForm" enctype="multipart/form-data" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="pdf_file" accept="application/pdf" />
+            <div id="compareDiv">
+                <button type="submit" name="small-compression" id="save-button">Compression basse</button>
+                <button type="submit" name="medium-compression" id="save-button">Compression moyenne</button>
+                <button type="submit" name="high-compression" id="save-button">Compression haute</button>
+            </div>
+
+            <!-- Display file size information -->
+            {% if final_size %}
+            <div class="downloader__info__content">
+                <p>
+                    <strong>
+                        Vos PDF sont désormais <span id="percent-saved">{{ final_ratio }}%</span> plus petits !
+                        <p><strong><span id="initial-size">{{ initial_size }} KO</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 448 512">
+                                    <path
+                                        d="M313.94 216H12c-6.627 0-12 5.373-12 12v56c0 6.627 5.373 12 12 12h301.94v46.06c0 21.382 25.85 32.1 40.97 16.97l86.06-86.06c9.373-9.373 9.373-24.57 0-33.94l-86.06-86.06c-15.12-15.12-40.97-4.41-40.97 16.97V216z">
+                                    </path>
+                                </svg> <span id="final-size">{{ final_size }} KO</span>
+                            </strong>
+                        </p>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 42 42" class="donut"
+                            id="donut">
+                            <circle class="donut-hole" cx="21" cy="21" r="15.91549430918954" fill="transparent">
+                            </circle>
+                            <!-- Outer circle, used as the ring -->
+                            <circle class="donut-ring" cx="21" cy="21" r="15.91549430918954" fill="transparent"
+                                stroke="#d2d3d4" stroke-width="3"></circle>
+                            <!-- Donut segment, showing the compression percentage -->
+                            <circle class="donut-segment" id="donut-segment" cx="21" cy="21" r="15.91549430918954"
+                                fill="transparent" stroke="#e4312c" stroke-width="3" stroke-dasharray="0 100"
+                                stroke-dashoffset="25" style="stroke-dasharray: 0, 100;"></circle>
+                        </svg>
+                    </strong>
+                </p>
+                {% if final_size %}
+                <a href="{% url 'download_compressed' %}">Telecharger le fichier compressé</a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+        </form>
+
+    </div>
+</body>
 
 </html>

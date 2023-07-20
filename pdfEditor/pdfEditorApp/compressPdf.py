@@ -32,6 +32,7 @@ def compress(input_file_path, output_file_path, power=0):
         sys.exit(1)
 
     gs = get_ghostscript_path()
+    print('ghostprint',gs)
     print("Compress PDF...")
     initial_size = os.path.getsize(file_path)
     subprocess.call(
@@ -53,6 +54,7 @@ def compress(input_file_path, output_file_path, power=0):
     infoText = print("Final file size is {0:.5f}MB".format(final_size / 1000000))
     print("Done.")
     os.remove(file_path)
+    return (final_size,ratio,initial_size)
 
 
 def get_ghostscript_path():
