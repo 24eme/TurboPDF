@@ -1,62 +1,69 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
-<head>
-    <title>TurboPDF</title>
-    <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
-</head>
-<body>
-<div id="app">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
-            <a class="navbar-brand" href="/">TurboPDF</a>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/appendPdf">Joindre</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/compressPdf/">Compresser</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/fillFormPdf/">Remplir un formulaire</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/addImage/">Ajouter une image</a>
+    <head>
+        <title>TurboPDF</title>
 
-                    </li>
-                    <li>
-                        <a class="nav-link" href="/lockPdf/">Verrouiller</a>
-                    </li>
-                    <li>
-                        <a class="nav-link" href="/unlockPdf/">
-                            Deverrouiller
-                        </a>
-                    </li>
-                    <li>
-                        <a class="nav-link" href="/deletePagePdf/">
-                            Supprimer
-                        </a>
-                    </li>
-                </ul>
+        <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
+        <link rel="stylesheet" href="{%static 'css/style.css' %}">
+        <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
+    </head>
+    <body>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container">
+                <a class="navbar-brand" href="/">TurboPDF</a>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/appendPdf">Joindre</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/compressPdf/">Compresser</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/fillFormPdf/">Remplir un formulaire</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/addImage/">Ajouter une image</a>
+
+                        </li>
+                        <li>
+                            <a class="nav-link" href="/lockPdf/">Verrouiller</a>
+                        </li>
+                        <li>
+                            <a class="nav-link" href="/unlockPdf/">
+                                Deverrouiller
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link" href="/deletePagePdf/">
+                                Supprimer
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </div>
-    </nav>
-    <h1>Assembler des PDF</h1>
+        </nav>
+        <div id="app">
+            <h1>Assembler des PDF</h1>
+            <p>Combiner deux ou plusieurs fichiers PDF.
+                Cliquez sur les bouton ci-dessous pour charger vos fichiers.
+            </p>
 
-    <form enctype="multipart/form-data" id="upload-compare-pdf" method="post">
-        {% csrf_token %}
-        <input type="file" name="pdf-upload1" accept=".pdf">
-        <input type="file" name="pdf-upload2" accept=".pdf">
-        <button type="submit">Joindre les fichiers</button>
-    </form>
-    {% if download_status %}
-        <p>Votre fichier a été joint avec succes et il est pret à etre téléchargé!</p> <br/>
-        <div>
-            <a href="{% url 'download_append_file' %}">Télécharger le fichier joint</a>
+            <form enctype="multipart/form-data" id="upload-compare-pdf" method="post">
+                {% csrf_token %}
+                <input type="file" name="pdf-upload1" accept=".pdf"><br/><br />
+                <input type="file" name="pdf-upload2" accept=".pdf"><br /><br />
+                <button type="submit" id="save-button">Joindre les fichiers</button>
+            </form>
+            {% if download_status %}
+                <p>Votre fichier a été joint avec succes et il est pret à etre téléchargé!</p> <br/>
+                <div>
+                    <a href="{% url 'download_append_file' %}">Télécharger le fichier joint</a>
+                </div>
+            {% endif %}
         </div>
-    {% endif %}
-</div>
 
-</body>
+    </body>
 </html>

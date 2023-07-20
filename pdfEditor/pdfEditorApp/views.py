@@ -1,5 +1,4 @@
 from PyPDF2 import PdfReader, PdfWriter
-#from django.shortcuts import render
 from django.http import HttpResponse, FileResponse, Http404
 from django.shortcuts import render
 from pdfEditorApp.listing.forms import inputForm
@@ -12,22 +11,6 @@ import os
 
 
 # Create your views here.
-
-def compressPdf(request):
-    compressedFileSize = None
-    form = inputForm()
-    if 'filename' in request.POST:
-        compressedFileSize = compressPdfFunction(request.FILES['pdf_file'])
-        print('your file was compressed ', compressedFileSize)
-
-    elif 'high-compression' in request.POST:
-        compressedFileSize = highCompressionPdfFunction(request.FILES['pdf_file'])
-        print('your file was highly compressed', compressedFileSize)
-
-    else:
-        form = inputForm()
-    return render(request, 'compressPdf.html', {'compressedFileSize': compressedFileSize})
-
 
 def homePagePdf(request):
     return render(request, 'homePagePdf.html')
@@ -48,13 +31,52 @@ def compressPdf(request):
         compress(request.FILES['pdf_file'], 'smallCompressedPdf.pdf', power=2)
         print('your file was small compressed')
 
+        # Renvoyer le fichier verrouillé en téléchargement
+        smallCcompressed_file_path = "smallCompressedPdf.pdf"
+        if os.path.exists(smallCcompressed_file_path):
+            with open(smallCcompressed_file_path, 'rb') as f:
+                response = HttpResponse(f.read(), content_type='application/pdf')
+                response['Content-Disposition'] = 'attachment; filename="smallcompressedPDF.pdf"'
+                response['Content-Length'] = os.path.getsize(smallCcompressed_file_path)
+                response['Content-Disposition'] += '; attachment; filename*=UTF-8\'\'smallcompressedPDF.pdf'
+                os.remove(smallCcompressed_file_path)
+                return response
+        else:
+            return HttpResponse("Error while locking and downloading the file")
+
     elif 'medium-compression' in request.POST: 
         compress(request.FILES['pdf_file'], 'mediumCompressedPdf.pdf', power=3)
         print('your file was medium compressed')
 
+        # Renvoyer le fichier verrouillé en téléchargement
+        mediumCompressed_file_path = "mediumCompressedPdf.pdf"
+        if os.path.exists(mediumCompressed_file_path):
+            with open(mediumCompressed_file_path, 'rb') as f:
+                response = HttpResponse(f.read(), content_type='application/pdf')
+                response['Content-Disposition'] = 'attachment; filename="mediumCompressedPdf.pdf"'
+                response['Content-Length'] = os.path.getsize(mediumCompressed_file_path)
+                response['Content-Disposition'] += '; attachment; filename*=UTF-8\'\'mediumCompressedPdf.pdf'
+                os.remove(mediumCompressed_file_path)
+                return response
+        else:
+            return HttpResponse("Error while locking and downloading the file")
+
     elif 'high-compression' in request.POST:
         compress(request.FILES['pdf_file'], 'highlyCompressedPdf.pdf', power=4)
         print('your file was highly compressed')
+
+        # Renvoyer le fichier verrouillé en téléchargement
+        highCompressed_file_path = "highlyCompressedPdf.pdf"
+        if os.path.exists(highCompressed_file_path):
+            with open(highCompressed_file_path, 'rb') as f:
+                response = HttpResponse(f.read(), content_type='application/pdf')
+                response['Content-Disposition'] = 'attachment; filename="highlyCompressedPdf.pdf"'
+                response['Content-Length'] = os.path.getsize(highCompressed_file_path)
+                response['Content-Disposition'] += '; attachment; filename*=UTF-8\'\'highlyCompressedPdf.pdf'
+                os.remove(highCompressed_file_path)
+                return response
+        else:
+            retur
 
     return render(request, 'compressPdf.html')
 
@@ -178,3 +200,4 @@ def download_compressed(request):
 
 def splitPdf(request):
     return render(request, 'splitPdf.html')
+
