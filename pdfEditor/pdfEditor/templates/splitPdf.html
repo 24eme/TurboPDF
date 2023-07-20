@@ -4,6 +4,20 @@
 <head>
     <title>TurboPDF</title>
     <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{%static 'css/style.css' %}">
+            <style>
+                #pdf-container {
+                    width: 100%;
+                    height: 600px;
+                }
+            
+                .btn-primary {
+                    margin-bottom: 5px;
+                    background-color: #2A3944ff;
+                    border-color: black;
+            
+                }
+            </style>
 
     <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
@@ -54,11 +68,12 @@
             </div>
         </div>
     </nav>
-    <h2>Extraire une ou plusieurs page(s) d'un PDF</h2>
+    
     <div id="app">
+        <h2>Extraire une ou plusieurs page(s) d'un PDF</h2>
         <form id="pdf-upload-form">
             <input type="file" id="pdf-upload" name="pdf-upload" accept=".pdf" value="upload">
-            <button type="submit">Afficher</button>
+            <button class="btn btn-primary" type="submit">Afficher</button>
 
         </form>
             <div>
@@ -81,12 +96,11 @@
                 </div>
             </fieldset>
             </div>
-            <button id="extract-pdf">Extraire</button>
+            <button class="btn btn-primary" id="extract-pdf">Extraire</button>
 
-        <div id="pdf-container"></div>
-        <button id="previous-page">Précédent</button>
+        <button class="btn btn-primary" id="previous-page">Précédent</button>
         <div id="current-page-number">0</div>
-        <button id="next-page">Suivant</button>
+        <button class="btn btn-primary" id="next-page">Suivant</button>
 
         <style>
             #previous-page, #next-page, #current-page-number {
@@ -94,6 +108,7 @@
             }
         </style>
     </div>
+    <div id="pdf-container"></div>
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = '//mozilla.github.io/pdf.js/build/pdf.worker.js';
