@@ -1,14 +1,54 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <title>TurboPDF</title>
+        <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
         <meta charset="UTF-8">
-        <title>Display PDF</title>
+        <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
     </head>
     
     <body>
-        <form enctype="multipart/form-data" method="post" enctype="multipart/form-data">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">TurboPDF</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/appendPdf">Joindre</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/compressPdf/">Compresser</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/fillFormPdf/">Remplir un formulaire</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/addImage/">Ajouter une image</a>
+
+                    </li>
+                    <li>
+                        <a class="nav-link" href="/lockPdf/">Verrouiller</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="/unlockPdf/">
+                            Deverrouiller
+                        </a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="/deletePagePdf/">
+                            Supprimer
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <form enctype="multipart/form-data" method="post" enctype="multipart/form-data">
+
             {% csrf_token %}
-                <input type="file" name="pdf_file" accept="application/pdf" />
+            <input type="file" name="pdf_file" accept="application/pdf" />
             <div id="compareDiv">
                 <button type="submit" name="filename" id="displayButton">Display PDF</button>
             </div>

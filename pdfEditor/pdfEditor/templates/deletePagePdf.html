@@ -1,8 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 
 <head>
-    <title>Affichage de PDF éditable</title>
+    <title>TurboPDF</title>
+    <link rel="stylesheet" href="{%static 'css/style.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
 
     <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -13,27 +16,28 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"
         integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer">
-        </script>
+
+    </script>
 
     <style>
-        .pdf-page {
-            position: relative;
-            width: 200px;
-            height: 300px;
-            margin: 10px;
-            border: 3px solid red;
-        }
+        
     </style>
 </head>
 
 <body>
-    <input type="file" id="pdf-input">
-    <div id="pdf-container"></div>
-    <button type="button" id="save-button" disabled>Enregistrer les modifications</button>
+    <div id="app">
+        <h2>Supprimez des pages de votre fichier PDF</h1>
+        <p>Supprimez des pages de votre fichier PDF. Cliquez sur le bouton ci-dessous pour charger vos fichiers, 
+            ensuite cliquez sur une page pour la supprimer.
+        </p>
+        <input type="file" id="pdf-input">
+        <div id="pdf-container"></div>
+        <button type="button" id="save-button" disabled>Enregistrer vos modifications</button>
+    </div>
 
 
     <script>
-        var file;
+        let file;
         async function removePagesFromPDF(file, pageNumbers) {
             try {
                 const typedArray = new Uint8Array(await file.arrayBuffer());
@@ -60,15 +64,15 @@
         $(document).ready(function () {
             $('#pdf-input').change(function (e) {
                 file = e.target.files[0];
-                var fileReader = new FileReader();
+                let fileReader = new FileReader();
 
                 fileReader.onload = function () {
-                    var typedarray = new Uint8Array(this.result);
+                    let typedarray = new Uint8Array(this.result);
                     pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
-                        var numPages = pdf.numPages;
+                        let numPages = pdf.numPages;
 
-                        var pages = [];
-                        for (var i = 1; i <= numPages; i++) {
+                        let pages = [];
+                        for (let i = 1; i <= numPages; i++) {
                             pages.push({ number: i, rendered: false });
                         }
 
@@ -77,44 +81,30 @@
                                 return;
                             }
 
-                            var page = pages[index];
+                            let page = pages[index];
                             pdf.getPage(page.number).then(function (pdfPage) {
-                                var scale = 0.9;
-                                var viewport = pdfPage.getViewport({ scale: scale });
+                                let scale = 0.9;
+                                let viewport = pdfPage.getViewport({ scale: scale });
 
-                                var canvas = document.createElement('canvas');
+                                let canvas = document.createElement('canvas');
                                 canvas.classList.add('pdf-page');
                                 canvas.width = viewport.width;
                                 canvas.height = viewport.height;
                                 canvas.dataset.pageNumber = page.number;
 
-                                var context = canvas.getContext('2d');
-                                var renderContext = {
+                                let context = canvas.getContext('2d');
+                                let renderContext = {
                                     canvasContext: context,
                                     viewport: viewport
                                 };
 
                                 pdfPage.render(renderContext).promise.then(function () {
-                                    var crossSize = 30;
-                                    var crossLineWidth = 2;
-                                    var crossOffset = 10;
-
-                                    context.beginPath();
-                                    context.lineWidth = crossLineWidth;
-                                    context.strokeStyle = 'red';
-
-                                    context.moveTo(canvas.width - crossOffset - crossSize / 2, crossOffset - crossSize / 2);
-                                    context.lineTo(canvas.width - crossOffset + crossSize / 2, crossOffset + crossSize / 2);
-                                    context.moveTo(canvas.width - crossOffset - crossSize / 2, crossOffset + crossSize / 2);
-                                    context.lineTo(canvas.width - crossOffset + crossSize / 2, crossOffset - crossSize / 2);
-
-                                    context.stroke();
 
                                     canvas.addEventListener('click', function () {
                                         if ($('#save-button').prop('disabled')) {
                                             $('#save-button').prop('disabled', false);
                                         }
-                                        var pageNumber = this.dataset.pageNumber;
+                                        let pageNumber = this.dataset.pageNumber;
                                         $(canvas).remove();
                                         const index = pages.findIndex(page => page.number == pageNumber);
                                         if (index > -1) {
