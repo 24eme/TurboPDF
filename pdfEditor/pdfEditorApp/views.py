@@ -64,7 +64,6 @@ def compressPdf(request):
     elif 'high-compression' in request.POST:
         compress(request.FILES['pdf_file'], 'highlyCompressedPdf.pdf', power=4)
         print('your file was highly compressed')
-
         # Renvoyer le fichier verrouillé en téléchargement
         highCompressed_file_path = "highlyCompressedPdf.pdf"
         if os.path.exists(highCompressed_file_path):
@@ -79,6 +78,7 @@ def compressPdf(request):
             retur
 
     return render(request, 'compressPdf.html')
+
 
 
 def appendPdf(request):
@@ -198,6 +198,11 @@ def download_compressed(request):
     else:
         return HttpResponse("The compressed file does not exist.")
 
+
 def splitPdf(request):
     return render(request, 'splitPdf.html')
+
+def modifyText(request):
+  
+    return render(request, 'modifyText.html')
 
