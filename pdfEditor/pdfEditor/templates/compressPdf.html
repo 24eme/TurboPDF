@@ -58,6 +58,12 @@
         <p>Compresser des fichiers PDF, avec 3 niveaux de compression !
             Cliquez sur le bouton ci-dessous pour charger vos fichiers.
         </p>
+        <h6 class="rouge"> 
+            ⭐ Remarque : Si votre fichier contient des images le premier type de compression 
+        </h6>
+        <h6 class="rouge">
+            (compression base) n'est pas adapté, essayer les autres types de compression.
+        </h6>
 
         <form id="compressForm" enctype="multipart/form-data" method="post" enctype="multipart/form-data">
             {% csrf_token %}
@@ -69,7 +75,9 @@
             </div>
 
             <!-- Display file size information -->
-            {% if final_size %}
+
+            {% if final_size  %}
+            {% if final_ratio >= 0 %}
             <div class="downloader__info__content">
                 <p>
                     <strong>
@@ -100,6 +108,12 @@
                 <a href="{% url 'download_compressed' %}">Telecharger le fichier compressé</a>
                 {% endif %}
             </div>
+            {% endif %}
+            {% if final_ratio < 0 %}
+            <div>
+            <h3 class="rouge"> Veuiller choisir une type de compression plus adapté a votre fichier pdf!</h1>
+            </div>
+            {% endif %}
             {% endif %}
 
         </form>

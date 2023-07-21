@@ -26,7 +26,7 @@ def fillFormPdf(request):
 
 def compressPdf(request):
     form = inputForm()
-    final_size = 0
+    final_size = None
     initial_size = 0
     ratio = 0
     if request.method == 'POST':
