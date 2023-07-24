@@ -28,21 +28,24 @@ def fillFormPdf(request):
 
 def compressPdf(request):
     form = inputForm()
+    compression_option = ''
+    compression_value = ''
     final_size = 0
     initial_size = 0
     ratio = 0
+    pdf_file = request.FILES.get('pdf_file')
     if request.method == 'POST':
-        if 'small-compression' in request.POST:
-            (final_size, ratio, initial_size) = compress(request.FILES['pdf_file'], 'CompressedPdf.pdf', power=1)
+        compression_option = request.POST.get('compressionTypes')
 
-        elif 'medium-compression' in request.POST: 
-            (final_size, ratio, initial_size) = compress(request.FILES['pdf_file'], 'CompressedPdf.pdf', power=3)
+        if compression_option == 'moyenne':
+            (final_size, ratio, initial_size) = compress(pdf_file, 'CompressedPdf.pdf', power=3)
+        elif compression_option == 'haute':
+            (final_size, ratio, initial_size) = compress(pdf_file, 'CompressedPdf.pdf', power=4)
 
-        elif 'high-compression' in request.POST:
-            (final_size, ratio, initial_size) = compress(request.FILES['pdf_file'], 'CompressedPdf.pdf', power=4)
-
-    final_ratio = round(ratio, 3)
-    return render(request, 'compressPdf.html', {'final_size': final_size, 'final_ratio': final_ratio, 'initial_size':initial_size})
+    final_ratio = int(ratio)
+    final_size = round(final_size, 3)
+    initial_size = round(initial_size, 3)
+    return render(request, 'compressPdf.html', {'final_size': final_size, 'final_ratio': final_ratio, 'initial_size': initial_size,'compression_option':compression_option})
 
 
 def appendPdf(request):

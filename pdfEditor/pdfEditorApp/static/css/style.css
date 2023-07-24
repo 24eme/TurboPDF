@@ -72,3 +72,7 @@
 #percent-saved, #initial-size, #final-size{
     color: salmon;
 }
+
+.rouge{
+    color: rgb(134, 35, 35);
+}

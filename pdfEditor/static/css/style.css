@@ -69,6 +69,10 @@
     margin: 20px;
 }
 
-#percent-saved{
+#percent-saved, #initial-size, #final-size{
     color: salmon;
+}
+
+#alert{
+    color: rgb(134, 35, 35);
 }
