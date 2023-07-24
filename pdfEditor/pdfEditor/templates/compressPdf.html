@@ -55,23 +55,18 @@
     </nav>
     <div id="app">
         <h2>Compresser des fichiers PDF</h2>
-        <p>Compresser des fichiers PDF, avec 3 niveaux de compression !
-            Cliquez sur le bouton ci-dessous pour charger vos fichiers.
-        </p>
-        <h6 class="rouge"> 
-            ⭐ Remarque : Si votre fichier contient des images le premier type de compression 
-        </h6>
-        <h6 class="rouge">
-            (compression base) n'est pas adapté, essayer les autres types de compression.
-        </h6>
+        <p>Compresser des fichiers PDF, Cliquez sur le bouton ci-dessous pour charger votre fichier.</p>
 
         <form id="compressForm" enctype="multipart/form-data" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="file" name="pdf_file" accept="application/pdf" />
             <div id="compareDiv">
-                <button type="submit" name="small-compression" id="save-button">Compression basse</button>
-                <button type="submit" name="medium-compression" id="save-button">Compression moyenne</button>
-                <button type="submit" name="high-compression" id="save-button">Compression haute</button>
+                <select id="compressionTypes" name="compressionTypes"> 
+                    <option value="moyenne">Compression moyenne</option>
+                    <option value="haute">Compression forte</option>
+                </select>
+                <input type="hidden" id="compressionValue" name="compressionValue" value="">
+                <button type="submit" id="save-button">Compresser</button>
             </div>
 
             <!-- Display file size information -->
@@ -82,12 +77,12 @@
                 <p>
                     <strong>
                         Vos PDF sont désormais <span id="percent-saved">{{ final_ratio }}%</span> plus petits !
-                        <p><strong><span id="initial-size">{{ initial_size }} KO</span>
+                        <p><strong><span id="initial-size">{{ initial_size }} MO</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 448 512">
                                     <path
                                         d="M313.94 216H12c-6.627 0-12 5.373-12 12v56c0 6.627 5.373 12 12 12h301.94v46.06c0 21.382 25.85 32.1 40.97 16.97l86.06-86.06c9.373-9.373 9.373-24.57 0-33.94l-86.06-86.06c-15.12-15.12-40.97-4.41-40.97 16.97V216z">
                                     </path>
-                                </svg> <span id="final-size">{{ final_size }} KO</span>
+                                </svg> <span id="final-size">{{ final_size }} MO</span>
                             </strong>
                         </p>
                         <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 42 42" class="donut"
@@ -111,14 +106,49 @@
             {% endif %}
             {% if final_ratio < 0 %}
             <div>
-            <h3 class="rouge"> Veuiller choisir une type de compression plus adapté a votre fichier pdf!</h1>
+            <h3 class="rouge"> Veuiller choisir un type de compression plus adapté a votre fichier pdf!</h1>
             </div>
             {% endif %}
             {% endif %}
 
         </form>
+        <!--pour l'alerte -->
+        <div id="alertBox" style="display:none;">
+            <p class="rouge">Attention : Compression élevée sélectionnée<br>
+                Vous avez choisi une compression forte pour votre fichier PDF. <br>
+                Veuillez noter que cette option peut entraîner une perte
+                significative de qualité des images et du PDF lui-même.
+            </p>
+            <button id="confirmBtn">OK</button>
+        </div>
 
     </div>
+
+    <script>
+        document.getElementById('save-button').addEventListener('click', function (event) {
+            event.preventDefault();
+
+            var compressionOption = document.getElementById('compressionTypes').value;
+
+            document.getElementById('compressionValue').value = compressionOption;
+
+            if (compressionOption === 'haute') {
+                document.getElementById('alertBox').style.display = 'block';
+
+                document.getElementById('compressForm').addEventListener('submit', function (event) {
+                    event.preventDefault();
+                });
+
+                document.getElementById('confirmBtn').addEventListener('click', function () {
+                    document.getElementById('compressForm').submit();
+                });
+            } else {
+                document.getElementById('compressForm').submit();
+            }
+        });
+    </script>
+
+
 </body>
 
 </html>
