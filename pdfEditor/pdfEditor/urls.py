@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.urls import path
 from pdfEditorApp.views import download_compressed, compressPdf, displayPdf, lockPdf, unlockPdf, addImage
-
 from pdfEditorApp.views import fillFormPdf, appendPdf, download_append_file, splitPdf
 from pdfEditorApp.views import homePagePdf,deletePagePdf
 

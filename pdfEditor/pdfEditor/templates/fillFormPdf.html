@@ -77,6 +77,8 @@
 
         document.getElementById('pdf-input').addEventListener('change', async function (e) {
             const file = e.target.files[0];
+            console.log(file)
+
             const fileReader = new FileReader();
 
             fileReader.onload = async function () {

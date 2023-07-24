@@ -7,7 +7,9 @@ from pdfEditorApp.unlockPdf import unlock_pdf_file
 from pdfEditorApp.appendPdf import append_pdf_file
 from pdfEditorApp.deletePagePdf import removePageFromPdf
 from pdfEditorApp.compressPdf import compress
+from pdfEditorApp.splitPdf import split_pdf_pages
 import os
+import zipfile
 
 
 # Create your views here.
@@ -151,7 +153,65 @@ def download_compressed(request):
         return HttpResponse("Error while downloading the file")
 
 def splitPdf(request):
+    if request.method == 'POST':
+        split_pdf_file = []
+        tab_page_selection = request.POST.get('page_selection', '').split(',')
+        uploaded_file = None
+        for file_name, file in request.FILES.items():
+            with open('uploaded_file.pdf', 'wb') as destination:
+                for chunk in file.chunks():
+                    destination.write(chunk)
+
+            uploaded_file = 'uploaded_file.pdf'
+
+        for index, element in enumerate(tab_page_selection, 1):
+            file_data = split_pdf_pages(uploaded_file, element)
+            if file_data is not None:
+                split_pdf_file.append((f'file_{index}.pdf', file_data))
+
+        os.remove('uploaded_file.pdf')  # Remove the uploaded file
+
+        # Vérifier le nombre de fichiers extraits
+        if len(split_pdf_file) == 1:
+            filename, file_data = split_pdf_file[0]
+            response = HttpResponse(file_data, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            response['Content-Length'] = len(file_data)
+            return response
+        else:
+            # S'il y a plusieurs fichiers, créer un fichier ZIP et les compresser dedans
+            zip_filename = 'extracted_files.zip'
+            with zipfile.ZipFile(zip_filename, 'w') as zip_file:
+                for filename, file_data in split_pdf_file:
+                    zip_file.writestr(filename, file_data)
+
+            # Télécharger le fichier ZIP
+            with open(zip_filename, 'rb') as zip_file:
+                response = HttpResponse(zip_file.read(), content_type='application/zip')
+                response['Content-Disposition'] = f'attachment; filename="{zip_filename}"'
+                response['Content-Length'] = os.path.getsize(zip_filename)
+
+            # Supprimer le fichier ZIP
+            os.remove(zip_filename)
+
+            # Renvoyer la réponse de téléchargement
+            return response
+
     return render(request, 'splitPdf.html')
+
+def download_split_file(file_data, index):
+    filename = f'file_{index}.pdf'
+    if os.path.exists(filename):
+        with open(filename, 'rb') as f:
+            response = HttpResponse(file_data, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            response['Content-Length'] = os.path.getsize(filename)
+            response['Content-Disposition'] += f'; filename*=UTF-8\'\'{filename}'
+
+            os.remove(filename)
+            return response
+    else:
+        return HttpResponse("Error while downloading the file")
 
 def modifyText(request):
   

@@ -11,5 +11,3 @@ def append_pdf_file(file_list):
 
     with open("grouped_file.pdf", 'wb') as output:
         merger.write(output)
-
-    print("function done in ", os.getcwd())
