@@ -62,19 +62,20 @@
         </nav>
 
         <div id="app">
-            <h1>Ajouter une image</h1>
+            <h2>Ajouter une image</h2>
             <p>Ajouter une image à votre fichier PDF. Cliquez sur les boutons ci-dessous pour charger votre
                 fichier et votre image.
             </p>
             <form id="pdf-upload-form">
-                <input class="" type="file" id="pdf-upload" name="pdf-upload" accept=".pdf" value="upload"><br/>
+                <input class="" type="file" id="pdf-input" name="pdf-upload" accept=".pdf" value="upload"><br/>
                 <button class="btn btn-primary" id="save-button" type="submit">Afficher</button>
             </form>
 
             <div>
                 <button class="btn btn-primary" id="add-image-btn">Ajouter une image</button>
            
-                <button class="btn btn-primary" id="download-pdf-btn" >Télécharger le PDF</button>
+                <!-- <button class="btn btn-primary" id="download-pdf-btn" >Télécharger le PDF</button> -->
+                <button type="button" id="save-button" disabled>Enregistrer vos modifications</button>
             </div>
 
             <div>
@@ -85,158 +86,83 @@
         
         </div>
 
-        <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
-
-
-<div id="pdf-container"></div>
-
-        <script>
-            pdfjsLib.GlobalWorkerOptions.workerSrc = '//mozilla.github.io/pdf.js/build/pdf.worker.js';
-                var isDragging = false;
-                var dragStartX = 0; // départ du déplacement
-                var dragStartY = 0;
-                var dragOffsetX = 0;
-                var dragOffsetY = 0;
-                var pdfDoc = null;
-                var canvas = null;
-                var context = null;
-                var image = null;
-                var pageNumber = 1;
-
-                function renderPage(pageNumber) {
-                    pdfDoc.getPage(pageNumber).then(function (page) {
-                        var viewport = page.getViewport({scale: 1});
-                        canvas.height = viewport.height;
-                        canvas.width = viewport.width;
-
-                        page.render({canvasContext: context, viewport: viewport}).promise.then(function () {
-                            if (image) {
-                                context.drawImage(image, dragOffsetX, dragOffsetY); // Dessine l'image en utilisant les coordonnées de décalage
-
-                            }
-                        });
-                    });
-                }
-
-                document.getElementById('pdf-upload-form').addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    var fileInput = document.getElementById('pdf-upload');
-                    var file = fileInput.files[0];
-
-                    if (file && file.type === 'application/pdf') {
-                        var fileReader = new FileReader();
-                        fileReader.onload = function (e) {
-                            var pdfData = new Uint8Array(e.target.result);
-
-                            // Chargement du PDF avec PDF.js
-                            pdfjsLib.getDocument({data: pdfData}).promise.then(function (pdf) {
-
-                                pdfDoc = pdf;
-                                var pageNumber = 1; // Numéro de page à afficher
-                                numPage = pdfDoc.numPages;
-                                console.log("Numpage : ", numPage);
-
-                                canvas = document.createElement('canvas');
-                                context = canvas.getContext('2d');
-                                canvas.style.display = 'block';
-                                canvas.style.margin = 'auto';
-                                canvas.setAttribute("id", "Mycanvas")
-                                document.getElementById('pdf-container').innerHTML = '';
-                                document.getElementById('pdf-container').appendChild(canvas);
-
-                                renderPage(pageNumber);
-                            });
-                        };
-                        fileReader.readAsArrayBuffer(file);
-                    } else {
-                        console.log('Veuillez sélectionner un fichier PDF valide !');
-                    }
-                });
-
-                document.getElementById('add-image-btn').addEventListener('click', function (e) {
-                    if (pdfDoc) {
-                        var imageInput = document.createElement('input');
-                        imageInput.type = 'file';
-                        imageInput.accept = 'image/*';
-                        imageInput.addEventListener('change', function () {
-                            var imageFile = imageInput.files[0];
-
-                            if (imageFile && imageFile.type.includes('image/')) {
-                                var imageReader = new FileReader();
-                                imageReader.onload = function (e) {
-                                    image = new Image();
-                                    image.onload = function () {
-                                        //context.clearRect(0, 0, canvas.width, canvas.height); // Efface le contenu précédent du canvas
-                                        renderPage(1);
-                                    };
-                                    image.src = e.target.result;
-                                };
-                                imageReader.readAsDataURL(imageFile);
-                            } else {
-                                consoleconsole.log('Veuillez sélectionner un fichier image valide !');
-                            }
-                        });
-                        imageInput.click();
-                    }
-                    canvas.addEventListener('mousedown', function (e) {
-                        if (image) {
-                            isDragging = true;
-                            dragStartX = e.clientX;
-                            dragStartY = e.clientY;
-                        }
-                    });
-
-                    canvas.addEventListener('mousemove', function (e) {
-                        if (isDragging) {
-
-                            var offsetX = e.clientX - dragStartX;
-                            var offsetY = e.clientY - dragStartY;
-                            dragOffsetX += offsetX;
-                            dragOffsetY += offsetY;
-                            dragStartX = e.clientX;
-                            dragStartY = e.clientY;
-                            // context.drawImage(image, dragOffsetX, dragOffsetY);
-                            renderPage(numPage);
-                        }
-                    });
-
-                    canvas.addEventListener('mouseup', function () {
-                        isDragging = false;
-                    });
-                });
-
-
-    document.getElementById('nextButton').addEventListener('click', function() {
-    if (pageNumber < numPage) {
-        pageNumber++;
-        renderPage(pageNumber)}
-
-    });
+        <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"
+            integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer">
+            </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"
+            integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer">
     
-    document.getElementById('predButton').addEventListener('click', function() {
-        if (pageNumber > 1) {
-
-            pageNumber--;
-            renderPage(pageNumber)}
-
-    });
-
-    document.getElementById('download-pdf-btn').addEventListener('click', function () {
-      if (canvas) {
-        var pdf = new jsPDF();
-        var imageData = canvas.toDataURL('image/jpeg'); // Convertir le contenu du canvas en image
-        pdf.addImage(imageData, 'JPEG', 0, 0); 
-
-        // Télécharger le PDF modifié
-        pdf.save('modified_pdf.pdf');
-    }
-});
-
-
-
         </script>
+
+
+<div class="Mon-pdf-page" id="pdf-container"></div>
+
+<script>
+            $(document).ready(function () {
+            $('#pdf-input').change(function (e) {
+                file = e.target.files[0];
+                let fileReader = new FileReader();
+
+                fileReader.onload = function () {
+                    let typedarray = new Uint8Array(this.result);
+                    pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
+                        let numPages = pdf.numPages;
+
+                        let pages = [];
+                        for (let i = 1; i <= numPages; i++) {
+                            pages.push({ number: i, rendered: false });
+                        }
+
+                        function displayPages(index) {
+                            if (index >= pages.length) {
+                                return;
+                            }
+
+                            let page = pages[index];
+                            pdf.getPage(page.number).then(function (pdfPage) {
+                                let scale = 2;
+                                let viewport = pdfPage.getViewport({ scale: scale });
+
+                                let canvas = document.createElement('canvas');
+                                canvas.classList.add('Mon-pdf-page');
+                                canvas.width = viewport.width;
+                                canvas.height = viewport.height;
+                                canvas.dataset.pageNumber = page.number;
+
+                                let context = canvas.getContext('2d');
+                                let renderContext = {
+                                    canvasContext: context,
+                                    viewport: viewport
+                                };
+
+                                pdfPage.render(renderContext).promise.then(function () {
+
+
+                                    $('#pdf-container').append(canvas);
+                                    let hr = document.createElement('hr');
+                                    $('pdf-container').append(hr);
+
+                                    page.rendered = true;
+
+                                    // Afficher la page suivante
+                                    displayPages(index + 1);
+                                });
+                            });
+                        }
+
+                        displayPages(0);
+                    });
+                };
+
+                fileReader.readAsArrayBuffer(file);
+            });
+        });
+</script>
     </body>
 </html>
