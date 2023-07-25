@@ -107,10 +107,12 @@ var dragOffsetY = 0;
 var context = null;
 var pdfDoc = null;
 var pages = [];
+var page = null;
 var canvas = null;
 var canvasImage = null;
 var image = null;
 var pageNumber = 1;
+var canvasStock = [];
 
 ////////////// Function add image ///////////////////////
 
@@ -121,21 +123,49 @@ function addImage(image, numP = "1"){
     canvasImage.classList.add('My-image');
     let contextImage = canvasImage.getContext('2d');
     canvasImage.height = 50;
-    canvasImage.width = 50;
+    canvasImage.width = 50; 
+    canvasPagePourMerge = canvasStock[0];
     let canvasMerge = document.createElement('canvas');
     canvasMerge.height = canvasPage1.height;
     canvasMerge.width = canvasPage1.width;
     contextmerge = canvasMerge.getContext('2d')
     
-    contextmerge.drawImage(canvasPage1, 0,0);
-    contextmerge.drawImage(image, 1, 1);
+    contextmerge.drawImage(canvasPagePourMerge, 0,0);
+    contextmerge.drawImage(image, dragOffsetX, dragOffsetY);
+    canvasMerge.id = numP;
 
     //canvasPage1.parentNode.removeChild(canvasPage1);
     canvasPage1.replaceWith(canvasMerge);
+
     
     
     
-    $('#1').append(canvasImage);
+    canvasMerge.addEventListener('mousedown', function (e) {
+            if (image) {
+                    isDragging = true;
+                    dragStartX = e.clientX;
+                    dragStartY = e.clientY;
+                }
+        });
+
+    canvasMerge.addEventListener('mousemove', function (e) {
+        if (isDragging) {
+
+            var offsetX = e.clientX - dragStartX;
+            var offsetY = e.clientY - dragStartY;
+            dragOffsetX += offsetX;
+            dragOffsetY += offsetY;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+                            // context.drawImage(image, dragOffsetX, dragOffsetY);
+                            addImage(image);
+                            displayPages(pageNumber);
+                        }
+                    });
+
+            canvasMerge.addEventListener('mouseup', function () {
+                        isDragging = false;
+                    });
     console.log("added")
 
 }
@@ -147,7 +177,7 @@ function displayPages(index) {
                                 return;
                             }
 
-                            let page = pages[index];
+                            page = pages[index];
                             pdfDoc.getPage(page.number).then(function (pdfPage) {
                                 let scale = 2;
                                 let viewport = pdfPage.getViewport({ scale: scale });
@@ -159,6 +189,9 @@ function displayPages(index) {
                                 canvas.dataset.pageNumber = page.number;
                                 canvas.id = page.number;
 
+                                canvasStock.push(canvas);
+                                
+
                                 let context = canvas.getContext('2d');
                                 let renderContext = {
                                     canvasContext: context,
@@ -166,9 +199,10 @@ function displayPages(index) {
                                 };
 
                                 pdfPage.render(renderContext).promise.then(function () {
-
+                                    
 
                                     $('#pdf-container').append(canvas);
+
                                     //let hr = document.createElement('hr');
                                     //$('pdf-container').append(hr);
 
@@ -193,45 +227,6 @@ $(document).ready(function () {
                         pages = [];
                         for (let i = 1; i <= numPages; i++) {
                             pages.push({ number: i, rendered: false });
-                        }
-
-                        function displayPages(index) {
-                            if (index >= pages.length) {
-                                return;
-                            }
-
-                            let page = pages[index];
-                            pdfDoc.getPage(page.number).then(function (pdfPage) {
-                                let scale = 2;
-                                let viewport = pdfPage.getViewport({ scale: scale });
-
-                                canvas = document.createElement('canvas');
-                                canvas.classList.add('Mon-pdf-page');
-                                canvas.width = viewport.width;
-                                canvas.height = viewport.height;
-                                canvas.dataset.pageNumber = page.number;
-                                canvas.id = page.number;
-
-                                context = canvas.getContext('2d');
-                                let renderContext = {
-                                    canvasContext: context,
-                                    viewport: viewport
-                                };
-
-                                pdfPage.render(renderContext).promise.then(function () {
-
-
-                                    $('#pdf-container').append(canvas);
-                                    //uploadImage();
-                                    //let hr = document.createElement('hr');
-                                    //$('pdf-container').append(hr);
-
-                                    page.rendered = true;
-
-                                    // Afficher la page suivante
-                                    displayPages(index + 1);
-                                });
-                            });
                         }
 
                         displayPages(0);
