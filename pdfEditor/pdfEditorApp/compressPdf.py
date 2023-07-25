@@ -52,10 +52,6 @@ def compress(input_file_path, output_file_path, power=0):
     final_size = os.path.getsize(output_file_path)
     ratio = 1 - (final_size / init_size)
     final_ratio = ratio * 100
-    # print("Compression by {0:.0%}.".format(ratio))
-    # print("Final file size is {0:.3f}MB".format(final_size / 1000000))
-    # print("Done.")
-    #convert bytes to kilobytes the final size
     final_size = final_size / 1000
     os.remove(file_path)
     return (final_size, final_ratio, initial_size)

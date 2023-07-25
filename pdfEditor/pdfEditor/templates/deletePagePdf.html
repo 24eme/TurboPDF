@@ -19,10 +19,6 @@
         crossorigin="anonymous" referrerpolicy="no-referrer">
 
     </script>
-
-    <style>
-        
-    </style>
 </head>
 
 <body>
@@ -194,6 +190,28 @@
                 saveAs(modifiedPdfBlob, 'modified.pdf');
             }
         });
+
+        function addPageNumbers() {
+            $('.pdf-page').each(function () {
+                const pageNumber = $(this).data('pageNumber');
+
+                const canvas = this;
+                const context = canvas.getContext('2d');
+
+                const canvasWidth = canvas.width;
+                const canvasHeight = canvas.height;
+
+                context.font = '24px Arial';
+                context.fillStyle = 'black';
+                context.textAlign = 'center';
+
+                context.fillText('Page ' + pageNumber, canvasWidth / 2, canvasHeight - 10);
+            });
+        }
+        $('#pdf-container').on('DOMNodeInserted', function () {
+            addPageNumbers();
+        });
+        
 
     </script>
 </body>
