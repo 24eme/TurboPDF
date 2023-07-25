@@ -76,6 +76,7 @@
 
 <div id="app">
     <h2>Extraire une ou plusieurs page(s) d'un PDF</h2>
+    <p>Extrayez des pages de votre fichier PDF, Cliquez sur le bouton ci-dessous pour charger votre fichier.</p>
     <form enctype="multipart/form-data" method="post" id="pdf-upload-form">
         {% csrf_token %}
         <input type="file" id="pdf-upload" name="pdf-upload" accept=".pdf">
@@ -84,7 +85,7 @@
             <input type="text" name="page_selection" placeholder="ex. 2-6,9,3-12" id="pageSelection">
         </div>
         <div>
-            <button class="btn btn-primary" id="extract-pdf" type="submit">Extraire</button>
+            <button class="btn btn-primary" id="save-button" type="submit">Extraire</button>
         </div>
     </form>
 
