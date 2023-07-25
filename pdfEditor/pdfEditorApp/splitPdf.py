@@ -20,6 +20,8 @@ def split_pdf_pages(uploaded_file, element):
     pdf_reader = PdfReader(uploaded_file)
     max_page = len(pdf_reader.pages)
 
+    solo_page = 0
+
     start = 1
     end = max_page
 
@@ -38,6 +40,7 @@ def split_pdf_pages(uploaded_file, element):
     elif len(elements) == 1:
         if elements[0].isdigit():
             start = int(elements[0])
+            solo_page = 1
         elif elements[0] == '-':
             start = 1
             end = max_page
@@ -49,8 +52,11 @@ def split_pdf_pages(uploaded_file, element):
         return None
 
     pdf_writer = PdfWriter()
-    for page_number in range(start - 1, end):
-        pdf_writer.add_page(pdf_reader.pages[page_number])
+    if solo_page == 0:
+        for page_number in range(start - 1, end):
+            pdf_writer.add_page(pdf_reader.pages[page_number])
+    else:
+        pdf_writer.add_page(pdf_reader.pages[start - 1])
 
     temp_output_file = f'extracted_pages_{element}.pdf'
     with open(temp_output_file, 'wb') as output:

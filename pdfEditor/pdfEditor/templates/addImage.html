@@ -94,7 +94,6 @@
     
         </script>
 
-
 <div class="Mon-pdf-page" id="pdf-container"></div>
 
 <script>
@@ -273,9 +272,7 @@ document.getElementById('add-image-btn').addEventListener('click', function (e) 
 });
 
 /////////////////////////// DOWNLOAD ////////////////////////////////
-
 $('#save-button').click( function () {
-    console.log("thus ", file)
     const modifiedPDFData = file.output();
 
     if (modifiedPDFData) {

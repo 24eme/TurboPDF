@@ -68,9 +68,6 @@
                 <input type="hidden" id="compressionValue" name="compressionValue" value="">
                 <button type="submit" id="save-button">Compresser</button>
             </div>
-
-            <!-- Display file size information -->
-
             {% if final_size  %}
             {% if final_ratio >= 0 %}
             <div class="downloader__info__content">
@@ -114,12 +111,13 @@
         </form>
         <!--pour l'alerte -->
         <div id="alertBox" style="display:none;">
-            <p class="rouge">Attention : Compression élevée sélectionnée<br>
-                Vous avez choisi une compression forte pour votre fichier PDF. <br>
+            <p class="rouge">Attention : Vous avez choisi une compression forte pour votre fichier PDF. <br>
                 Veuillez noter que cette option peut entraîner une perte
-                significative de qualité des images et du PDF lui-même.
+                significative de la qualité des images et du PDF lui-même.
             </p>
+            <button id="cancelBtn">Annuler</button>
             <button id="confirmBtn">OK</button>
+            
         </div>
 
     </div>
@@ -141,6 +139,11 @@
 
                 document.getElementById('confirmBtn').addEventListener('click', function () {
                     document.getElementById('compressForm').submit();
+                });
+
+                // Si l'utilisateur clique sur le bouton "Cancel", masquer l'alerte
+                document.getElementById('cancelBtn').addEventListener('click', function () {
+                    document.getElementById('alertBox').style.display = 'none';
                 });
             } else {
                 document.getElementById('compressForm').submit();
