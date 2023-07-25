@@ -188,33 +188,16 @@ def splitPdf(request):
                 for filename, file_data in split_pdf_file:
                     zip_file.writestr(filename, file_data)
 
-            # Télécharger le fichier ZIP
             with open(zip_filename, 'rb') as zip_file:
                 response = HttpResponse(zip_file.read(), content_type='application/zip')
                 response['Content-Disposition'] = f'attachment; filename="{zip_filename}"'
                 response['Content-Length'] = os.path.getsize(zip_filename)
 
-            # Supprimer le fichier ZIP
             os.remove(zip_filename)
 
-            # Renvoyer la réponse de téléchargement
             return response
 
     return render(request, 'splitPdf.html')
-
-def download_split_file(file_data, index):
-    filename = f'file_{index}.pdf'
-    if os.path.exists(filename):
-        with open(filename, 'rb') as f:
-            response = HttpResponse(file_data, content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
-            response['Content-Length'] = os.path.getsize(filename)
-            response['Content-Disposition'] += f'; filename*=UTF-8\'\'{filename}'
-
-            os.remove(filename)
-            return response
-    else:
-        return HttpResponse("Error while downloading the file")
 
 def modifyText(request):
   
