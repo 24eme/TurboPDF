@@ -67,21 +67,14 @@
                 fichier et votre image.
             </p>
             <form id="pdf-upload-form">
-                <input class="" type="file" id="pdf-input" name="pdf-upload" accept=".pdf" value="upload"><br/>
-                <button class="btn btn-primary" id="save-button" type="submit">Afficher</button>
+                <input class="" type="file" id="pdf-input" name="pdf-upload" accept=".pdf" value="upload">
             </form>
 
             <div>
                 <button class="btn btn-primary" id="add-image-btn">Ajouter une image</button>
            
                 <!-- <button class="btn btn-primary" id="download-pdf-btn" >Télécharger le PDF</button> -->
-                <button type="button" id="save-button" disabled>Enregistrer vos modifications</button>
-            </div>
-
-            <div>
-                <button class="btn btn-primary" id="predButton">précedent</button>
-                <button class="btn btn-primary " id="nextButton">suivant</button>
-                
+                <button type="button" id="save-button" >Enregistrer vos modifications</button>
             </div>
         
         </div>
@@ -89,6 +82,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
         <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+        
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"
             integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ=="
@@ -104,28 +98,57 @@
 <div class="Mon-pdf-page" id="pdf-container"></div>
 
 <script>
-            $(document).ready(function () {
-            $('#pdf-input').change(function (e) {
-                file = e.target.files[0];
-                let fileReader = new FileReader();
+///////////////////////////// Initialisation variable /////////////////////////
+var isDragging = false;
+var dragStartX = 0; // départ du déplacement
+var dragStartY = 0;
+var dragOffsetX = 0;
+var dragOffsetY = 0;
+var context = null;
+var pdfDoc = null;
+var pages = [];
+var canvas = null;
+var canvasImage = null;
+var image = null;
+var pageNumber = 1;
 
-                fileReader.onload = function () {
-                    let typedarray = new Uint8Array(this.result);
-                    pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
-                        let numPages = pdf.numPages;
+////////////// Function add image ///////////////////////
 
-                        let pages = [];
-                        for (let i = 1; i <= numPages; i++) {
-                            pages.push({ number: i, rendered: false });
-                        }
+function addImage(image, numP = "1"){
 
-                        function displayPages(index) {
+    let canvasImage = document.createElement('canvas');
+    canvasPage1 = document.getElementById(numP);
+    canvasImage.classList.add('My-image');
+    let contextImage = canvasImage.getContext('2d');
+    canvasImage.height = 50;
+    canvasImage.width = 50;
+    let canvasMerge = document.createElement('canvas');
+    canvasMerge.height = canvasPage1.height;
+    canvasMerge.width = canvasPage1.width;
+    contextmerge = canvasMerge.getContext('2d')
+    
+    contextmerge.drawImage(canvasPage1, 0,0);
+    contextmerge.drawImage(image, 1, 1);
+
+    //canvasPage1.parentNode.removeChild(canvasPage1);
+    canvasPage1.replaceWith(canvasMerge);
+    
+    
+    
+    $('#1').append(canvasImage);
+    console.log("added")
+
+}
+
+
+///////////////////////////// Display PDF //////////////////////
+function displayPages(index) {
                             if (index >= pages.length) {
                                 return;
                             }
 
                             let page = pages[index];
-                            pdf.getPage(page.number).then(function (pdfPage) {
+                            pdfDoc.getPage(page.number).then(function (pdfPage) {
                                 let scale = 2;
                                 let viewport = pdfPage.getViewport({ scale: scale });
 
@@ -134,6 +157,7 @@
                                 canvas.width = viewport.width;
                                 canvas.height = viewport.height;
                                 canvas.dataset.pageNumber = page.number;
+                                canvas.id = page.number;
 
                                 let context = canvas.getContext('2d');
                                 let renderContext = {
@@ -145,8 +169,62 @@
 
 
                                     $('#pdf-container').append(canvas);
-                                    let hr = document.createElement('hr');
-                                    $('pdf-container').append(hr);
+                                    //let hr = document.createElement('hr');
+                                    //$('pdf-container').append(hr);
+
+                                    page.rendered = true;
+
+                                    // Afficher la page suivante
+                                    displayPages(index + 1);
+                                });
+                            });
+                        }
+$(document).ready(function () {
+            $('#pdf-input').change(function (e) {
+                file = e.target.files[0];
+                let fileReader = new FileReader();
+
+                fileReader.onload = function () {
+                    let typedarray = new Uint8Array(this.result);
+                    pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
+                        let numPages = pdf.numPages;
+                        pdfDoc = pdf;
+
+                        pages = [];
+                        for (let i = 1; i <= numPages; i++) {
+                            pages.push({ number: i, rendered: false });
+                        }
+
+                        function displayPages(index) {
+                            if (index >= pages.length) {
+                                return;
+                            }
+
+                            let page = pages[index];
+                            pdfDoc.getPage(page.number).then(function (pdfPage) {
+                                let scale = 2;
+                                let viewport = pdfPage.getViewport({ scale: scale });
+
+                                canvas = document.createElement('canvas');
+                                canvas.classList.add('Mon-pdf-page');
+                                canvas.width = viewport.width;
+                                canvas.height = viewport.height;
+                                canvas.dataset.pageNumber = page.number;
+                                canvas.id = page.number;
+
+                                context = canvas.getContext('2d');
+                                let renderContext = {
+                                    canvasContext: context,
+                                    viewport: viewport
+                                };
+
+                                pdfPage.render(renderContext).promise.then(function () {
+
+
+                                    $('#pdf-container').append(canvas);
+                                    //uploadImage();
+                                    //let hr = document.createElement('hr');
+                                    //$('pdf-container').append(hr);
 
                                     page.rendered = true;
 
@@ -163,6 +241,60 @@
                 fileReader.readAsArrayBuffer(file);
             });
         });
+////////////////////////////////add button image///////////////////////////////////////////////////////
+let i = 1;
+document.getElementById('add-image-btn').addEventListener('click', function (e) {
+    if ($('#save-button').prop('disabled')) {
+                                            $('#save-button').prop('disabled', false);
+                }
+
+    if (pdfDoc) {
+        var imageInput = document.createElement('input');
+        imageInput.type = 'file';
+        imageInput.accept = 'image/*';
+        imageInput.addEventListener('change', function () {
+            var imageFile = imageInput.files[0];
+
+            if (imageFile && imageFile.type.includes('image/')) {
+                var imageReader = new FileReader();
+                    imageReader.onload = function (e) {
+                        image = new Image();
+                                    image.onload = function () {
+                                        //context.clearRect(0, 0, canvas.width, canvas.height); // Efface le contenu précédent du canvas
+                                        addImage(image);
+                                        
+                                        displayPages(i);
+                                    };
+                                    image.src = e.target.result;
+                                };
+                        imageReader.readAsDataURL(imageFile);
+            } else {
+                consoleconsole.log('Veuillez sélectionner un fichier image valide !');
+                    }     
+        });
+            imageInput.click();
+
+    } 
+});
+
+/////////////////////////// DOWNLOAD ////////////////////////////////
+
+$('#save-button').click( function () {
+    console.log("thus ", file)
+    const modifiedPDFData = file.output();
+
+    if (modifiedPDFData) {
+        const blob = new Blob([file], { type: 'application/pdf' });
+
+        // Télécharger le fichier PDF modifié
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "modified_pdf.pdf";
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+});
 </script>
     </body>
 </html>

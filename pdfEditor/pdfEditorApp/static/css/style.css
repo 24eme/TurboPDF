@@ -80,3 +80,12 @@
 .Mon-pdf-page{
     text-align: center;
 }
+
+#add-image-btn{
+    background-color: #2A3944ff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 20px; 
+}
