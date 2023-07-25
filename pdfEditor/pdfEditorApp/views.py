@@ -168,6 +168,8 @@ def splitPdf(request):
             uploaded_file = 'uploaded_file.pdf'
 
         for index, element in enumerate(tab_page_selection, 1):
+            if element == "":
+                continue;
             file_data = split_pdf_pages(uploaded_file, element)
             if file_data is not None:
                 split_pdf_file.append((f'file_{index}.pdf', file_data))
