@@ -2,218 +2,246 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-    <title>TurboPDF</title>
-    <link rel="stylesheet" href="{%static 'css/style.css' %}">
-    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
-    <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
+    <head>
+        <title>TurboPDF</title>
+        <link rel="stylesheet" href="{%static 'css/style.css' %}">
+        <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
+        <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
 
-    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"
-        integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer">
+        <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"
+            integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer">
+            </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"
+            integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer">
+
         </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"
-        integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer">
 
-    </script>
-</head>
-
-<body>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container">
-                <a class="navbar-brand" href="/">TurboPDF</a>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/appendPdf">Joindre</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/compressPdf/">Compresser</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/fillFormPdf/">Remplir un formulaire</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/addImage/">Ajouter une image</a>
-        
-                        </li>
-                        <li>
-                            <a class="nav-link" href="/lockPdf/">Verrouiller</a>
-                        </li>
-                        <li>
-                            <a class="nav-link" href="/unlockPdf/">
-                                Deverrouiller
-                            </a>
-                        </li>
-                        <li>
-                            <a class="nav-link" href="/deletePagePdf/">
-                                Supprimer
-                            </a>
-                        </li>
-                        <li>
-                            <a class="nav-link" href="/splitPdf/">
-                                Extraire
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    <div id="app">
-        <h2>Supprimez des pages de votre fichier PDF</h1>
-        <p>Supprimez des pages de votre fichier PDF. Cliquez sur le bouton ci-dessous pour charger vos fichiers, 
-            ensuite cliquez sur une page pour la supprimer.
-        </p>
-        <input type="file" id="pdf-input">
-        <div id="pdf-container"></div>
-        <button type="button" id="save-button" disabled>Enregistrer vos modifications</button>
-    </div>
-
-
-    <script>
-        let file;
-        async function removePagesFromPDF(file, pageNumbers) {
-            try {
-                const typedArray = new Uint8Array(await file.arrayBuffer());
-                const pdfDoc = await PDFLib.PDFDocument.load(typedArray);
-                const pagesToDelete = new Set(pageNumbers);
-
-                for (let i = pdfDoc.getPageCount() - 1; i >= 0; i--) {
-                    if (pagesToDelete.has(i + 1)) {
-                        continue;
-                    }
-                    pdfDoc.removePage(i);
-                }
-
-                // Convertir le document PDF en tableau de bytes
-                const modifiedPdfBytes = await pdfDoc.save();
-
-                return modifiedPdfBytes;
-            } catch (error) {
-                console.error('Une erreur est survenue :', error);
-                return null;
+        <style>
+            .selected-page {
+                border: 2px solid red;
             }
-        }
+        </style>
 
-        $(document).ready(function () {
-            $('#pdf-input').change(function (e) {
-                file = e.target.files[0];
-                let fileReader = new FileReader();
+    </head>
 
-                fileReader.onload = function () {
-                    let typedarray = new Uint8Array(this.result);
-                    pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
-                        let numPages = pdf.numPages;
+    <body>
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <div class="container">
+                    <a class="navbar-brand" href="/">TurboPDF</a>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/appendPdf">Joindre</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/compressPdf/">Compresser</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/fillFormPdf/">Remplir un formulaire</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/addImage/">Ajouter une image</a>
+            
+                            </li>
+                            <li>
+                                <a class="nav-link" href="/lockPdf/">Verrouiller</a>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="/unlockPdf/">
+                                    Deverrouiller
+                                </a>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="/deletePagePdf/">
+                                    Supprimer
+                                </a>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="/splitPdf/">
+                                    Extraire
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        <div id="app">
+            <h2>Supprimez des pages de votre fichier PDF</h1>
+            <p>Supprimez des pages de votre fichier PDF. Cliquez sur le bouton ci-dessous pour charger vos fichiers, 
+                ensuite cliquez sur une page pour la supprimer.
+            </p>
+            <input type="file" id="pdf-input">
+            <div id="pdf-container"></div>
+            <button type="button" id="save-button" disabled>Enregistrer vos modifications</button>
+        </div>
 
-                        let pages = [];
-                        for (let i = 1; i <= numPages; i++) {
-                            pages.push({ number: i, rendered: false });
+
+        <script>
+            let file;
+            async function removePagesFromPDF(file, pageNumbers) {
+                try {
+                    const typedArray = new Uint8Array(await file.arrayBuffer());
+                    const pdfDoc = await PDFLib.PDFDocument.load(typedArray);
+                    const pagesToDelete = new Set(pageNumbers);
+
+                    for (let i = pdfDoc.getPageCount() - 1; i >= 0; i--) {
+                        if (pagesToDelete.has(i + 1)) {
+                            continue;
                         }
+                        pdfDoc.removePage(i);
+                    }
 
-                        function displayPages(index) {
-                            if (index >= pages.length) {
-                                return;
+                    // Convertir le document PDF en tableau de bytes
+                    const modifiedPdfBytes = await pdfDoc.save();
+
+                    return modifiedPdfBytes;
+                } catch (error) {
+                    console.error('Une erreur est survenue :', error);
+                    return null;
+                }
+            }
+
+            $(document).ready(function () {
+                $('#pdf-input').change(function (e) {
+                    file = e.target.files[0];
+                    let fileReader = new FileReader();
+
+                    fileReader.onload = function () {
+                        let typedarray = new Uint8Array(this.result);
+                        pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
+                            let numPages = pdf.numPages;
+
+                            let pages = [];
+                            for (let i = 1; i <= numPages; i++) {
+                                pages.push({ number: i, rendered: false });
                             }
 
-                            let page = pages[index];
-                            pdf.getPage(page.number).then(function (pdfPage) {
-                                let scale = 0.9;
-                                let viewport = pdfPage.getViewport({ scale: scale });
+                            function displayPages(index) {
+                                if (index >= pages.length) {
+                                    return;
+                                }
 
-                                let canvas = document.createElement('canvas');
-                                canvas.classList.add('pdf-page');
-                                canvas.width = viewport.width;
-                                canvas.height = viewport.height;
-                                canvas.dataset.pageNumber = page.number;
+                                let page = pages[index];
+                                pdf.getPage(page.number).then(function (pdfPage) {
+                                    let scale = 0.9;
+                                    let viewport = pdfPage.getViewport({ scale: scale });
 
-                                let context = canvas.getContext('2d');
-                                let renderContext = {
-                                    canvasContext: context,
-                                    viewport: viewport
-                                };
+                                    let canvas = document.createElement('canvas');
+                                    canvas.classList.add('pdf-page');
+                                    canvas.width = viewport.width;
+                                    canvas.height = viewport.height;
+                                    canvas.dataset.pageNumber = page.number;
 
-                                pdfPage.render(renderContext).promise.then(function () {
+                                    let context = canvas.getContext('2d');
+                                    let renderContext = {
+                                        canvasContext: context,
+                                        viewport: viewport
+                                    };
 
-                                    canvas.addEventListener('click', function () {
-                                        if ($('#save-button').prop('disabled')) {
-                                            $('#save-button').prop('disabled', false);
-                                        }
-                                        let pageNumber = this.dataset.pageNumber;
-                                        $(canvas).remove();
-                                        const index = pages.findIndex(page => page.number == pageNumber);
-                                        if (index > -1) {
-                                            pages.splice(index, 1);
-                                        }
+                                    pdfPage.render(renderContext).promise.then(function () {
+
+                                        canvas.addEventListener('click', function () {
+                                            if ($('#save-button').prop('disabled')) {
+                                                $('#save-button').prop('disabled', false);
+                                            }
+                                            togglePageSelection(canvas);
+                                        });
+
+                                        $('#pdf-container').append(canvas);
+
+                                        page.rendered = true;
+
+                                        // Afficher la page suivante
+                                        displayPages(index + 1);
                                     });
-
-                                    $('#pdf-container').append(canvas);
-
-                                    page.rendered = true;
-
-                                    // Afficher la page suivante
-                                    displayPages(index + 1);
                                 });
-                            });
-                        }
+                            }
 
-                        displayPages(0);
-                    });
-                };
+                            displayPages(0);
+                        });
+                    };
 
-                fileReader.readAsArrayBuffer(file);
-            });
-        });
-
-        $('#save-button').click(async function () {
-            const pageNumbersToRemove = [];
-
-            $('.pdf-page').each(function () {
-                const pageNumber = $(this).data('pageNumber');
-                pageNumbersToRemove.push(pageNumber);
+                    fileReader.readAsArrayBuffer(file);
+                });
             });
 
-            if (pageNumbersToRemove.length === 0) {
-                console.log('Aucune page sélectionnée pour suppression.');
-                return;
+            // Function to toggle selected pages
+            function togglePageSelection(canvas) {
+                const pageNumber = $(canvas).data('pageNumber');
+                const index = selectedPages.indexOf(pageNumber);
+                if (index > -1) {
+                    selectedPages.splice(index, 1);
+                    $(canvas).removeClass('selected-page');
+                } else {
+                    selectedPages.push(pageNumber);
+                    $(canvas).addClass('selected-page');
+                }
             }
 
-            // Supprimer les pages 
-            const modifiedPdfBytes = await removePagesFromPDF(file, pageNumbersToRemove);
+            let selectedPages = [];
 
-            if (modifiedPdfBytes) {
+            $('#save-button').click(async function () {
+                if (selectedPages.length === 0) {
+                    console.log('Aucune page sélectionnée pour suppression.');
+                    return;
+                }
+
+                const originalTypedArray = new Uint8Array(await file.arrayBuffer());
+                const originalPdfDoc = await PDFLib.PDFDocument.load(originalTypedArray);
+
+                // Create a new PDF document to store the modified pages
+                const modifiedPdfDoc = await PDFLib.PDFDocument.create();
+
+                const copiedPages = [];
+                for (let i = 0; i < originalPdfDoc.getPageCount(); i++) {
+                    const pageNumber = i + 1;
+                    if (!selectedPages.includes(pageNumber)) {
+                        const [copiedPage] = await modifiedPdfDoc.copyPages(originalPdfDoc, [i]);
+                        copiedPages.push(copiedPage);
+                    }
+                }
+
+                for (const page of copiedPages) {
+                    modifiedPdfDoc.addPage(page);
+                }
+
+                const modifiedPdfBytes = await modifiedPdfDoc.save();
+
+                // Create a Blob from the Uint8Array and download the file
                 const modifiedPdfBlob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
-
-                // Télécharger le fichier PDF modifié
-                saveAs(modifiedPdfBlob, 'modified.pdf');
-            }
-        });
-
-        function addPageNumbers() {
-            $('.pdf-page').each(function () {
-                const pageNumber = $(this).data('pageNumber');
-
-                const canvas = this;
-                const context = canvas.getContext('2d');
-
-                const canvasWidth = canvas.width;
-                const canvasHeight = canvas.height;
-
-                context.font = '24px Arial';
-                context.fillStyle = 'black';
-                context.textAlign = 'center';
-
-                context.fillText('Page ' + pageNumber, canvasWidth / 2, canvasHeight - 10);
+                const downloadUrl = URL.createObjectURL(modifiedPdfBlob);
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = 'modified.pdf';
+                link.click();
+                URL.revokeObjectURL(downloadUrl); // Clean up the object URL after download
             });
-        }
-        $('#pdf-container').on('DOMNodeInserted', function () {
-            addPageNumbers();
-        });
-        
 
-    </script>
-</body>
+            function addPageNumbers() {
+                $('.pdf-page').each(function () {
+                    const pageNumber = $(this).data('pageNumber');
+
+                    const canvas = this;
+                    const context = canvas.getContext('2d');
+
+                    const canvasWidth = canvas.width;
+                    const canvasHeight = canvas.height;
+
+                    context.font = '24px Arial';
+                    context.textAlign = 'center';
+                    context.fillStyle = '#000'; // Change the text color to black
+                    context.fillText('Page ' + pageNumber, canvasWidth / 2, canvasHeight - 10);
+                });
+            }
+
+            $('#pdf-container').on('DOMNodeInserted', function () {
+                addPageNumbers();
+            });
+        </script>
+    </body>
 
 </html>
