@@ -8,6 +8,7 @@ from pdfEditorApp.appendPdf import append_pdf_file
 from pdfEditorApp.deletePagePdf import removePageFromPdf
 from pdfEditorApp.compressPdf import compress
 from pdfEditorApp.splitPdf import split_pdf_pages
+from pdfEditorApp.pdfToImage import pdf_to_png,zip_folder
 import os
 import zipfile
 
@@ -25,6 +26,26 @@ def deletePagePdf(request):
     
 def fillFormPdf(request):
     return render(request, 'fillFormPdf.html')
+
+def pdfToImage(request):
+    output_folder = 'output_images'
+    output_zip = 'output_images.zip'
+    if request.method == 'POST':
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+        input_path = save_input_file(request.FILES['input_file'])
+        pdf_to_png(input_path,output_folder)
+        zip_folder(output_folder,output_zip)
+        #download the zipped folder
+        with open(output_zip, 'rb') as zip_file:
+            response = HttpResponse(zip_file.read(), content_type='application/zip')
+            response['Content-Disposition'] = f'attachment; filename="{output_zip}"'
+            response['Content-Length'] = os.path.getsize(output_zip)
+
+        os.remove(output_zip)
+
+        return response
+    return render(request, 'pdfToImage.html')
 
 def compressPdf(request):
     form = inputForm()
