@@ -119,13 +119,14 @@ var numP = "1";
 ////////////// Function add image ///////////////////////
 
 function addImage(image){
-
+    let canvasMerge = null;
+    function addIm(image){
 
     canvasPage1 = document.getElementById(numP);
     
     canvasPagePourMerge = canvasStock[Number(numP)-1];
 
-    let canvasMerge = document.createElement('canvas');
+    canvasMerge = document.createElement('canvas');
     canvasMerge.height = canvasPage1.height;
     canvasMerge.width = canvasPage1.width;
     contextmerge = canvasMerge.getContext('2d')
@@ -135,6 +136,8 @@ function addImage(image){
     canvasMerge.id = numP;
 
     canvasPage1.replaceWith(canvasMerge);
+    }
+    addIm(image);
 
     
     
@@ -156,9 +159,7 @@ function addImage(image){
             dragOffsetY += offsetY;
             dragStartX = e.clientX;
             dragStartY = e.clientY;
-                            // context.drawImage(image, dragOffsetX, dragOffsetY);
-                            addImage(image);
-                            displayPages(pageNumber);
+            addImage(image);
                         }
                     });
 
@@ -173,7 +174,7 @@ function addImage(image){
 ///////////////////////////// Display PDF //////////////////////
 function displayPages(index) {
     if (index >= pages.length) {
-        return;
+        return true;
     }
 
     page = pages[index];
@@ -201,10 +202,6 @@ function displayPages(index) {
                                     
 
         $('#pdf-container').append(canvas);
-        canvas.addEventListener("click", (e) => {
-        numP = canvas.id;
-        console.log('the id is : ', numP);
-        });
         page.rendered = true;
         // Afficher la page suivante
         displayPages(index + 1);
@@ -229,7 +226,7 @@ $(document).ready(function () {
                             pages.push({ number: i, rendered: false });
                         }
 
-                        displayPages(0);
+                        displayPages(0);                      
                     });
                 };
 
@@ -237,14 +234,18 @@ $(document).ready(function () {
             });
         });
 
-        //const lesCanvas = document.querySelectorAll('canvas');
-//console.log('the canvas is : ', lesCanvas);
-//lesCanvas.forEach(canva => {
-   // canva.addEventListener("click", (e) => {
-//         numP = canva.id;
-//         console.log('the id is : ', numP);
-//     });
-// });
+
+let pdfContainer = document.getElementById('pdf-container');
+pdfContainer.addEventListener('click', function () {
+    const lesCanvas = document.querySelectorAll('canvas');
+    lesCanvas.forEach(cnv => {
+        cnv.addEventListener("click", (e) => {
+        numP = cnv.id;
+        console.log('the id is : ', numP);
+        });
+    });
+});
+
 
 
 ////////////////////////////////add button image///////////////////////////////////////////////////////
@@ -267,10 +268,8 @@ document.getElementById('add-image-btn').addEventListener('click', function (e) 
                     imageReader.onload = function (e) {
                         image = new Image();
                                     image.onload = function () {
-                                        //context.clearRect(0, 0, canvas.width, canvas.height); // Efface le contenu précédent du canvas
+                                
                                         addImage(image);
-                                        
-                                        displayPages(i);
                                     };
                                     image.src = e.target.result;
                                 };
