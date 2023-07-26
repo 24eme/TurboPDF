@@ -1,15 +1,18 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
+
+<head>
+    <title>TurboPDF</title>
+    <link rel="stylesheet" href="{%static 'css/style.css' %}">
+    <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+
     <head>
-        <title>TurboPDF</title>
-        <link rel="stylesheet" href="{%static 'css/style.css' %}">
-        <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
-        <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
-    <head>
+
     <body>
-        
+
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container">
                 <a class="navbar-brand" href="/">TurboPDF</a>
@@ -26,7 +29,7 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/addImage/">Ajouter une image</a>
-        
+
                         </li>
                         <li>
                             <a class="nav-link" href="/lockPdf/">Verrouiller</a>
@@ -46,38 +49,30 @@
                                 Extraire
                             </a>
                         </li>
+                        <li>
+                            <a class="nav-link" href="/pdfToImage/">
+                                PDF en JPG
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
         </nav>
         <div id="app">
-            <h2>Verrouillez vos fichiers PDFs en un click</h2>
-            <p>Verrouillez votre fichier PDF. Cliquez sur le bouton ci-dessous pour charger votre
+            <h2>convertissez les pages de vos fichiers PDFs en JPG</h2>
+            <p>convertissez les pages de vos fichiers PDFs en JPG, ou extayez toutes les images de votre fichier pdf.<br>
+                Cliquez sur le bouton ci-dessous pour charger votre
                 fichier.
-            </p>          
+            </p>
 
-            <form enctype="multipart/form-data" method="post" >
+            <form enctype="multipart/form-data" method="post">
                 {% csrf_token %}
-                <label for="password">Entrez votre mot de passe:</label>
-                <div class="password-container">
-                    <input type="password" id="pass" name="password" placeholder="password" required> 
-                    <i class="fa-solid fa-eye" id="eye"></i><br /><br />
-                </div>
                 <input type="file" name="input_file" accept="application/pdf" /><br /><br />
                 <div id="lockDiv">
-                    <button type="submit" name="filename" id="save-button">verrouiller le fichier</button>
+                    <button type="submit" name="filename" id="save-button">PDF en JPG</button>
+                    <button type="submit" name="filename1" id="save-button">Extraire images</button>
                 </div>
             </form>
         </div>
     </body>
-
-    <script>
-        const passwordInput = document.querySelector("#pass")
-        const eye = document.querySelector("#eye")
-        eye.addEventListener("click", function () {
-                this.classList.toggle("fa-eye-slash")
-                const type = passwordInput.getAttribute("type") === "password" ? "text" : "password"
-                passwordInput.setAttribute("type", type)
-            })
-    </script>
 </html>
