@@ -89,3 +89,13 @@
     border-radius: 5px;
     font-size: 20px; 
 }
+
+#choose-button{
+    background-color: #2A3944ff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    margin-top: 40px;
+    font-size: 20px;
+}

@@ -66,6 +66,7 @@
             <p>Ajouter une image à votre fichier PDF. Cliquez sur les boutons ci-dessous pour charger votre
                 fichier et votre image.
             </p>
+            <p> <B> Cliquer sur la page dans laquelle vous vouler importer votre image </B> </p>
             <form id="pdf-upload-form">
                 <input class="" type="file" id="pdf-input" name="pdf-upload" accept=".pdf" value="upload">
             </form>
@@ -74,7 +75,8 @@
                 <button class="btn btn-primary" id="add-image-btn">Ajouter une image</button>
            
                 <!-- <button class="btn btn-primary" id="download-pdf-btn" >Télécharger le PDF</button> -->
-                <button type="button" id="save-button" >Enregistrer vos modifications</button>
+                <button type="button" id="save-button" disabled >Enregistrer vos modifications</button>
+                
             </div>
         
         </div>
@@ -112,18 +114,17 @@ var canvasImage = null;
 var image = null;
 var pageNumber = 1;
 var canvasStock = [];
+var numP = "1";
 
 ////////////// Function add image ///////////////////////
 
-function addImage(image, numP = "1"){
+function addImage(image){
 
-    let canvasImage = document.createElement('canvas');
+
     canvasPage1 = document.getElementById(numP);
-    canvasImage.classList.add('My-image');
-    let contextImage = canvasImage.getContext('2d');
-    canvasImage.height = 50;
-    canvasImage.width = 50; 
-    canvasPagePourMerge = canvasStock[0];
+    
+    canvasPagePourMerge = canvasStock[Number(numP)-1];
+
     let canvasMerge = document.createElement('canvas');
     canvasMerge.height = canvasPage1.height;
     canvasMerge.width = canvasPage1.width;
@@ -133,7 +134,6 @@ function addImage(image, numP = "1"){
     contextmerge.drawImage(image, dragOffsetX, dragOffsetY);
     canvasMerge.id = numP;
 
-    //canvasPage1.parentNode.removeChild(canvasPage1);
     canvasPage1.replaceWith(canvasMerge);
 
     
@@ -172,46 +172,47 @@ function addImage(image, numP = "1"){
 
 ///////////////////////////// Display PDF //////////////////////
 function displayPages(index) {
-                            if (index >= pages.length) {
-                                return;
-                            }
+    if (index >= pages.length) {
+        return;
+    }
 
-                            page = pages[index];
-                            pdfDoc.getPage(page.number).then(function (pdfPage) {
-                                let scale = 2;
-                                let viewport = pdfPage.getViewport({ scale: scale });
+    page = pages[index];
+    pdfDoc.getPage(page.number).then(function (pdfPage) {
+    let scale = 2;
+    let viewport = pdfPage.getViewport({ scale: scale });
 
-                                let canvas = document.createElement('canvas');
-                                canvas.classList.add('Mon-pdf-page');
-                                canvas.width = viewport.width;
-                                canvas.height = viewport.height;
-                                canvas.dataset.pageNumber = page.number;
-                                canvas.id = page.number;
+    let canvas = document.createElement('canvas');
+    canvas.classList.add('Mon-pdf-page');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    canvas.dataset.pageNumber = page.number;
+    canvas.id = page.number;
 
-                                canvasStock.push(canvas);
+    canvasStock.push(canvas);
                                 
 
-                                let context = canvas.getContext('2d');
-                                let renderContext = {
-                                    canvasContext: context,
-                                    viewport: viewport
-                                };
+    let context = canvas.getContext('2d');
+    let renderContext = {
+        canvasContext: context,
+        viewport: viewport
+        };
 
-                                pdfPage.render(renderContext).promise.then(function () {
+    pdfPage.render(renderContext).promise.then(function () {
                                     
 
-                                    $('#pdf-container').append(canvas);
+        $('#pdf-container').append(canvas);
+        canvas.addEventListener("click", (e) => {
+        numP = canvas.id;
+        console.log('the id is : ', numP);
+        });
+        page.rendered = true;
+        // Afficher la page suivante
+        displayPages(index + 1);
+        });
+    });
+    }
 
-                                    //let hr = document.createElement('hr');
-                                    //$('pdf-container').append(hr);
-
-                                    page.rendered = true;
-
-                                    // Afficher la page suivante
-                                    displayPages(index + 1);
-                                });
-                            });
-                        }
+/////////////////// Load PDF ////////////////////
 $(document).ready(function () {
             $('#pdf-input').change(function (e) {
                 file = e.target.files[0];
@@ -235,12 +236,24 @@ $(document).ready(function () {
                 fileReader.readAsArrayBuffer(file);
             });
         });
+
+        //const lesCanvas = document.querySelectorAll('canvas');
+//console.log('the canvas is : ', lesCanvas);
+//lesCanvas.forEach(canva => {
+   // canva.addEventListener("click", (e) => {
+//         numP = canva.id;
+//         console.log('the id is : ', numP);
+//     });
+// });
+
+
 ////////////////////////////////add button image///////////////////////////////////////////////////////
 let i = 1;
 document.getElementById('add-image-btn').addEventListener('click', function (e) {
+
     if ($('#save-button').prop('disabled')) {
-                                            $('#save-button').prop('disabled', false);
-                }
+        $('#save-button').prop('disabled', false);
+        }
 
     if (pdfDoc) {
         var imageInput = document.createElement('input');
