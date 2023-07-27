@@ -8,150 +8,169 @@
     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
     <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{%static 'css/style.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
 
 </head>
 
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
-            <a class="navbar-brand" href="/">TurboPDF</a>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/appendPdf">Joindre</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/compressPdf/">Compresser</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/fillFormPdf/">Remplir un formulaire</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/addImage/">Ajouter une image</a>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="/">TurboPDF</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/appendPdf">Joindre</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/compressPdf/">Compresser</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/fillFormPdf/">Remplir un formulaire</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/addImage/">Ajouter une image</a>
 
-                    </li>
-                    <li>
-                        <a class="nav-link" href="/lockPdf/">Verrouiller</a>
-                    </li>
-                    <li>
-                        <a class="nav-link" href="/unlockPdf/">
-                            Deverrouiller
-                        </a>
-                    </li>
-                    <li>
-                        <a class="nav-link" href="/deletePagePdf/">
-                            Supprimer
-                        </a>
-                    </li>
-                    <li>
-                        <a class="nav-link" href="/splitPdf/">
-                            Extraire
-                        </a>
-                    </li>
-                </ul>
+                </li>
+                <li>
+                    <a class="nav-link" href="/lockPdf/">Verrouiller</a>
+                </li>
+                <li>
+                    <a class="nav-link" href="/unlockPdf/">
+                        Deverrouiller
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link" href="/deletePagePdf/">
+                        Supprimer
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link" href="/splitPdf/">
+                        Extraire
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div id="app">
+    <h2>Compresser des fichiers PDF</h2>
+    <p>Compresser des fichiers PDF, Cliquez sur le bouton ci-dessous pour charger votre fichier.</p>
+
+    <form id="compressForm" enctype="multipart/form-data" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="pdf_file" accept="application/pdf" />
+        <div id="compareDiv">
+            <input type="hidden" id="compressionValue" name="compressionValue" value="">
+            <button type="submit" id="save-button-mid" value="moyenne">Compresser</button>
+        </div>
+        <div id="accordion">
+            <h5 class="mb-0">
+                <div role="button" class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    Option avancée
+                </div>
+            </h5>
+            <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+                <div class="card-body">
+                    <p class="warning-text">
+                        Attention, si votre PDF contient des images,
+                        la haute compression va fortement impacter leur qualité.
+                    </p>
+                    <button type="submit" id="save-button-high" value="haute">Haute compression</button>
+                </div>
             </div>
         </div>
-    </nav>
-    <div id="app">
-        <h2>Compresser des fichiers PDF</h2>
-        <p>Compresser des fichiers PDF, Cliquez sur le bouton ci-dessous pour charger votre fichier.</p>
 
-        <form id="compressForm" enctype="multipart/form-data" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input type="file" name="pdf_file" accept="application/pdf" />
-            <div id="compareDiv">
-                <select id="compressionTypes" name="compressionTypes"> 
-                    <option value="moyenne">Compression moyenne</option>
-                    <option value="haute">Compression forte</option>
-                </select>
-                <input type="hidden" id="compressionValue" name="compressionValue" value="">
-                <button type="submit" id="save-button">Compresser</button>
-            </div>
-            {% if final_size  %}
+
+        <script>
+            // Initialize the accordion behavior
+            $(document).ready(function () {
+                $("#accordion").on("click", ".btn-link", function () {
+                    $(this).toggleClass("collapsed");
+                    var target = $(this).attr("data-target");
+                    $(target).toggleClass("show");
+                });
+            });
+        </script>
+
+        {% if final_size  %}
             {% if final_ratio >= 0 %}
-            <div class="downloader__info__content">
-                <p>
-                    <strong>
-                        Vos PDF sont désormais <span id="percent-saved">{{ final_ratio }}%</span> plus petits !
-                        <p><strong><span id="initial-size">{{ initial_size }} MO</span>
+                <div class="downloader__info__content">
+                    <p>
+                        <strong>
+                            Votre PDF a été réduit de <span id="percent-saved">{{ final_ratio }}%</span>.
+                            <p><strong><span id="initial-size">{{ initial_size }} Mo</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 448 512">
                                     <path
-                                        d="M313.94 216H12c-6.627 0-12 5.373-12 12v56c0 6.627 5.373 12 12 12h301.94v46.06c0 21.382 25.85 32.1 40.97 16.97l86.06-86.06c9.373-9.373 9.373-24.57 0-33.94l-86.06-86.06c-15.12-15.12-40.97-4.41-40.97 16.97V216z">
+                                            d="M313.94 216H12c-6.627 0-12 5.373-12 12v56c0 6.627 5.373 12 12 12h301.94v46.06c0 21.382 25.85 32.1 40.97 16.97l86.06-86.06c9.373-9.373 9.373-24.57 0-33.94l-86.06-86.06c-15.12-15.12-40.97-4.41-40.97 16.97V216z">
                                     </path>
-                                </svg> <span id="final-size">{{ final_size }} MO</span>
+                                </svg> <span id="final-size">{{ final_size }} Mo</span>
                             </strong>
-                        </p>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 42 42" class="donut"
-                            id="donut">
-                            <circle class="donut-hole" cx="21" cy="21" r="15.91549430918954" fill="transparent">
-                            </circle>
-                            <!-- Outer circle, used as the ring -->
-                            <circle class="donut-ring" cx="21" cy="21" r="15.91549430918954" fill="transparent"
-                                stroke="#d2d3d4" stroke-width="3"></circle>
-                            <!-- Donut segment, showing the compression percentage -->
-                            <circle class="donut-segment" id="donut-segment" cx="21" cy="21" r="15.91549430918954"
-                                fill="transparent" stroke="#e4312c" stroke-width="3" stroke-dasharray="0 100"
-                                stroke-dashoffset="25" style="stroke-dasharray: 0, 100;"></circle>
-                        </svg>
-                    </strong>
-                </p>
-                {% if final_size %}
-                <a href="{% url 'download_compressed' %}">Telecharger le fichier compressé</a>
-                {% endif %}
-            </div>
+                            </p>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 42 42" class="donut"
+                                 id="donut">
+                                <circle class="donut-hole" cx="21" cy="21" r="15.91549430918954" fill="transparent">
+                                </circle>
+                                <!-- Outer circle, used as the ring -->
+                                <circle class="donut-ring" cx="21" cy="21" r="15.91549430918954" fill="transparent"
+                                        stroke="#d2d3d4" stroke-width="3"></circle>
+                                <!-- Donut segment, showing the compression percentage -->
+                                <circle class="donut-segment" id="donut-segment" cx="21" cy="21" r="15.91549430918954"
+                                        fill="transparent" stroke="#e4312c" stroke-width="3" stroke-dasharray="0 100"
+                                        stroke-dashoffset="25" style="stroke-dasharray: 0, 100;"></circle>
+                            </svg>
+                        </strong>
+                    </p>
+                    {% if final_size %}
+                            <a href="{% url 'download_compressed' %}" id="download-link" class="download-compress-link">Telecharger le fichier compressé</a>
+                    {% endif %}
+
+                </div>
             {% endif %}
             {% if final_ratio < 0 %}
-            <div>
-            <h3 class="rouge"> Veuiller choisir un type de compression plus adapté a votre fichier pdf!</h1>
-            </div>
+                <div>
+                    <h3 class="rouge"> Veuiller choisir un type de compression plus adapté a votre fichier pdf!</h1>
+                </div>
             {% endif %}
-            {% endif %}
+        {% endif %}
 
-        </form>
-        <!--pour l'alerte -->
-        <div id="alertBox" style="display:none;">
-            <p class="rouge">Attention : Vous avez choisi une compression forte pour votre fichier PDF. <br>
-                Veuillez noter que cette option peut entraîner une perte
-                significative de la qualité des images et du PDF lui-même.
-            </p>
-            <button id="cancelBtn">Annuler</button>
-            <button id="confirmBtn">OK</button>
-            
-        </div>
+    </form>
+</div>
 
-    </div>
+<script>
 
-    <script>
-        document.getElementById('save-button').addEventListener('click', function (event) {
+    document.addEventListener('click', function (event) {
+        if (event.target.matches('.download-compress-link')) {
+
+            // Set a short delay (e.g., 500ms) to give the server some time to start the download
+            setTimeout(function () {
+                // Then disable the link and change its text
+                event.target.removeAttribute('href');
+                event.target.textContent = 'Téléchargement effectué';
+            }, 500);
+        }
+    });
+
+    document.getElementById('save-button-mid').addEventListener('click', function (event) {
             event.preventDefault();
-
-            var compressionOption = document.getElementById('compressionTypes').value;
-
+            var compressionOption = document.getElementById('save-button-mid').value;
             document.getElementById('compressionValue').value = compressionOption;
-
-            if (compressionOption === 'haute') {
-                document.getElementById('alertBox').style.display = 'block';
-
-                document.getElementById('compressForm').addEventListener('submit', function (event) {
-                    event.preventDefault();
-                });
-
-                document.getElementById('confirmBtn').addEventListener('click', function () {
-                    document.getElementById('compressForm').submit();
-                });
-
-                // Si l'utilisateur clique sur le bouton "Cancel", masquer l'alerte
-                document.getElementById('cancelBtn').addEventListener('click', function () {
-                    document.getElementById('alertBox').style.display = 'none';
-                });
-            } else {
-                document.getElementById('compressForm').submit();
-            }
+            document.getElementById('compressForm').submit();
         });
-    </script>
+
+        document.getElementById('save-button-high').addEventListener('click', function (event) {
+            event.preventDefault();
+            var compressionOption = document.getElementById('save-button-high').value;
+            document.getElementById('compressionValue').value = compressionOption;
+            document.getElementById('compressForm').submit();
+        });
+</script>
+</div>
 
 
 </body>
 
 </html>
+

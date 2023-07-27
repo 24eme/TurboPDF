@@ -61,6 +61,26 @@
     font-size: 20px;
 }
 
+#save-button-high{
+    background-color: #2A3944ff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    margin-top: 2%;
+    font-size: 20px;
+}
+
+#save-button-mid {
+    background-color: #2A3944ff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    margin-top: 2%;
+    font-size: 20px;
+}
+
 #pdf-input {
     font-size: 25px;
 }
@@ -98,4 +118,8 @@
     border-radius: 5px;
     margin-top: 40px;
     font-size: 20px;
+
+.warning-text {
+    margin-top:1% !important;
+    font-size: small;
 }
