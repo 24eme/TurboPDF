@@ -121,8 +121,10 @@
 }
 .warning-text {
     margin-top:1% !important;
-    font-size: small;
+    font-size: medium;
+    color: red;
 }
+
 #pdf-previews {
     display: flex;
     flex-wrap: wrap;
