@@ -15,7 +15,7 @@ urlpatterns = [
 
     path('appendPdf/', appendPdf, name='appendPdf'),
     path('download_append_file', download_append_file, name='download_append_file'),
-     path('pdfToImage/', pdfToImage, name='pdfToImage'),
+    path('pdfToImage/', pdfToImage, name='pdfToImage'),
     path('download_compressed', download_compressed, name='download_compressed'),
    
 

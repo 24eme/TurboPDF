@@ -8,7 +8,7 @@ from pdfEditorApp.appendPdf import append_pdf_file
 from pdfEditorApp.deletePagePdf import removePageFromPdf
 from pdfEditorApp.compressPdf import compress
 from pdfEditorApp.splitPdf import split_pdf_pages
-from pdfEditorApp.pdfToImage import pdf_to_png,zip_folder
+from pdfEditorApp.pdfToImage import pdf_to_png, zip_folder, extract_images_from_pdf
 import os
 import zipfile
 
@@ -31,10 +31,15 @@ def pdfToImage(request):
     output_folder = 'output_images'
     output_zip = 'output_images.zip'
     if request.method == 'POST':
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
         input_path = save_input_file(request.FILES['input_file'])
-        pdf_to_png(input_path,output_folder)
+
+        # Vérifier quel bouton a été cliqué
+        if 'filename' in request.POST:
+            pdf_to_png(input_path,output_folder)
+        else:
+            print("extract images")
+            extract_images_from_pdf(input_path, output_folder)
+            
         zip_folder(output_folder,output_zip)
         #download the zipped folder
         with open(output_zip, 'rb') as zip_file:
