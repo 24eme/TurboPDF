@@ -135,11 +135,13 @@
     margin: 10px;
 }
 
-.pdf-preview embed {
+.pdf-preview  embed{
     width: 100%;
     height: 250px;
+    margin-left: 600px;
+    direction: rtl;
+    text-align: center;
 }
-
 .pdf-info {
     white-space: nowrap;
     overflow: hidden;
@@ -152,4 +154,13 @@
 
 .canvas-wrapper:hover {
     transform: scale(1.1);
+}
+#append-body{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        /* Optionnel - Cela centrera verticalement le contenu */
+        margin: 0;
+        padding: 0;
 }

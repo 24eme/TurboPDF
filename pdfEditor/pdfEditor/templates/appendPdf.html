@@ -69,10 +69,11 @@
         </div>
     </div>
 </nav>
-<div id="app">
+
 <h2>Fusion des PDF</h2>
 <form enctype="multipart/form-data" id="upload-pdf" method="post">
     {% csrf_token %}
+    
     <input type="file" name="pdf-upload[]" id="pdf-upload" accept=".pdf" multiple><br /><br />
 
     <div id="pdf-previews"></div>
@@ -80,7 +81,6 @@
         <button type="submit" id="save-button">Fusionner</button>
     </div>
 </form>
-</div>
 
 <script>
     document.getElementById('upload-pdf').addEventListener('change', function (e) {
