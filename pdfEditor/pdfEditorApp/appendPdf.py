@@ -1,5 +1,4 @@
 from PyPDF2 import PdfMerger
-import os
 
 
 def append_pdf_file(input_files, output_file):

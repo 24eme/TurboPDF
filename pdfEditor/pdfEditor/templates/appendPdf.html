@@ -69,19 +69,39 @@
         </div>
     </div>
 </nav>
-
-<h2>Fusion des PDF</h2>
-<form enctype="multipart/form-data" id="upload-pdf" method="post">
-    {% csrf_token %}
-    
-    <input type="file" name="pdf-upload[]" id="pdf-upload" accept=".pdf" multiple><br /><br />
-
+<div id="app">
+    <h2>Fusion des PDF</h2>
+    <form enctype="multipart/form-data" id="upload-pdf" method="post">
+        {% csrf_token %}
+        <input type="file" name="pdf-upload[]" id="pdf-upload" accept=".pdf" multiple><br /><br />
+</div>
     <div id="pdf-previews"></div>
-    <div>
+    <div id="app" style="margin-bottom: 10%">
         <button type="submit" id="save-button">Fusionner</button>
     </div>
 </form>
+<style>
+    #pdf-previews {
+        display: flex;
+        flex-wrap: wrap;
+    }
 
+    .pdf-preview {
+        width: 200px;
+        margin: 2%;
+    }
+
+    .pdf-preview embed {
+        width: 100%;
+        height: 250px;
+    }
+
+    .pdf-info {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
 <script>
     document.getElementById('upload-pdf').addEventListener('change', function (e) {
         e.preventDefault();
@@ -90,7 +110,13 @@
         const pdfPreviews = document.getElementById('pdf-previews');
         pdfPreviews.innerHTML = '';
 
-        function createPreview(file) {
+        function createPreviewWithDelay(files, index) {
+            if (index >= files.length) {
+                return;
+            }
+            updateFileOrder();
+            const file = files[index];
+
             if (file.type === 'application/pdf') {
                 const fileReader = new FileReader();
                 fileReader.onload = function () {
@@ -113,7 +139,10 @@
                                 const pdfPreviewDiv = document.createElement('div');
                                 pdfPreviewDiv.classList.add('pdf-preview');
                                 pdfPreviewDiv.innerHTML = '<embed src="' + URL.createObjectURL(file) + '" type="application/pdf" />';
-                                pdfPreviews.appendChild(pdfPreviewDiv);
+
+                                pdfPreviewDiv.setAttribute('data-index', index);
+
+                                pdfPreviews.prepend(pdfPreviewDiv);
 
                                 const pdfInfoDiv = document.createElement('div');
                                 pdfInfoDiv.classList.add('pdf-info');
@@ -121,6 +150,11 @@
                                 pdfInfoDiv.innerHTML += '<p>Nombre de pages : ' + pdf.numPages + '</p>';
                                 pdfInfoDiv.innerHTML += '<p>Taille : ' + (file.size / 1024).toFixed(2) + ' Ko</p>';
                                 pdfPreviewDiv.appendChild(pdfInfoDiv);
+
+                                // Appeler la fonction pour afficher le fichier suivant après un délai de 500 millisecondes
+                                setTimeout(function () {
+                                    createPreviewWithDelay(files, index + 1);
+                                }, 500);
                             });
                         });
                     });
@@ -129,9 +163,7 @@
             }
         }
 
-        for (let i = 0; i < fileArray.length; i++) {
-            createPreview(fileArray[i]);
-        }
+        createPreviewWithDelay(fileArray, 0);
     });
 
     function truncateFileName(fileName, maxLength) {
@@ -142,16 +174,14 @@
         }
     }
 
-    function createPreview(file, originalFilename) {
+    function updateFileOrder() {
+        const fileInput = document.getElementById('pdf-upload');
+        const fileArray = fileInput.files;
+        const fileOrder = [];
 
-        const pdfPreviewDiv = document.createElement('div');
-        pdfPreviewDiv.classList.add('pdf-preview');
-        pdfPreviewDiv.innerHTML = '<embed src="' + URL.createObjectURL(file) + '" type="application/pdf" />';
-        pdfPreviews.appendChild(pdfPreviewDiv);
-
-        // Add the original filename as a data attribute
-        pdfPreviewDiv.setAttribute('data-original-filename', originalFilename);
-
+        for (let i = 0; i < fileArray.length; i++) {
+            fileOrder.push(fileArray[i].name);
+        }
     }
 
 </script>
