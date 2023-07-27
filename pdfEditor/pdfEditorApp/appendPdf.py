@@ -2,12 +2,12 @@ from PyPDF2 import PdfMerger
 import os
 
 
-def append_pdf_file(file_list):
+def append_pdf_file(input_files, output_file):
     merger = PdfMerger()
 
-    for file_path in file_list:
-        with open(file_path, 'rb') as pdf:
-            merger.append(pdf)
+    for input_file in input_files:
+        with open(input_file, 'rb') as pdf_file:
+            merger.append(pdf_file)
 
-    with open("grouped_file.pdf", 'wb') as output:
+    with open(output_file, 'wb') as output:
         merger.write(output)
