@@ -19,13 +19,6 @@
             crossorigin="anonymous" referrerpolicy="no-referrer">
 
         </script>
-
-        <style>
-            .selected-page {
-                border: 2px solid red;
-            }
-        </style>
-
     </head>
 
     <body>
@@ -137,6 +130,7 @@
 
                                     let canvas = document.createElement('canvas');
                                     canvas.classList.add('pdf-page');
+                                    canvas.classList.add('canvas-wrapper');
                                     canvas.width = viewport.width;
                                     canvas.height = viewport.height;
                                     canvas.dataset.pageNumber = page.number;
