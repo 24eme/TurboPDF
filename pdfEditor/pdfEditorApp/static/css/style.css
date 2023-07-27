@@ -123,3 +123,23 @@
     margin-top:1% !important;
     font-size: small;
 }
+#pdf-previews {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.pdf-preview {
+    width: 200px;
+    margin: 10px;
+}
+
+.pdf-preview embed {
+    width: 100%;
+    height: 250px;
+}
+
+.pdf-info {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
