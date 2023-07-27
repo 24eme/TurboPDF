@@ -100,6 +100,7 @@
 
 <script>
 ///////////////////////////// Initialisation variable /////////////////////////
+var MypdfDoc = null;
 var isDragging = false;
 var dragStartX = 0; // départ du déplacement
 var dragStartY = 0;
@@ -166,7 +167,6 @@ function addImage(image){
             canvasMerge.addEventListener('mouseup', function () {
                         isDragging = false;
                     });
-    console.log("added")
 
 }
 
@@ -217,7 +217,7 @@ $(document).ready(function () {
 
                 fileReader.onload = function () {
                     let typedarray = new Uint8Array(this.result);
-                    pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
+                    MypdfDoc = pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
                         let numPages = pdf.numPages;
                         pdfDoc = pdf;
 
@@ -241,7 +241,6 @@ pdfContainer.addEventListener('click', function () {
     lesCanvas.forEach(cnv => {
         cnv.addEventListener("click", (e) => {
         numP = cnv.id;
-        console.log('the id is : ', numP);
         });
     });
 });
@@ -251,6 +250,15 @@ pdfContainer.addEventListener('click', function () {
 ////////////////////////////////add button image///////////////////////////////////////////////////////
 let i = 1;
 document.getElementById('add-image-btn').addEventListener('click', function (e) {
+    const lesCanvas = document.querySelectorAll('canvas');
+                        let j = 0;
+                        if (lesCanvas){
+                            lesCanvas.forEach(cvn =>{
+                            canvasStock[j] = cvn;
+                            j++;
+
+                        });
+                        }
 
     if ($('#save-button').prop('disabled')) {
         $('#save-button').prop('disabled', false);
@@ -275,7 +283,7 @@ document.getElementById('add-image-btn').addEventListener('click', function (e) 
                                 };
                         imageReader.readAsDataURL(imageFile);
             } else {
-                consoleconsole.log('Veuillez sélectionner un fichier image valide !');
+                console.log('Veuillez sélectionner un fichier image valide !');
                     }     
         });
             imageInput.click();
@@ -285,19 +293,9 @@ document.getElementById('add-image-btn').addEventListener('click', function (e) 
 
 /////////////////////////// DOWNLOAD ////////////////////////////////
 $('#save-button').click( function () {
-    const modifiedPDFData = file.output();
 
-    if (modifiedPDFData) {
-        const blob = new Blob([file], { type: 'application/pdf' });
 
-        // Télécharger le fichier PDF modifié
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "modified_pdf.pdf";
-        a.click();
-        URL.revokeObjectURL(url);
-    }
+
 });
 </script>
     </body>
