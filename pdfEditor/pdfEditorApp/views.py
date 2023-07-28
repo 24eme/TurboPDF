@@ -30,6 +30,8 @@ def pdfToImage(request):
     output_folder = 'output_images'
     output_zip = 'output_images.zip'
     if request.method == 'POST':
+        if not request.FILES:
+            return render(request, 'pdfToImage.html')
         input_path = save_input_file(request.FILES['input_file'])
 
         # Vérifier quel bouton a été cliqué
@@ -92,6 +94,9 @@ def appendPdf(request):
             uploaded_files.append(file_name)
 
         uploaded_files.reverse()
+        if not uploaded_files:
+            return render(request, 'appendPdf.html')
+
         append_pdf_file(uploaded_files, merged_file_path)
 
         return download_append_file(merged_file_path, uploaded_files)
@@ -101,7 +106,6 @@ def appendPdf(request):
 
 def download_append_file(file_path, uploaded_files):
     if os.path.exists(file_path):
-        # No need to unpack values from uploaded_files, use it directly
         sorted_uploaded_files = uploaded_files
 
         append_pdf_file(sorted_uploaded_files, file_path)
@@ -112,10 +116,8 @@ def download_append_file(file_path, uploaded_files):
             response['Content-Length'] = os.path.getsize(file_path)
             response['Content-Disposition'] += f'attachment; filename*=UTF-8\'\'{os.path.basename(file_path)}'
 
-        # Delete the merged file after download
         os.remove(file_path)
 
-        # Delete the uploaded files (Note: uploaded_files contains only file paths)
         for uploaded_file in uploaded_files:
             os.remove(uploaded_file)
 
@@ -126,6 +128,8 @@ def download_append_file(file_path, uploaded_files):
 
 def lockPdf(request):
     if request.method == 'POST':
+        if not request.FILES:
+            return render(request, 'lockPdf.html')
         password = request.POST['password']
         input_path = save_input_file(request.FILES['input_file'])
         lock_pdf_file(input_path, password)
@@ -148,6 +152,8 @@ def lockPdf(request):
 
 def unlockPdf(request):
     if request.method == 'POST':
+        if not request.FILES:
+            return render(request, 'unlockPdf.html')
         password = request.POST['password']
         unlock_pdf_file(request.FILES['input_file'], password)
 
@@ -199,6 +205,8 @@ def download_compressed(request):
 
 def splitPdf(request):
     if request.method == 'POST':
+        if not request.FILES:
+            return render(request, 'splitPdf.html')
         split_pdf_file = []
         tab_page_selection = request.POST.get('page_selection', '').split(',')
         uploaded_file = None
@@ -216,9 +224,9 @@ def splitPdf(request):
             if file_data is not None:
                 split_pdf_file.append((f'file_{index}.pdf', file_data))
 
-        os.remove('uploaded_file.pdf')  # Remove the uploaded file
+        if os.path.exists('uploaded_file.pdf'):
+            os.remove('uploaded_file.pdf')
 
-        # Vérifier le nombre de fichiers extraits
         if len(split_pdf_file) == 1:
             filename, file_data = split_pdf_file[0]
             response = HttpResponse(file_data, content_type='application/pdf')
@@ -226,7 +234,6 @@ def splitPdf(request):
             response['Content-Length'] = len(file_data)
             return response
         else:
-            # S'il y a plusieurs fichiers, créer un fichier ZIP et les compresser dedans
             zip_filename = 'extracted_files.zip'
             with zipfile.ZipFile(zip_filename, 'w') as zip_file:
                 for filename, file_data in split_pdf_file:
