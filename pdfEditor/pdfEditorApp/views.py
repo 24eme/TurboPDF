@@ -8,8 +8,8 @@ from pdfEditorApp.appendPdf import append_pdf_file
 from pdfEditorApp.deletePagePdf import removePageFromPdf
 from pdfEditorApp.compressPdf import compress
 from pdfEditorApp.splitPdf import split_pdf_pages
-from pdfEditorApp.pdfToImage import pdf_to_png,zip_folder
-import os, uuid, zipfile
+from pdfEditorApp.pdfToImage import pdf_to_png, zip_folder, extract_images_from_pdf
+import os, uuid, zipfile, json
 
 
 # Create your views here.
@@ -30,10 +30,15 @@ def pdfToImage(request):
     output_folder = 'output_images'
     output_zip = 'output_images.zip'
     if request.method == 'POST':
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
         input_path = save_input_file(request.FILES['input_file'])
-        pdf_to_png(input_path,output_folder)
+
+        # Vérifier quel bouton a été cliqué
+        if 'filename' in request.POST:
+            pdf_to_png(input_path,output_folder)
+        else:
+            print("extract images")
+            extract_images_from_pdf(input_path, output_folder)
+            
         zip_folder(output_folder,output_zip)
         #download the zipped folder
         with open(output_zip, 'rb') as zip_file:
@@ -76,18 +81,18 @@ def appendPdf(request):
         uploaded_files = []
 
         files = request.FILES.getlist('pdf-upload[]')
-        for file in files:
-            unique_filename = f"{str(uuid.uuid4())}.pdf"  # Generate a unique filename for each file
-            with open(unique_filename, 'wb') as destination:
+
+        sorted_files = sorted(files, key=lambda f: int(request.POST.get(f'pdf-index-{f.name}', 0)))
+
+        for file in sorted_files:
+            file_name = file.name
+            with open(file_name, 'wb') as destination:
                 for chunk in file.chunks():
                     destination.write(chunk)
+            uploaded_files.append(file_name)
 
-            uploaded_files.append((unique_filename, file.name))  # Store the tuple (unique_filename, original_filename)
-
-        # Sort the uploaded_files list based on the order of appearance in the request.FILES list
-        sorted_uploaded_files = [unique_filename for unique_filename, _ in uploaded_files]
-
-        append_pdf_file(sorted_uploaded_files, merged_file_path)
+        uploaded_files.reverse()
+        append_pdf_file(uploaded_files, merged_file_path)
 
         return download_append_file(merged_file_path, uploaded_files)
 
@@ -96,11 +101,8 @@ def appendPdf(request):
 
 def download_append_file(file_path, uploaded_files):
     if os.path.exists(file_path):
-        # Get the original filenames in the order they were uploaded
-        original_filenames = [original_filename for _, original_filename in uploaded_files]
-
-        # Merge the files in the order of their original filenames
-        sorted_uploaded_files = [filename for filename in original_filenames]
+        # No need to unpack values from uploaded_files, use it directly
+        sorted_uploaded_files = uploaded_files
 
         append_pdf_file(sorted_uploaded_files, file_path)
 
@@ -113,14 +115,13 @@ def download_append_file(file_path, uploaded_files):
         # Delete the merged file after download
         os.remove(file_path)
 
-        # Delete the uploaded files
+        # Delete the uploaded files (Note: uploaded_files contains only file paths)
         for uploaded_file in uploaded_files:
             os.remove(uploaded_file)
 
         return response
     else:
         return HttpResponse("Error while downloading the file")
-
 
 
 def lockPdf(request):
