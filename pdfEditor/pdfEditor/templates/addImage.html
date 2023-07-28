@@ -31,9 +31,9 @@
                         <li class="nav-item">
                             <a class="nav-link" href="/compressPdf/">Compresser</a>
                         </li>
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a class="nav-link" href="/fillFormPdf/">Remplir un formulaire</a>
-                        </li>
+                        </li> -->
                         <li class="nav-item">
                             <a class="nav-link" href="/addImage/">Ajouter une image</a>
 
@@ -123,6 +123,10 @@ var canvasStock = [];
 var numP = "1";
 var file = null;
 let imageFile = null;
+let imageStock = [];
+let imageStockX = [];
+let imageStockY = [];
+let listNbrPages = [];
 //let typedarray = null
 let typedarrayPdf;
 ////////////// Function add image ///////////////////////
@@ -286,6 +290,11 @@ document.getElementById('add-image-btn').addEventListener('click', function (e) 
         imageInput.accept = 'image/*';
         imageInput.addEventListener('change', function () {
             imageFile = imageInput.files[0];
+            imageStock.push(imageFile);
+            if (dragOffsetX != 0){
+                imageStockX.push(dragOffsetX);
+                imageStockY.push(dragOffsetY);
+            }
 
             if (imageFile && imageFile.type.includes('image/')) {
                 var imageReader = new FileReader();
@@ -293,6 +302,7 @@ document.getElementById('add-image-btn').addEventListener('click', function (e) 
                         image = new Image();                     
                                     image.onload = function () {
                                 
+                                        listNbrPages.push(numP);
                                         addImage(image);
                                     };
                                     image.src = e.target.result;
@@ -319,25 +329,47 @@ $('#save-button').click(async function () {
    
     const copiedPages = [];
     const modifiedPdfDoc = await PDFLib.PDFDocument.create();
+
     for (let i = 0; i < pdfDocLib.getPageCount(); i++) {
         const [copiedPage] = await modifiedPdfDoc.copyPages(pdfDocLib, [i]);
         copiedPages.push(copiedPage);
 
     }
-    let pngImageBytes = new Uint8Array( await imageFile.arrayBuffer());
-    console.log("pngImageBytes : ", pngImageBytes);
-    const pngImage = await modifiedPdfDoc.embedPng(pngImageBytes);
-    const pngDims = pngImage.scale(0.5);
-            
+
+    imageStockX.push(dragOffsetX);
+    imageStockY.push(dragOffsetY);
+    console.log("imageStock ", imageStock);
+    console.log("listNbrPages ", listNbrPages);
+
+        
+    let i = 1;
+    let j = 0;        
     for (let Monpage of copiedPages) {
-        Monpage.drawImage(pngImage,{
-    x: dragOffsetX / 2,
-    y: Monpage.getHeight() - dragOffsetY/2 - pngDims.height,
-    width: pngDims.width,
-    height: pngDims.height,
-  } );
+        for (n of listNbrPages){
+            if (Number(n) == i){
+                let pngImageBytes = new Uint8Array( await imageStock[j].arrayBuffer());
+                console.log("pngImageBytes : ", pngImageBytes);
+                const pngImage = await modifiedPdfDoc.embedPng(pngImageBytes);
+                const pngDims = pngImage.scale(0.5);
+
+                Monpage.drawImage(pngImage,{
+                x: imageStockX[i-1] / 2,
+                y: Monpage.getHeight() - imageStockY[j]/2 - pngDims.height,
+                width: pngDims.width,
+                height: pngDims.height,
+             } );
+             j++;
+
+            }
+            
+            
+        }
+        i++;
+        
         modifiedPdfDoc.addPage(Monpage);
     }
+    
+ 
     const pdfDocLibBytes = await modifiedPdfDoc.save();
 
     const blob = new Blob([pdfDocLibBytes], { type: 'application/pdf' });
