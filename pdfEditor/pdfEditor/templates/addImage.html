@@ -82,7 +82,6 @@
         </div>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
         <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
         
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -90,6 +89,7 @@
             integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ=="
             crossorigin="anonymous" referrerpolicy="no-referrer">
             </script>
+            <!-- <script src="{%static 'pdf-lib/pdf-lib.min.js' %}"></script> -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"
             integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ=="
             crossorigin="anonymous" referrerpolicy="no-referrer">
@@ -101,22 +101,25 @@
 <script>
 ///////////////////////////// Initialisation variable /////////////////////////
 var MypdfDoc = null;
-var isDragging = false;
-var dragStartX = 0; // départ du déplacement
-var dragStartY = 0;
-var dragOffsetX = 0;
-var dragOffsetY = 0;
-var context = null;
-var pdfDoc = null;
+let isDragging = false;
+let dragStartX = 0; // départ du déplacement
+let dragStartY = 0;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+let context = null;
+let pdfDoc = null;
 var pages = [];
-var page = null;
+let page = null;
 var canvas = null;
 var canvasImage = null;
 var image = null;
 var pageNumber = 1;
 var canvasStock = [];
 var numP = "1";
-
+var file = null;
+let imageFile = null;
+//let typedarray = null
+let typedarrayPdf;
 ////////////// Function add image ///////////////////////
 
 function addImage(image){
@@ -210,30 +213,38 @@ function displayPages(index) {
     }
 
 /////////////////// Load PDF ////////////////////
+
+
 $(document).ready(function () {
-            $('#pdf-input').change(function (e) {
-                file = e.target.files[0];
-                let fileReader = new FileReader();
+    $('#pdf-input').change(async function (e) {
+    file = e.target.files[0];
+                
+    let fileReader = new FileReader();
+    fileReader.onload = async function () {
+        typedarray = new Uint8Array(await this.result);
+                    console.log("this typedarray", typedarray);
+                    typedarrayPdf = await new Uint8Array();
+                    typedarrayPdf = await typedarray;
+                    
+                    console.log("this typedarrayPdf", typedarrayPdf);
+        MypdfDoc = pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
+            let numPages = pdf.numPages;
+            pdfDoc = pdf;
 
-                fileReader.onload = function () {
-                    let typedarray = new Uint8Array(this.result);
-                    MypdfDoc = pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
-                        let numPages = pdf.numPages;
-                        pdfDoc = pdf;
+            pages = [];
+            for (let i = 1; i <= numPages; i++) {
+                pages.push({ number: i, rendered: false });
+            }
 
-                        pages = [];
-                        for (let i = 1; i <= numPages; i++) {
-                            pages.push({ number: i, rendered: false });
-                        }
-
-                        displayPages(0);                      
-                    });
-                };
-
-                fileReader.readAsArrayBuffer(file);
-            });
+            displayPages(0);                      
         });
+    };
 
+    fileReader.readAsArrayBuffer(file);
+                
+    });
+});
+        
 
 let pdfContainer = document.getElementById('pdf-container');
 pdfContainer.addEventListener('click', function () {
@@ -269,12 +280,12 @@ document.getElementById('add-image-btn').addEventListener('click', function (e) 
         imageInput.type = 'file';
         imageInput.accept = 'image/*';
         imageInput.addEventListener('change', function () {
-            var imageFile = imageInput.files[0];
+            imageFile = imageInput.files[0];
 
             if (imageFile && imageFile.type.includes('image/')) {
                 var imageReader = new FileReader();
                     imageReader.onload = function (e) {
-                        image = new Image();
+                        image = new Image();                     
                                     image.onload = function () {
                                 
                                         addImage(image);
@@ -292,9 +303,49 @@ document.getElementById('add-image-btn').addEventListener('click', function (e) 
 });
 
 /////////////////////////// DOWNLOAD ////////////////////////////////
-$('#save-button').click( function () {
+$('#save-button').click(async function () {
+    
 
+    const typedArray = new Uint8Array( await file.arrayBuffer());
+    
+    
+   console.log('mon pdf array : ', typedArray);
+    const pdfDocLib = await PDFLib.PDFDocument.load(typedArray);
+   
+    const copiedPages = [];
+    const modifiedPdfDoc = await PDFLib.PDFDocument.create();
+    for (let i = 0; i < pdfDocLib.getPageCount(); i++) {
+        const [copiedPage] = await modifiedPdfDoc.copyPages(pdfDocLib, [i]);
+        copiedPages.push(copiedPage);
 
+    }
+    let pngImageBytes = new Uint8Array( await imageFile.arrayBuffer());
+    console.log("pngImageBytes : ", pngImageBytes);
+    const pngImage = await modifiedPdfDoc.embedPng(pngImageBytes);
+    const pngDims = pngImage.scale(0.5);
+            
+    for (let Monpage of copiedPages) {
+        Monpage.drawImage(pngImage,{
+    x: dragOffsetX / 2,
+    y: Monpage.getHeight() - dragOffsetY/2 - pngDims.height,
+    width: pngDims.width,
+    height: pngDims.height,
+  } );
+        modifiedPdfDoc.addPage(Monpage);
+    }
+    const pdfDocLibBytes = await modifiedPdfDoc.save();
+
+    const blob = new Blob([pdfDocLibBytes], { type: 'application/pdf' });
+
+// Télécharger le fichier PDF modifié
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "modified_pdf.pdf";
+    a.click();
+    URL.revokeObjectURL(url);
+
+  
 
 });
 </script>
