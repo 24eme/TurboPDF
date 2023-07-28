@@ -91,6 +91,7 @@ def appendPdf(request):
                     destination.write(chunk)
             uploaded_files.append(file_name)
 
+        uploaded_files.reverse()
         append_pdf_file(uploaded_files, merged_file_path)
 
         return download_append_file(merged_file_path, uploaded_files)

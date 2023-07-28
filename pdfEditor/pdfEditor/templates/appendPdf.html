@@ -30,7 +30,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="/appendPdf">Joindre</a>
+                    <a class="nav-link" href="/appendPdf">Fusionner</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/compressPdf/">Compresser</a>
@@ -151,7 +151,6 @@
                                 pdfInfoDiv.innerHTML += '<p>Taille : ' + (file.size / 1024).toFixed(2) + ' Ko</p>';
                                 pdfPreviewDiv.appendChild(pdfInfoDiv);
 
-                                // Appeler la fonction pour afficher le fichier suivant après un délai de 500 millisecondes
                                 setTimeout(function () {
                                     createPreviewWithDelay(files, index + 1);
                                 }, 500);
