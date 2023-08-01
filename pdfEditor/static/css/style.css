@@ -145,3 +145,14 @@
 .m-b-30{
     margin-bottom: 15px;
 }
+
+.add-image{
+            margin-bottom: 5px;
+            background-color: #2A3944ff;
+            border-color:black;
+}
+
+.pdf-container-add-image {
+                width: 100%;
+                height: 600px;
+}

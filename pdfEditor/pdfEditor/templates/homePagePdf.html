@@ -3,98 +3,54 @@
 <html>
 
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <title>TurboPDF</title>
-    <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
 </head>
 
 <body>
-    <div id="app">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container">
-                <a class="navbar-brand" href="/">TurboPDF</a>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/appendPdf">Fusionner</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/compressPdf/">Compresser</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/fillFormPdf/">Remplir un formulaire</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/addImage/">Ajouter une image</a>
-
-                        </li>
-                        <li>
-                            <a class="nav-link" href="/lockPdf/">Verrouiller</a>
-                        </li>
-                        <li>
-                            <a class="nav-link" href="/unlockPdf/">
-                                Deverrouiller
-                            </a>
-                        </li>
-                        <li>
-                            <a class="nav-link" href="/deletePagePdf/">
-                                Supprimer
-                            </a>
-                        </li>
-                        <li>
-                            <a class="nav-link" href="/splitPdf/">
-                                Extraire
-                            </a>
-                        </li>
-                        <li>
-                            <a class="nav-link" href="/pdfToImage/">
-                                PDF en PNG
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-
-        <div class="container mt-5">
-            <h1>Bienvenue sur TurboPDF !</h1>
-            <p>Utilisez les fonctionnalités ci-dessous pour manipuler vos fichiers PDF :</p>
-            <ul>
-                <li>
-                    <a href="appendPdf/">Fusionner des fichiers PDF</a> - Ajoutez des fichiers PDF a la suite des autres.
-                </li>
-                <li>
-                    <a href="compressPdf/">Compresser un fichier PDF</a> - Réduisez la taille de vos fichiers PDF en les
-                    compressant.
-                </li>
-                <li>
-                    <a href="fillFormPdf/">Remplir un formulaire</a> - Remplissez des formulaires PDF interactifs.
-                </li>
-                <li>
-                    <a href="addImage/">Ajouter une image</a> - Ajoutez une image dans une ou plusieurs pages d'un fichier PDF
-                </li>
-                <li>
-                    <a href="lockPdf/">Verrouiller un PDF</a> - Verrouillez un PDF
-                </li>
-                <li>
-                    <a href="unlockPdf/">Deverrouiller un PDF</a> - Deverrouillez un PDF.
-                </li>
-                <li>
-                    <a href="deletePagePdf/">Supprimer une page</a> - Supprimez une ou plusieurs pages du PDF.
-                </li>
-                <li>
-                    <a href="splitPdf/">Extraire</a> - Extraire une page ou un ensemble de page d'un fichier PDF.
-                </li>
-                <li>
-                    <a href="pdfToImage/">PDF en PNG</a> - Convertissez les pages de votre PDF en images.
-                </li>
-                <li>
-                    <a href="redact/">Masquer</a> - Masquer des informations sensibles dans votre PDF.
-                </li>
-            </ul>
-        </div>
+{% include "main/includes/header.html" %}
+<div id="app">
+    <div class="container mt-5">
+        <h1>Bienvenue sur TurboPDF !</h1>
+        <p>Utilisez les fonctionnalités ci-dessous pour manipuler vos fichiers PDF :</p>
+        <ul>
+            <li>
+                <a href="appendPdf/">Fusionner des fichiers PDF</a> - Ajoutez des fichiers PDF a la suite des autres.
+            </li>
+            <li>
+                <a href="compressPdf/">Compresser un fichier PDF</a> - Réduisez la taille de vos fichiers PDF en les
+                compressant.
+            </li>
+            <li>
+                <a href="fillFormPdf/">Remplir un formulaire</a> - Remplissez des formulaires PDF interactifs.
+            </li>
+            <li>
+                <a href="addImage/">Ajouter une image</a> - Ajoutez une image dans une ou plusieurs pages d'un fichier
+                PDF
+            </li>
+            <li>
+                <a href="lockPdf/">Verrouiller un PDF</a> - Verrouillez un PDF
+            </li>
+            <li>
+                <a href="unlockPdf/">Deverrouiller un PDF</a> - Deverrouillez un PDF.
+            </li>
+            <li>
+                <a href="deletePagePdf/">Supprimer une page</a> - Supprimez une ou plusieurs pages du PDF.
+            </li>
+            <li>
+                <a href="splitPdf/">Extraire</a> - Extraire une page ou un ensemble de page d'un fichier PDF.
+            </li>
+            <li>
+                <a href="pdfToImage/">PDF en PNG</a> - Convertissez les pages de votre PDF en images.
+            </li>
+            <li>
+                <a href="redact/">Masquer</a> - Masquer des informations sensibles dans votre PDF.
+            </li>
+        </ul>
     </div>
+</div>
 </body>
 
 </html>

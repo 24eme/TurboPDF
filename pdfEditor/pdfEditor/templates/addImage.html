@@ -6,385 +6,329 @@
         <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
         <link rel="stylesheet" href="{%static 'css/style.css' %}">
         <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
-        <style>
-            #pdf-container {
-                width: 100%;
-                height: 600px;
-            }
-            .btn-primary{
-            margin-bottom: 5px;
-            background-color: #2A3944ff;
-            border-color:black;
-            
-            }
-        </style>
     </head>
     <body>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container">
-                <a class="navbar-brand" href="/">TurboPDF</a>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/appendPdf">Fusionner</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/compressPdf/">Compresser</a>
-                        </li>
-                        <!-- <li class="nav-item">
-                            <a class="nav-link" href="/fillFormPdf/">Remplir un formulaire</a>
-                        </li> -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="/addImage/">Ajouter une image</a>
 
-                        </li>
-                        <li>
-                            <a class="nav-link" href="/lockPdf/">Verrouiller</a>
-                        </li>
-                        <li>
-                            <a class="nav-link" href="/unlockPdf/">
-                                Deverrouiller
-                            </a>
-                        </li>
-                        <li>
-                            <a class="nav-link" href="/deletePagePdf/">
-                                Supprimer
-                            </a>
-                        </li>
-                        <li>
-                            <a class="nav-link" href="/splitPdf/">
-                                Extraire
-                            </a>
-                        </li>
-                        <li>
-                            <a class="nav-link" href="/pdfToImage/">
-                                PDF en PNG
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
+{% include "main/includes/header.html" %}
 
-        <div id="app">
-            <h2>Ajouter une image</h2>
-            <p>Ajouter une image à votre fichier PDF. Cliquez sur les boutons ci-dessous pour charger votre
-                fichier et votre image.
-            </p>
-            <p> <B> Cliquer sur la page dans laquelle vous voulez importer votre image </B> </p>
-            <form id="pdf-upload-form">
-                <input class="" type="file" id="pdf-input" name="pdf-upload" accept=".pdf" value="upload">
-            </form>
+<div id="app">
+    <h2>Ajouter une image</h2>
+    <p>Ajouter une image à votre fichier PDF. Cliquez sur les boutons ci-dessous pour charger votre
+        fichier et votre image.
+    </p>
+    <p><B> Cliquer sur la page dans laquelle vous voulez importer votre image </B></p>
+    <form id="pdf-upload-form">
+        <input class="" type="file" id="pdf-input" name="pdf-upload" accept=".pdf" value="upload">
+    </form>
 
-            <div>
-                <button class="btn btn-primary" id="add-image-btn">Ajouter une image</button>
-           
-                <!-- <button class="btn btn-primary" id="download-pdf-btn" >Télécharger le PDF</button> -->
-                <button type="button" id="save-button" disabled >Enregistrer vos modifications</button>
-                
-            </div>
-        
-        </div>
+    <div>
+        <button class="btn btn-primary add-image" id="add-image-btn">Ajouter une image</button>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
-        <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
-        
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"
-            integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ=="
-            crossorigin="anonymous" referrerpolicy="no-referrer">
-            </script>
-            <!-- <script src="{%static 'pdf-lib/pdf-lib.min.js' %}"></script> -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"
-            integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ=="
-            crossorigin="anonymous" referrerpolicy="no-referrer">
-    
-        </script>
+        <!-- <button class="btn btn-primary" id="download-pdf-btn" >Télécharger le PDF</button> -->
+        <button type="button" id="save-button" disabled>Enregistrer vos modifications</button>
 
-<div class="Mon-pdf-page" id="pdf-container"></div>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+<script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"
+        integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+</script>
+<!-- <script src="{%static 'pdf-lib/pdf-lib.min.js' %}"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"
+        integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+
+</script>
+
+<div class="Mon-pdf-page pdf-container-add-image" id="pdf-container"></div>
 
 <script>
-///////////////////////////// Initialisation variable /////////////////////////
-var MypdfDoc = null;
-let isDragging = false;
-let dragStartX = 0; // départ du déplacement
-let dragStartY = 0;
-let dragOffsetX = 0;
-let dragOffsetY = 0;
-let context = null;
-let pdfDoc = null;
-var pages = [];
-let page = null;
-var canvas = null;
-var canvasImage = null;
-var image = null;
-var pageNumber = 1;
-var canvasStock = [];
-var numP = "1";
-var file = null;
-let imageFile = null;
-let imageStock = [];
-let imageStockX = [];
-let imageStockY = [];
-let listNbrPages = [];
-//let typedarray = null
-let typedarrayPdf;
-////////////// Function add image ///////////////////////
+    ///////////////////////////// Initialisation variable /////////////////////////
+    let MypdfDoc = null;
+    let isDragging = false;
+    let dragStartX = 0; // départ du déplacement
+    let dragStartY = 0;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+    let context = null;
+    let pdfDoc = null;
+    let pages = [];
+    let page = null;
+    let canvas = null;
+    let canvasImage = null;
+    let image = null;
+    let pageNumber = 1;
+    let canvasStock = [];
+    let numP = "1";
+    let file = null;
+    let imageFile = null;
+    let imageStock = [];
+    let imageStockX = [];
+    let imageStockY = [];
+    let listNbrPages = [];
+    //let typedarray = null
+    let typedarrayPdf;
 
-function addImage(image){
-    let canvasMerge = null;
-    function addIm(image){
+    ////////////// Function add image ///////////////////////
 
-    canvasPage1 = document.getElementById(numP);
-    
-    canvasPagePourMerge = canvasStock[Number(numP)-1];
+    function addImage(image) {
+        let canvasMerge = null;
 
-    canvasMerge = document.createElement('canvas');
-    canvasMerge.height = canvasPage1.height;
-    canvasMerge.width = canvasPage1.width;
-    contextmerge = canvasMerge.getContext('2d')
-    
-    contextmerge.drawImage(canvasPagePourMerge, 0,0);
-    contextmerge.drawImage(image, dragOffsetX, dragOffsetY);
-    canvasMerge.id = numP;
+        function addIm(image) {
 
-    canvasPage1.replaceWith(canvasMerge);
-    }
-    addIm(image);
+            canvasPage1 = document.getElementById(numP);
 
-    
-    
-    
-    canvasMerge.addEventListener('mousedown', function (e) {
-            if (image) {
-                    isDragging = true;
-                    dragStartX = e.clientX;
-                    dragStartY = e.clientY;
-                }
-        });
+            canvasPagePourMerge = canvasStock[Number(numP) - 1];
 
-    canvasMerge.addEventListener('mousemove', function (e) {
-        if (isDragging) {
+            canvasMerge = document.createElement('canvas');
+            canvasMerge.height = canvasPage1.height;
+            canvasMerge.width = canvasPage1.width;
+            contextmerge = canvasMerge.getContext('2d')
 
-            var offsetX = e.clientX - dragStartX;
-            var offsetY = e.clientY - dragStartY;
-            dragOffsetX += offsetX;
-            dragOffsetY += offsetY;
-            dragStartX = e.clientX;
-            dragStartY = e.clientY;
-            addImage(image);
-                        }
-                    });
+            contextmerge.drawImage(canvasPagePourMerge, 0, 0);
+            contextmerge.drawImage(image, dragOffsetX, dragOffsetY);
+            canvasMerge.id = numP;
 
-            canvasMerge.addEventListener('mouseup', function () {
-                        isDragging = false;
-                    });
-
-}
-
-
-///////////////////////////// Display PDF //////////////////////
-function displayPages(index) {
-    if (index >= pages.length) {
-        return true;
-    }
-
-    page = pages[index];
-    pdfDoc.getPage(page.number).then(function (pdfPage) {
-    let scale = 2;
-    let viewport = pdfPage.getViewport({ scale: scale });
-
-    let canvas = document.createElement('canvas');
-    canvas.classList.add('Mon-pdf-page');
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-    canvas.dataset.pageNumber = page.number;
-    canvas.id = page.number;
-
-    canvasStock.push(canvas);
-                                
-
-    let context = canvas.getContext('2d');
-    let renderContext = {
-        canvasContext: context,
-        viewport: viewport
-        };
-
-    pdfPage.render(renderContext).promise.then(function () {
-                                    
-
-        $('#pdf-container').append(canvas);
-        page.rendered = true;
-        // Afficher la page suivante
-        displayPages(index + 1);
-        });
-    });
-    }
-
-/////////////////// Load PDF ////////////////////
-
-
-$(document).ready(function () {
-    $('#pdf-input').change(async function (e) {
-    file = e.target.files[0];
-                
-    let fileReader = new FileReader();
-    fileReader.onload = async function () {
-        typedarray = new Uint8Array(await this.result);
-                    console.log("this typedarray", typedarray);
-                    typedarrayPdf = await new Uint8Array();
-                    typedarrayPdf = await typedarray;
-                    
-                    console.log("this typedarrayPdf", typedarrayPdf);
-        MypdfDoc = pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
-            let numPages = pdf.numPages;
-            pdfDoc = pdf;
-
-            pages = [];
-            for (let i = 1; i <= numPages; i++) {
-                pages.push({ number: i, rendered: false });
-            }
-
-            displayPages(0);                      
-        });
-    };
-
-    fileReader.readAsArrayBuffer(file);
-                
-    });
-});
-        
-
-let pdfContainer = document.getElementById('pdf-container');
-pdfContainer.addEventListener('click', function () {
-    const lesCanvas = document.querySelectorAll('canvas');
-    lesCanvas.forEach(cnv => {
-        cnv.addEventListener("click", (e) => {
-        numP = cnv.id;
-        });
-    });
-});
-
-
-
-////////////////////////////////add button image///////////////////////////////////////////////////////
-let i = 1;
-document.getElementById('add-image-btn').addEventListener('click', function (e) {
-    const lesCanvas = document.querySelectorAll('canvas');
-                        let j = 0;
-                        if (lesCanvas){
-                            lesCanvas.forEach(cvn =>{
-                            canvasStock[j] = cvn;
-                            j++;
-
-                        });
-                        }
-
-    if ($('#save-button').prop('disabled')) {
-        $('#save-button').prop('disabled', false);
+            canvasPage1.replaceWith(canvasMerge);
         }
 
-    if (pdfDoc) {
-        var imageInput = document.createElement('input');
-        imageInput.type = 'file';
-        imageInput.accept = 'image/*';
-        imageInput.addEventListener('change', function () {
-            imageFile = imageInput.files[0];
-            imageStock.push(imageFile);
-            if (dragOffsetX != 0){
-                imageStockX.push(dragOffsetX);
-                imageStockY.push(dragOffsetY);
-            }
+        addIm(image);
 
-            if (imageFile && imageFile.type.includes('image/')) {
-                var imageReader = new FileReader();
-                    imageReader.onload = function (e) {
-                        image = new Image();                     
-                                    image.onload = function () {
-                                
-                                        listNbrPages.push(numP);
-                                        addImage(image);
-                                    };
-                                    image.src = e.target.result;
-                                };
-                        imageReader.readAsDataURL(imageFile);
-            } else {
-                console.log('Veuillez sélectionner un fichier image valide !');
-                    }     
+
+        canvasMerge.addEventListener('mousedown', function (e) {
+            if (image) {
+                isDragging = true;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+            }
         });
+
+        canvasMerge.addEventListener('mousemove', function (e) {
+            if (isDragging) {
+
+                var offsetX = e.clientX - dragStartX;
+                var offsetY = e.clientY - dragStartY;
+                dragOffsetX += offsetX;
+                dragOffsetY += offsetY;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                addImage(image);
+            }
+        });
+
+        canvasMerge.addEventListener('mouseup', function () {
+            isDragging = false;
+        });
+
+    }
+
+
+    ///////////////////////////// Display PDF //////////////////////
+    function displayPages(index) {
+        if (index >= pages.length) {
+            return true;
+        }
+
+        page = pages[index];
+        pdfDoc.getPage(page.number).then(function (pdfPage) {
+            let scale = 2;
+            let viewport = pdfPage.getViewport({scale: scale});
+
+            let canvas = document.createElement('canvas');
+            canvas.classList.add('Mon-pdf-page');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            canvas.dataset.pageNumber = page.number;
+            canvas.id = page.number;
+
+            canvasStock.push(canvas);
+
+
+            let context = canvas.getContext('2d');
+            let renderContext = {
+                canvasContext: context,
+                viewport: viewport
+            };
+
+            pdfPage.render(renderContext).promise.then(function () {
+
+
+                $('#pdf-container').append(canvas);
+                page.rendered = true;
+                // Afficher la page suivante
+                displayPages(index + 1);
+            });
+        });
+    }
+
+    /////////////////// Load PDF ////////////////////
+
+
+    $(document).ready(function () {
+        $('#pdf-input').change(async function (e) {
+            file = e.target.files[0];
+
+            let fileReader = new FileReader();
+            fileReader.onload = async function () {
+                typedarray = new Uint8Array(await this.result);
+                console.log("this typedarray", typedarray);
+                typedarrayPdf = await new Uint8Array();
+                typedarrayPdf = await typedarray;
+
+                console.log("this typedarrayPdf", typedarrayPdf);
+                MypdfDoc = pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
+                    let numPages = pdf.numPages;
+                    pdfDoc = pdf;
+
+                    pages = [];
+                    for (let i = 1; i <= numPages; i++) {
+                        pages.push({number: i, rendered: false});
+                    }
+
+                    displayPages(0);
+                });
+            };
+
+            fileReader.readAsArrayBuffer(file);
+
+        });
+    });
+
+
+    let pdfContainer = document.getElementById('pdf-container');
+    pdfContainer.addEventListener('click', function () {
+        const lesCanvas = document.querySelectorAll('canvas');
+        lesCanvas.forEach(cnv => {
+            cnv.addEventListener("click", (e) => {
+                numP = cnv.id;
+            });
+        });
+    });
+
+
+    ////////////////////////////////add button image///////////////////////////////////////////////////////
+    let i = 1;
+    document.getElementById('add-image-btn').addEventListener('click', function (e) {
+        const lesCanvas = document.querySelectorAll('canvas');
+        let j = 0;
+        if (lesCanvas) {
+            lesCanvas.forEach(cvn => {
+                canvasStock[j] = cvn;
+                j++;
+
+            });
+        }
+
+        if ($('#save-button').prop('disabled')) {
+            $('#save-button').prop('disabled', false);
+        }
+
+        if (pdfDoc) {
+            var imageInput = document.createElement('input');
+            imageInput.type = 'file';
+            imageInput.accept = 'image/*';
+            imageInput.addEventListener('change', function () {
+                imageFile = imageInput.files[0];
+                imageStock.push(imageFile);
+                if (dragOffsetX != 0) {
+                    imageStockX.push(dragOffsetX);
+                    imageStockY.push(dragOffsetY);
+                }
+
+                if (imageFile && imageFile.type.includes('image/')) {
+                    var imageReader = new FileReader();
+                    imageReader.onload = function (e) {
+                        image = new Image();
+                        image.onload = function () {
+
+                            listNbrPages.push(numP);
+                            addImage(image);
+                        };
+                        image.src = e.target.result;
+                    };
+                    imageReader.readAsDataURL(imageFile);
+                } else {
+                    console.log('Veuillez sélectionner un fichier image valide !');
+                }
+            });
             imageInput.click();
 
-    } 
-});
+        }
+    });
 
-/////////////////////////// DOWNLOAD ////////////////////////////////
-$('#save-button').click(async function () {
-    
+    /////////////////////////// DOWNLOAD ////////////////////////////////
+    $('#save-button').click(async function () {
 
-    const typedArray = new Uint8Array( await file.arrayBuffer());
-    
-    
-   console.log('mon pdf array : ', typedArray);
-    const pdfDocLib = await PDFLib.PDFDocument.load(typedArray);
-   
-    const copiedPages = [];
-    const modifiedPdfDoc = await PDFLib.PDFDocument.create();
 
-    for (let i = 0; i < pdfDocLib.getPageCount(); i++) {
-        const [copiedPage] = await modifiedPdfDoc.copyPages(pdfDocLib, [i]);
-        copiedPages.push(copiedPage);
+        const typedArray = new Uint8Array(await file.arrayBuffer());
 
-    }
 
-    imageStockX.push(dragOffsetX);
-    imageStockY.push(dragOffsetY);
-    console.log("imageStock ", imageStock);
-    console.log("listNbrPages ", listNbrPages);
+        console.log('mon pdf array : ', typedArray);
+        const pdfDocLib = await PDFLib.PDFDocument.load(typedArray);
 
-        
-    let i = 1;
-    let j = 0;        
-    for (let Monpage of copiedPages) {
-        for (n of listNbrPages){
-            if (Number(n) == i){
-                let pngImageBytes = new Uint8Array( await imageStock[j].arrayBuffer());
-                console.log("pngImageBytes : ", pngImageBytes);
-                const pngImage = await modifiedPdfDoc.embedPng(pngImageBytes);
-                const pngDims = pngImage.scale(0.5);
+        const copiedPages = [];
+        const modifiedPdfDoc = await PDFLib.PDFDocument.create();
 
-                Monpage.drawImage(pngImage,{
-                x: imageStockX[i-1] / 2,
-                y: Monpage.getHeight() - imageStockY[j]/2 - pngDims.height,
-                width: pngDims.width,
-                height: pngDims.height,
-             } );
-             j++;
+        for (let i = 0; i < pdfDocLib.getPageCount(); i++) {
+            const [copiedPage] = await modifiedPdfDoc.copyPages(pdfDocLib, [i]);
+            copiedPages.push(copiedPage);
+
+        }
+
+        imageStockX.push(dragOffsetX);
+        imageStockY.push(dragOffsetY);
+        console.log("imageStock ", imageStock);
+        console.log("listNbrPages ", listNbrPages);
+
+
+        let i = 1;
+        let j = 0;
+        for (let Monpage of copiedPages) {
+            for (n of listNbrPages) {
+                if (Number(n) == i) {
+                    let pngImageBytes = new Uint8Array(await imageStock[j].arrayBuffer());
+                    console.log("pngImageBytes : ", pngImageBytes);
+                    const pngImage = await modifiedPdfDoc.embedPng(pngImageBytes);
+                    const pngDims = pngImage.scale(0.5);
+
+                    Monpage.drawImage(pngImage, {
+                        x: imageStockX[i - 1] / 2,
+                        y: Monpage.getHeight() - imageStockY[j] / 2 - pngDims.height,
+                        width: pngDims.width,
+                        height: pngDims.height,
+                    });
+                    j++;
+
+                }
+
 
             }
-            
-            
-        }
-        i++;
-        
-        modifiedPdfDoc.addPage(Monpage);
-    }
-    
- 
-    const pdfDocLibBytes = await modifiedPdfDoc.save();
+            i++;
 
-    const blob = new Blob([pdfDocLibBytes], { type: 'application/pdf' });
+            modifiedPdfDoc.addPage(Monpage);
+        }
+
+
+        const pdfDocLibBytes = await modifiedPdfDoc.save();
+
+        const blob = new Blob([pdfDocLibBytes], {type: 'application/pdf'});
 
 // Télécharger le fichier PDF modifié
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "modified_pdf.pdf";
-    a.click();
-    URL.revokeObjectURL(url);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "modified_pdf.pdf";
+        a.click();
+        URL.revokeObjectURL(url);
 
-  
 
-});
+    });
 </script>
-    </body>
+</body>
 </html>
