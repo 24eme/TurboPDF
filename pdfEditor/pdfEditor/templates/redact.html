@@ -1,0 +1,185 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TurboPDF</title>
+        <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
+        <link rel="stylesheet" href="{%static 'css/style.css' %}">
+        <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
+        <style>
+            #pdf-container {
+                width: 100%;
+                height: 600px;
+            }
+            .btn-primary{
+            margin-bottom: 5px;
+            background-color: #2A3944ff;
+            border-color:black;
+            
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container">
+                <a class="navbar-brand" href="/">TurboPDF</a>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/appendPdf">Fusionner</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/compressPdf/">Compresser</a>
+                        </li>
+                        <!-- <li class="nav-item">
+                            <a class="nav-link" href="/fillFormPdf/">Remplir un formulaire</a>
+                        </li> -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="/addImage/">Ajouter une image</a>
+
+                        </li>
+                        <li>
+                            <a class="nav-link" href="/lockPdf/">Verrouiller</a>
+                        </li>
+                        <li>
+                            <a class="nav-link" href="/unlockPdf/">
+                                Deverrouiller
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link" href="/deletePagePdf/">
+                                Supprimer
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link" href="/splitPdf/">
+                                Extraire
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link" href="/pdfToImage/">
+                                PDF en PNG
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div id="app">
+            <h2>Masquer des information</h2>
+            <p>Pour protéger vos informations sensibles, , TurboPdf est le bon choix
+            </p>
+               
+            <form enctype="multipart/form-data" id="pdf-upload-form" method="post">
+                {% csrf_token %}
+                <div class="m-b-30">
+                    <input class="" type="file" id="pdf-input" name="pdf-upload" accept="application/pdf" value="upload">
+                </div>
+                <div>
+                    <button type="submit" name="mask-email" class="btn btn-primary" id="mask-email">Masquer les adresses email</button>
+                    <button class="btn btn-primary" id="mask-num">Masquer les numéros de Téléphone</button>
+                    <button class="btn btn-primary" id="mask-zone">Masquer un zone précise</button>
+                </div>
+        </form>
+
+        
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+        <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+        
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"
+            integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer">
+            </script>
+            <!-- <script src="{%static 'pdf-lib/pdf-lib.min.js' %}"></script> -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"
+            integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer">
+    
+        </script>
+
+<div class="Mon-pdf-page" id="pdf-container"></div>
+
+<script>
+///////////////////////////// Initialisation ///////////////////
+let file = null;
+
+///////////////////////////// Display PDF //////////////////////
+function displayPages(index) {
+    if (index >= pages.length) {
+        return true;
+    }
+
+    page = pages[index];
+    pdfDoc.getPage(page.number).then(function (pdfPage) {
+    let scale = 2;
+    let viewport = pdfPage.getViewport({ scale: scale });
+
+    let canvas = document.createElement('canvas');
+    canvas.classList.add('Mon-pdf-page');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    canvas.dataset.pageNumber = page.number;
+    canvas.id = page.number;
+                                
+
+    let context = canvas.getContext('2d');
+    let renderContext = {
+        canvasContext: context,
+        viewport: viewport
+        };
+
+    pdfPage.render(renderContext).promise.then(function () {
+                                    
+
+        $('#pdf-container').append(canvas);
+        page.rendered = true;
+        // Afficher la page suivante
+        displayPages(index + 1);
+        });
+    });
+    }
+
+
+    /////////////////// Load PDF ////////////////////
+
+
+$(document).ready(function () {
+    $('#pdf-input').change(async function (e) {
+    file = e.target.files[0];
+                
+    let fileReader = new FileReader();
+    fileReader.onload = async function () {
+        typedarray = new Uint8Array(await this.result);
+        MypdfDoc = pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
+            let numPages = pdf.numPages;
+            pdfDoc = pdf;
+
+            pages = [];
+            for (let i = 1; i <= numPages; i++) {
+                pages.push({ number: i, rendered: false });
+            }
+
+            displayPages(0);                      
+        });
+    };
+
+    fileReader.readAsArrayBuffer(file);
+                
+    });
+});
+
+document.getElementById('mask-email').addEventListener('click', (e)=> {
+        if ($('#save-button').prop('disabled')) {
+        $('#save-button').prop('disabled', false);
+        }
+});
+        
+
+</script>
+
+    </body>
+</html>

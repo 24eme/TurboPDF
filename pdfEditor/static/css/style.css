@@ -125,31 +125,23 @@
     color: red;
 }
 
-#pdf-previews {
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.pdf-preview {
-    width: 200px;
-    margin: 10px;
-}
-
-.pdf-preview embed {
-    width: 100%;
-    height: 250px;
-}
-
-.pdf-info {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
 .selected-page {
     border: 4px solid red;
 }
 
 .canvas-wrapper:hover {
     transform: scale(1.1);
+}
+#append-body{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        /* Optionnel - Cela centrera verticalement le contenu */
+        margin: 0;
+        padding: 0;
+}
+
+.m-b-30{
+    margin-bottom: 15px;
 }

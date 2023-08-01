@@ -1,4 +1,6 @@
 # imports
+import datetime
+
 import PyPDF2
 import fitz
 import re
@@ -26,6 +28,7 @@ class Redactor:
     def email_redaction(self):
 
         """ main redactor code """
+        print("heloo ")
 
         # opening the pdf
         doc = fitz.open(self.path)
@@ -44,8 +47,11 @@ class Redactor:
 
             # applying the redaction
             page.apply_redactions()
-        doc.save('../PDF_pool/redacted_PDF_From_Image.pdf')
+        current_datetime = datetime.datetime.now()
+        myFile = f"Fileredacted_{current_datetime.strftime('%Y-%m-%d_%H%M%S')}.pdf"
+        doc.save(myFile)
         print("Successfully redacted")
+        return myFile
 
     def redact_pdf(self, output_path, redaction_areas):
         pdf = fitz.open(self.path)

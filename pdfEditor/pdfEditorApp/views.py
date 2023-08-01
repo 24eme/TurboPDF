@@ -9,7 +9,9 @@ from pdfEditorApp.deletePagePdf import removePageFromPdf
 from pdfEditorApp.compressPdf import compress
 from pdfEditorApp.splitPdf import split_pdf_pages
 from pdfEditorApp.pdfToImage import pdf_to_png, zip_folder, extract_images_from_pdf
+from pdfEditorApp.maskInformationpdf import Redactor
 import os, uuid, zipfile, json
+import datetime
 
 
 # Create your views here.
@@ -254,3 +256,45 @@ def modifyText(request):
   
     return render(request, 'modifyText.html')
 
+fichier_finale = ""
+pdf_name = ""
+def redact(request) :
+    global fichier_finale
+    global pdf_name
+    #("save-button" in request.POST)
+    if request.method == 'POST':
+        if ("mask-email" in request.POST):
+            pdf_file = request.FILES['pdf-upload']
+            pdf_name = pdf_file.name
+            reader = PdfReader(pdf_file)
+            writer = PdfWriter()
+
+            for page in reader.pages:
+                writer.add_page(page)
+            # Obtenez la date et l'heure actuelles
+            current_datetime = datetime.datetime.now()
+            myFile = f"myFileredact_{current_datetime.strftime('%Y-%m-%d_%H%M%S')}.pdf"
+            with open(myFile, "wb") as f:
+                writer.write(f)
+            redactor = Redactor(myFile)
+
+            fichier_finale = redactor.email_redaction()
+            os.remove(myFile)
+            return download_pdf(request, fichier_finale, pdf_name)
+
+
+    return render(request, 'redact.html', {'fichier_finale': fichier_finale, 'pdf_name' : pdf_name})
+
+def download_pdf(request, fichier_finale, pdf_name):
+    if os.path.exists(fichier_finale):
+
+        with open(fichier_finale, 'rb') as f:
+            response = HttpResponse(f.read(), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{pdf_name}"'
+            response['Content-Length'] = os.path.getsize(fichier_finale)
+            response['Content-Disposition'] += f'attachment; filename*=UTF-8\'\'{pdf_name}'
+
+            os.remove(fichier_finale)
+            return response
+    else:
+        return HttpResponse("Error while downloading the file")
