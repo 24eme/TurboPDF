@@ -202,11 +202,15 @@
 
 
     let pdfContainer = document.getElementById('pdf-container');
-    pdfContainer.addEventListener('click', function () {
+    pdfContainer.addEventListener('mouseover', function () {
         const lesCanvas = document.querySelectorAll('canvas');
         lesCanvas.forEach(cnv => {
             cnv.addEventListener("click", (e) => {
+                if ((numP != 0) && (numP != cnv.id)){
+                    document.getElementById(numP).classList.remove("redacted-page");
+                }
                 numP = cnv.id;
+                cnv.classList.add("redacted-page");
             });
         });
     });
