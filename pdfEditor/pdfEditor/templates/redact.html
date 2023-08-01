@@ -6,6 +6,17 @@
         <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
         <link rel="stylesheet" href="{%static 'css/style.css' %}">
         <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+        <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"
+            integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer">
+            </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"
+            integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer">
+        </script>
         <style>
             #pdf-container {
                 width: 100%;
@@ -35,33 +46,31 @@
                 <div>
                     <button type="submit" name="mask-email" class="btn btn-primary" id="mask-email">Masquer les adresses email</button>
                     <button class="btn btn-primary" id="mask-num">Masquer les numéros de Téléphone</button>
-                    <button class="btn btn-primary" id="mask-zone">Masquer un zone précise</button>
+                    <button class="btn btn-primary" id="mask-zone">Masquer une zone précise</button>
                 </div>
         </form>
 
         
         </div>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
-        <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
-        
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"
-            integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ=="
-            crossorigin="anonymous" referrerpolicy="no-referrer">
-            </script>
-            <!-- <script src="{%static 'pdf-lib/pdf-lib.min.js' %}"></script> -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"
-            integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ=="
-            crossorigin="anonymous" referrerpolicy="no-referrer">
-    
-        </script>
 
 <div class="Mon-pdf-page" id="pdf-container"></div>
 
 <script>
 ///////////////////////////// Initialisation ///////////////////
 let file = null;
+let numP = 0;
+let isDragging = false;
+let dragStartX = 0; // départ du déplacement
+let dragStartY = 0;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+let context = null;
+let canvasStock = [];
+let pages = [];
+let page = null;
+let canvas = null;
+let pageNumber = 1;
 
 ///////////////////////////// Display PDF //////////////////////
 function displayPages(index) {
@@ -80,7 +89,8 @@ function displayPages(index) {
     canvas.height = viewport.height;
     canvas.dataset.pageNumber = page.number;
     canvas.id = page.number;
-                                
+
+    canvasStock.push(canvas);
 
     let context = canvas.getContext('2d');
     let renderContext = {
@@ -100,8 +110,7 @@ function displayPages(index) {
     }
 
 
-    /////////////////// Load PDF ////////////////////
-
+/////////////////// Load PDF ////////////////////
 
 $(document).ready(function () {
     $('#pdf-input').change(async function (e) {
@@ -128,10 +137,76 @@ $(document).ready(function () {
     });
 });
 
-document.getElementById('mask-email').addEventListener('click', (e)=> {
-        if ($('#save-button').prop('disabled')) {
-        $('#save-button').prop('disabled', false);
-        }
+/////////////////////////// redact file ///////////////////////////////////
+function redact(){
+    let canvasMerge = null;
+     canvasPage = document.getElementById(numP);
+     canvasPagePourMerge = canvasStock[Number(numP) - 1];
+     canvasMerge = document.createElement('canvas');
+     canvasMerge.height = canvasPage.height;
+     canvasMerge.width = canvasPage.width;
+     contextmerge = canvasMerge.getContext('2d');
+     contextmerge.drawImage(canvasPagePourMerge, 0, 0);
+     contextmerge.fillRect( dragOffsetX, dragOffsetY, 100, 100);
+     canvasMerge.id = numP;
+     canvasMerge.classList.add("redacted-page");
+     canvasPage.replaceWith(canvasMerge);
+
+    canvasMerge.addEventListener('mousedown', function (e) {
+                isDragging = true;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+        });
+
+        canvasMerge.addEventListener('mousemove', function (e) {
+            if (isDragging) {
+
+                var offsetX = e.clientX - dragStartX;
+                var offsetY = e.clientY - dragStartY;
+                dragOffsetX += offsetX;
+                dragOffsetY += offsetY;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                redact();
+            }
+        });
+
+        canvasMerge.addEventListener('mouseup', function () {
+            isDragging = false;
+        });
+
+
+}
+// fillRect(x, y, largeur, hauteur)
+document.getElementById('mask-zone').addEventListener('click', (e) => {
+    e.preventDefault();
+    const lesCanvas = document.querySelectorAll('canvas');
+    let j = 0;
+    if (lesCanvas) {
+        lesCanvas.forEach(cvn => {
+            canvasStock[j] = cvn;
+            j++;
+        });
+    }
+
+    redact();
+});
+
+
+
+
+let pdfContainer = document.getElementById('pdf-container');
+pdfContainer.addEventListener('mouseover', function () {
+    const lesCanvas = document.querySelectorAll('canvas');
+    lesCanvas.forEach(cnv => {
+        cnv.addEventListener("click", (e) => {
+            if ((numP != 0) && (numP != cnv.id)){
+                document.getElementById(numP).classList.remove("redacted-page");
+            }
+            numP = cnv.id;
+            cnv.classList.add("redacted-page");
+        });
+    });
 });
         
 

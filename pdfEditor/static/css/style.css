@@ -156,3 +156,7 @@
                 width: 100%;
                 height: 600px;
 }
+
+.redacted-page {
+    border: 6px solid blue;
+}
