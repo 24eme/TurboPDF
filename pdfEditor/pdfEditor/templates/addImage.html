@@ -240,6 +240,7 @@
             imageInput.addEventListener('change', function () {
                 imageFile = imageInput.files[0];
                 imageStock.push(imageFile);
+                listNbrPages.push(numP);
                 if (dragOffsetX != 0) {
                     imageStockX.push(dragOffsetX);
                     imageStockY.push(dragOffsetY);
@@ -251,7 +252,6 @@
                         image = new Image();
                         image.onload = function () {
 
-                            listNbrPages.push(numP);
                             addImage(image);
                         };
                         image.src = e.target.result;
@@ -269,6 +269,9 @@
     /////////////////////////// DOWNLOAD ////////////////////////////////
     $('#save-button').click(async function () {
 
+            imageStockX.push(dragOffsetX);
+            imageStockY.push(dragOffsetY);
+
 
         const typedArray = new Uint8Array(await file.arrayBuffer());
 
@@ -285,8 +288,7 @@
 
         }
 
-        imageStockX.push(dragOffsetX);
-        imageStockY.push(dragOffsetY);
+
         console.log("imageStock ", imageStock);
         console.log("listNbrPages ", listNbrPages);
 
@@ -302,7 +304,7 @@
                     const pngDims = pngImage.scale(0.5);
 
                     Monpage.drawImage(pngImage, {
-                        x: imageStockX[i - 1] / 2,
+                        x: imageStockX[j] / 2,
                         y: Monpage.getHeight() - imageStockY[j] / 2 - pngDims.height,
                         width: pngDims.width,
                         height: pngDims.height,

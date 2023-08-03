@@ -3,3 +3,6 @@ pdfEditor/pdfEditor/__pycache__/*
 pdfEditor/pdfEditorApp/__pycache__/*
 /.idea
 pdfEditor/node_modules
+node_modules/
+package-lock.json
+package.json
