@@ -15,10 +15,12 @@ def pdf_to_png(input_pdf_path, output_folder):
         output_path = os.path.join(output_folder, f'page_{page_num + 1}.png')
         image.save(output_path, 'PNG')
 
-
 def extract_images_from_pdf(pdf_file, output_folder):
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
+        
+    is_empty_output_folder = True 
+
     with open(pdf_file, "rb") as file:
         pdf_reader = PdfReader(file)
         num_pages = len(pdf_reader.pages)
@@ -45,8 +47,9 @@ def extract_images_from_pdf(pdf_file, output_folder):
                                 elif data['/Filter'] == '/JPXDecode':
                                     with open(f"{output_folder}/image_page_{page_num + 1}.jp2", "wb") as img_file:
                                         img_file.write(data.get_data())
-
+                                is_empty_output_folder = False
     print("Image extraction completed.")
+    return is_empty_output_folder 
 
 def zip_folder(input_folder, output_zip):
     with zipfile.ZipFile(output_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:

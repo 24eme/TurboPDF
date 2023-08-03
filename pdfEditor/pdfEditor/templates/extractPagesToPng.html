@@ -33,13 +33,8 @@
                 {% csrf_token %}
                 <input type="file" name="input_file" accept="application/pdf" /><br /><br />
                 <div id="lockDiv">
-                    <button type="submit" name="filename1" id="save-button">Extraire images</button>
+                    <button type="submit" name="filename" id="save-button">Extraire pages en PNG</button>
                 </div>
-                {% if is_empty %}
-                <div>
-                    <br><br><p>Le pdf que vous avez fournit ne contient aucune image.</p>
-                </div>
-                {% endif %}
             </form>
         </div>
     </body>

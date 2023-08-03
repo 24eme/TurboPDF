@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
-from pdfEditorApp.views import download_compressed, compressPdf, displayPdf, lockPdf, unlockPdf, addImage
-from pdfEditorApp.views import fillFormPdf, appendPdf, download_append_file, splitPdf
+from pdfEditorApp.views import compressPdf, displayPdf, lockPdf, unlockPdf, addImage
+from pdfEditorApp.views import fillFormPdf, appendPdf, download_append_file, splitPdf,extractPagesToPng
 from pdfEditorApp.views import homePagePdf, deletePagePdf, pdfToImage, modifyText, redact, download_pdf
 
 
@@ -16,9 +16,8 @@ urlpatterns = [
 
     path('appendPdf/', appendPdf, name='appendPdf'),
     path('download_append_file', download_append_file, name='download_append_file'),
-    path('pdfToImage/', pdfToImage, name='pdfToImage'),
-    path('download_compressed', download_compressed, name='download_compressed'),
-   
+    path('extractPagesToPng/', extractPagesToPng, name='extractPagesToPng'),
+    path('pdfToImage/', pdfToImage, name='pdfToImage'),   
 
     path('compressPdf/', compressPdf, name='compressPdf'),
     path('appendPdf/', appendPdf, name='appendPdf'),

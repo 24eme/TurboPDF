@@ -16,7 +16,7 @@
 
 .pdf-page:hover {
     /*transform: scale(1.2);*/
-    border-color: red;
+    border-color: gray;
 }
 
 .popup {
@@ -126,7 +126,7 @@
 }
 
 .selected-page {
-    border: 4px solid red;
+    opacity: 0.3;
 }
 
 .canvas-wrapper:hover {
