@@ -99,6 +99,18 @@ def compressPdf(request):
     initial_size = round(initial_size, 3)
     return render(request, 'compressPdf.html', {'final_size': round(final_size / 1024, 1), 'final_ratio': final_ratio, 'initial_size': round(initial_size / 1024, 1),'compression_option':compression_option})
 
+def download_compressed(request):
+    if os.path.exists("CompressedPdf.pdf"):
+        with open("CompressedPdf.pdf", 'rb') as f:
+            response = HttpResponse(f.read(), content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="CompressedPdf.pdf"'
+            response['Content-Length'] = os.path.getsize("CompressedPdf.pdf")
+            response['Content-Disposition'] += 'attachment; filename*=UTF-8\'\'CompressedPdf.pdf'
+
+            os.remove('CompressedPdf.pdf')
+            return response
+    else:
+        return HttpResponse("Error while downloading the file")
 
 def appendPdf(request):
     if request.method == 'POST':
