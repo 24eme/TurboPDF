@@ -36,10 +36,15 @@
                         Extraire
                     </a>
                 </li>
-                <li>
-                    <a class="nav-link" href="/pdfToImage/">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="pdfToPngDropdown" role="button" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
                         PDF en PNG
                     </a>
+                    <div class="dropdown-menu" aria-labelledby="pdfToPngDropdown">
+                        <a class="dropdown-item" href="/extractPagesToPng/">Extraire pages en PNG</a>
+                        <a class="dropdown-item" href="/pdfToImage/">Extraire images</a>
+                    </div>
                 </li>
                 <li>
                     <a class="nav-link" href="/redact/">

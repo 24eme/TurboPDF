@@ -28,32 +28,54 @@ def deletePagePdf(request):
 def fillFormPdf(request):
     return render(request, 'fillFormPdf.html')
 
+def extractPagesToPng(request):
+    output_folder = 'output_images'
+    output_zip = 'output_images.zip'
+    is_empty = None
+    if request.method == 'POST':
+        if not request.FILES:
+            return render(request, 'pdfToImage.html')
+        input_path = save_input_file(request.FILES['input_file'])
+        if 'filename' in request.POST:
+            pdf_to_png(input_path,output_folder)
+            zip_folder(output_folder,output_zip)
+            #download the zipped folder
+            with open(output_zip, 'rb') as zip_file:
+                response = HttpResponse(zip_file.read(), content_type='application/zip')
+                response['Content-Disposition'] = f'attachment; filename="{output_zip}"'
+                response['Content-Length'] = os.path.getsize(output_zip)
+
+            os.remove(output_zip)
+
+            return response
+    return render(request, 'extractPagesToPng.html')
+
 def pdfToImage(request):
     output_folder = 'output_images'
     output_zip = 'output_images.zip'
+    is_empty = None
     if request.method == 'POST':
         if not request.FILES:
             return render(request, 'pdfToImage.html')
         input_path = save_input_file(request.FILES['input_file'])
 
-        # Vérifier quel bouton a été cliqué
-        if 'filename' in request.POST:
-            pdf_to_png(input_path,output_folder)
-        else:
-            print("extract images")
-            extract_images_from_pdf(input_path, output_folder)
-            
-        zip_folder(output_folder,output_zip)
-        #download the zipped folder
-        with open(output_zip, 'rb') as zip_file:
-            response = HttpResponse(zip_file.read(), content_type='application/zip')
-            response['Content-Disposition'] = f'attachment; filename="{output_zip}"'
-            response['Content-Length'] = os.path.getsize(output_zip)
+        if 'filename1' in request.POST:
+            is_empty_output_folder = extract_images_from_pdf(input_path, output_folder)
+            if is_empty_output_folder:
+                is_empty = True
+            else:
+                is_empty_output_folder = False
+                zip_folder(output_folder,output_zip)
+                #download the zipped folder
+                with open(output_zip, 'rb') as zip_file:
+                    response = HttpResponse(zip_file.read(), content_type='application/zip')
+                    response['Content-Disposition'] = f'attachment; filename="{output_zip}"'
+                    response['Content-Length'] = os.path.getsize(output_zip)
 
-        os.remove(output_zip)
+                os.remove(output_zip)
 
-        return response
-    return render(request, 'pdfToImage.html')
+                return response
+    return render(request, 'pdfToImage.html',{'is_empty':is_empty})
 
 def compressPdf(request):
     form = inputForm()
@@ -76,7 +98,6 @@ def compressPdf(request):
     final_size = round(final_size, 3)
     initial_size = round(initial_size, 3)
     return render(request, 'compressPdf.html', {'final_size': round(final_size / 1024, 1), 'final_ratio': final_ratio, 'initial_size': round(initial_size / 1024, 1),'compression_option':compression_option})
-
 
 
 def appendPdf(request):
@@ -192,19 +213,6 @@ def displayPdf(request):
             return render(request, 'error_template.html', {'message': "The requested PDF file doesn't exist."})
     return render(request, 'displayPdf.html')
 
-def download_compressed(request):
-    if os.path.exists("CompressedPdf.pdf"):
-        with open("CompressedPdf.pdf", 'rb') as f:
-            response = HttpResponse(f.read(), content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; filename="CompressedPdf.pdf"'
-            response['Content-Length'] = os.path.getsize("CompressedPdf.pdf")
-            response['Content-Disposition'] += 'attachment; filename*=UTF-8\'\'CompressedPdf.pdf'
-
-            os.remove('CompressedPdf.pdf')
-            return response
-    else:
-        return HttpResponse("Error while downloading the file")
-
 def splitPdf(request):
     if request.method == 'POST':
         if not request.FILES:
@@ -253,8 +261,8 @@ def splitPdf(request):
     return render(request, 'splitPdf.html')
 
 def modifyText(request):
-  
     return render(request, 'modifyText.html')
+
 
 fichier_finale = ""
 pdf_name = ""
@@ -281,8 +289,6 @@ def redact(request) :
             fichier_finale = redactor.email_redaction()
             os.remove(myFile)
             return download_pdf(request, fichier_finale, pdf_name)
-
-
     return render(request, 'redact.html', {'fichier_finale': fichier_finale, 'pdf_name' : pdf_name})
 
 def download_pdf(request, fichier_finale, pdf_name):
