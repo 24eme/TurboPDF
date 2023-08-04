@@ -10,6 +10,7 @@
         integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
         crossorigin="anonymous"></script>
    
+
     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
     <link rel="stylesheet" href="{%static 'css/style.css' %}">
 
@@ -39,11 +40,14 @@
         {% csrf_token %}
         <input type="file" name="pdf-upload[]" id="pdf-upload" accept=".pdf" multiple><br /><br />
 </div>
-    <div id="pdf-previews"></div>
-    <div id="app" style="margin-bottom: 10%">
-        <button type="submit" id="save-button">Fusionner</button>
-    </div>
+<div id="pdf-previews"></div>
+<div id="pdf-order-inputs"></div>
+<div id="app" style="margin-bottom: 10%">
+    <button type="submit" id="save-button">Fusionner</button>
+</div>
 </form>
+
+
 <style>
     #pdf-previews {
         display: flex;
@@ -51,83 +55,230 @@
     }
 
     .pdf-preview {
-        width: 200px;
-        margin: 2%;
+        position: relative;
+        flex-basis: calc(33% - 2%);
+        padding: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        margin-left: 5px;
+        margin-right: 5px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        cursor: grab;
     }
 
     .pdf-preview embed {
         width: 100%;
-        height: 250px;
+        height: 500px;
     }
 
     .pdf-info {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        padding: 8px;
+        height: 15%;
+        text-align: center;
     }
+
+    .pdf-page-number {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background-color: #f0f0f0;
+        padding: 4px;
+        border-radius: 4px;
+        font-weight: bold;
+    }
+
+    .dragover {
+        border: 4px solid green;
+    }
+
+    .dragging {
+        border: 4px solid blue;
+    }
+
+
 </style>
+
 <script>
+
+    let fileArray = [];
+
+    function createPreview(files, index) {
+        if (index >= files.length) {
+            updateFileOrder();
+            updatePageNumbers();
+            return;
+        }
+        const file = files[index];
+
+        if (file.type === 'application/pdf') {
+            const fileReader = new FileReader();
+            fileReader.onload = function () {
+                const typedarray = new Uint8Array(this.result);
+
+                pdfjsLib.getDocument({ data: typedarray }).promise.then(function (pdf) {
+                    pdf.getPage(1).then(function (page) {
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        const viewport = page.getViewport({ scale: 0.5 });
+                        canvas.width = viewport.width;
+                        canvas.height = viewport.height;
+
+                        const renderContext = {
+                            canvasContext: context,
+                            viewport: viewport,
+                        };
+
+                        page.render(renderContext).promise.then(function () {
+                            const pdfPreviewDiv = document.createElement('div');
+                            pdfPreviewDiv.classList.add('pdf-preview');
+                            pdfPreviewDiv.innerHTML = '<embed src="' + URL.createObjectURL(file) + '" type="application/pdf" />';
+
+                            const pdfInfoDiv = document.createElement('div');
+                            pdfInfoDiv.classList.add('pdf-info');
+                            pdfInfoDiv.innerHTML += '<p>Nom : ' + truncateFileName(file.name, 20) + '</p>';
+                            pdfInfoDiv.innerHTML += '<p>Nombre de pages : ' + pdf.numPages + '</p>';
+
+                            pdfPreviewDiv.setAttribute('data-index', index);
+                            pdfPreviewDiv.setAttribute('data-filename', file.name);
+                            pdfPreviewDiv.setAttribute('draggable', 'true');
+
+                            const pageNumberDiv = document.createElement('div');
+                            pageNumberDiv.classList.add('pdf-page-number');
+                            pageNumberDiv.innerText = files.length - index;
+
+                            pdfPreviewDiv.appendChild(pdfInfoDiv);
+                            pdfPreviewDiv.appendChild(pageNumberDiv);
+                            pdfPreviews.prepend(pdfPreviewDiv);
+
+                            createPreview(files, index + 1);
+                        });
+                    });
+                });
+            };
+            fileReader.readAsArrayBuffer(file);
+        }
+    }
+
     document.getElementById('upload-pdf').addEventListener('change', function (e) {
         e.preventDefault();
         const fileInput = document.getElementById('pdf-upload');
-        const fileArray = fileInput.files;
-        const pdfPreviews = document.getElementById('pdf-previews');
-        pdfPreviews.innerHTML = '';
+        const newFiles = [...fileInput.files];
 
-        function createPreviewWithDelay(files, index) {
-            if (index >= files.length) {
-                return;
+        fileArray.push(...newFiles);
+
+        createPreview(newFiles, 0);
+        });
+
+
+    const pdfPreviews = document.getElementById('pdf-previews');
+
+    pdfPreviews.addEventListener('dragstart', function (event) {
+        event.dataTransfer.setData('text/plain', event.target.dataset.index);
+        event.target.classList.add('dragging');
+    });
+
+    pdfPreviews.addEventListener('dragover', function (event) {
+        event.preventDefault();
+        const targetElement = event.target.closest('.pdf-preview');
+        if (targetElement) {
+            targetElement.classList.add('dragover');
+        }
+    });
+
+    pdfPreviews.addEventListener('dragleave', function (event) {
+        const targetElement = event.target.closest('.pdf-preview');
+        if (targetElement) {
+            targetElement.classList.remove('dragover');
+        }
+    });
+
+
+    pdfPreviews.addEventListener('drop', function (event) {
+        event.preventDefault();
+        const data = event.dataTransfer.getData('text/plain');
+        const draggedElement = document.querySelector(`[data-index="${data}"]`);
+        const targetElement = event.target.closest('.pdf-preview');
+
+        if (targetElement && targetElement !== draggedElement) {
+            const draggedIndex = parseInt(draggedElement.getAttribute('data-index'));
+            const targetIndex = parseInt(targetElement.getAttribute('data-index'));
+
+            const clonedDraggedElement = draggedElement.cloneNode(true);
+            const clonedTargetElement = targetElement.cloneNode(true);
+
+            clonedDraggedElement.setAttribute('data-index', targetIndex);
+            clonedTargetElement.setAttribute('data-index', draggedIndex);
+
+            const draggedFileName = draggedElement.getAttribute('data-filename');
+            const targetFileName = targetElement.getAttribute('data-filename');
+
+            const draggedFileIndex = fileArray.findIndex(file => file.name === draggedFileName);
+            const targetFileIndex = fileArray.findIndex(file => file.name === targetFileName);
+
+            if (draggedFileIndex !== -1 && targetFileIndex !== -1) {
+                const tempFile = fileArray[draggedFileIndex];
+                fileArray[draggedFileIndex] = fileArray[targetFileIndex];
+                fileArray[targetFileIndex] = tempFile;
             }
+
+            pdfPreviews.replaceChild(clonedDraggedElement, targetElement);
+            pdfPreviews.replaceChild(clonedTargetElement, draggedElement);
+
+            const pdfPreviewDivs = document.querySelectorAll('.pdf-preview');
+            pdfPreviewDivs.forEach((div, index) => {
+                div.setAttribute('data-index', index);
+            });
+            updatePageNumbers();
+            updateHiddenInputs();
             updateFileOrder();
-            const file = files[index];
-
-            if (file.type === 'application/pdf') {
-                const fileReader = new FileReader();
-                fileReader.onload = function () {
-                    const typedarray = new Uint8Array(this.result);
-
-                    pdfjsLib.getDocument({ data: typedarray }).promise.then(function (pdf) {
-                        pdf.getPage(1).then(function (page) {
-                            const canvas = document.createElement('canvas');
-                            const context = canvas.getContext('2d');
-                            const viewport = page.getViewport({ scale: 0.5 });
-                            canvas.width = viewport.width;
-                            canvas.height = viewport.height;
-
-                            const renderContext = {
-                                canvasContext: context,
-                                viewport: viewport,
-                            };
-
-                            page.render(renderContext).promise.then(function () {
-                                const pdfPreviewDiv = document.createElement('div');
-                                pdfPreviewDiv.classList.add('pdf-preview');
-                                pdfPreviewDiv.innerHTML = '<embed src="' + URL.createObjectURL(file) + '" type="application/pdf" />';
-
-                                pdfPreviewDiv.setAttribute('data-index', index);
-
-                                pdfPreviews.prepend(pdfPreviewDiv);
-
-                                const pdfInfoDiv = document.createElement('div');
-                                pdfInfoDiv.classList.add('pdf-info');
-                                pdfInfoDiv.innerHTML += '<p>Nom : ' + truncateFileName(file.name, 20) + '</p>';
-                                pdfInfoDiv.innerHTML += '<p>Nombre de pages : ' + pdf.numPages + '</p>';
-                                pdfInfoDiv.innerHTML += '<p>Taille : ' + (file.size / 1024).toFixed(2) + ' Ko</p>';
-                                pdfPreviewDiv.appendChild(pdfInfoDiv);
-
-                                setTimeout(function () {
-                                    createPreviewWithDelay(files, index + 1);
-                                }, 500);
-                            });
-                        });
-                    });
-                };
-                fileReader.readAsArrayBuffer(file);
-            }
+        }
+        const draggingElement = pdfPreviews.querySelector('.dragging');
+        if (draggingElement) {
+            draggingElement.classList.remove('dragging');
         }
 
-        createPreviewWithDelay(fileArray, 0);
+        const dragoverElement = pdfPreviews.querySelector('.dragover');
+        if (dragoverElement) {
+            dragoverElement.classList.remove('dragover');
+        }
+
     });
+
+    function updateHiddenInputs() {
+        const pdfPreviewsDivs = document.querySelectorAll('.pdf-preview');
+        const pdfOrderInputs = document.getElementById('pdf-order-inputs');
+        pdfOrderInputs.innerHTML = '';
+
+        pdfPreviewsDivs.forEach((div, index) => {
+            const dataIndex = div.getAttribute('data-index');
+            const pageNumberDiv = div.querySelector('.pdf-page-number')
+            const pageNumber = pageNumberDiv.innerText
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = `${fileArray[dataIndex].name}`;
+            input.value = index;
+            pdfOrderInputs.appendChild(input);
+        });
+    }
+
+    function updatePageNumbers() {
+        const pdfPreviewsDivs = document.querySelectorAll('.pdf-preview');
+        pdfPreviewsDivs.forEach((div, index) => {
+            const pageNumberDiv = div.querySelector('.pdf-page-number');
+            pageNumberDiv.innerText = index + 1;
+
+            const fileName = div.getAttribute('data-filename');
+            div.setAttribute('data-index', index);
+            div.setAttribute('data-filename', fileName);
+        });
+
+    }
+
 
     function truncateFileName(fileName, maxLength) {
         if (fileName.length <= maxLength) {
@@ -138,14 +289,36 @@
     }
 
     function updateFileOrder() {
-        const fileInput = document.getElementById('pdf-upload');
-        const fileArray = fileInput.files;
-        const fileOrder = [];
 
-        for (let i = 0; i < fileArray.length; i++) {
-            fileOrder.push(fileArray[i].name);
-        }
+        const pdfPreviewsDivs = document.querySelectorAll('.pdf-preview');
+        const pdfOrderInputs = document.getElementById('pdf-order-inputs');
+        pdfOrderInputs.innerHTML = '';
+
+        pdfPreviewsDivs.forEach((div, index) => {
+            const dataIndex = div.getAttribute('data-index');
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = `${fileArray[dataIndex].name}`;
+            input.value = dataIndex;
+            pdfOrderInputs.appendChild(input);
+        });
     }
+
+    function updateReverseFileOrder() {
+        const pdfPreviewsDivs = document.querySelectorAll('.pdf-preview');
+        const pdfOrderInputs = document.getElementById('pdf-order-inputs');
+        pdfOrderInputs.innerHTML = '';
+
+        pdfPreviewsDivs.forEach((div, index) => {
+            const dataIndex = div.getAttribute('data-index');
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = `${fileArray[dataIndex].name}`;
+            input.value = pdfPreviewsDivs.length - index;;
+            pdfOrderInputs.appendChild(input);
+        });
+    }
+
 
 </script>
 </body>

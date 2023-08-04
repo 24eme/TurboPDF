@@ -117,11 +117,11 @@ def appendPdf(request):
         merged_file_path = 'grouped_file.pdf'
         uploaded_files = []
 
+        print(">>>", request.FILES)
+
         files = request.FILES.getlist('pdf-upload[]')
 
-        sorted_files = sorted(files, key=lambda f: int(request.POST.get(f'pdf-index-{f.name}', 0)))
-
-        for file in sorted_files:
+        for file in files:
             file_name = file.name
             with open(file_name, 'wb') as destination:
                 for chunk in file.chunks():
@@ -137,6 +137,7 @@ def appendPdf(request):
         return download_append_file(merged_file_path, uploaded_files)
 
     return render(request, 'appendPdf.html')
+
 
 
 def download_append_file(file_path, uploaded_files):
