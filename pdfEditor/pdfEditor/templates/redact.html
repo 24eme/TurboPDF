@@ -41,7 +41,7 @@
 
         <div id="app">
             <h2>Masquer des information</h2>
-            <p>Pour protéger vos informations sensibles, , TurboPdf est le bon choix
+            <p>Protéger vos informations sensibles
             </p>
                
             <form enctype="multipart/form-data" id="pdf-upload-form" method="post">
@@ -50,9 +50,9 @@
                     <input class="" type="file" id="pdf-input" name="pdf-upload" accept="application/pdf" value="upload">
                 </div>
                 <div>
-                    <button type="submit" name="mask-email" class="btn btn-primary" id="mask-email">Masquer les adresses email</button>
-                    <button class="btn btn-primary" id="mask-num">Masquer les numéros de Téléphone</button>
-                    <button class="btn btn-primary" id="mask-zone">Masquer une zone précise</button>
+                    <button type="submit" name="mask-email" class="btn btn-primary" id="mask-email" disabled> Masquer les adresses email</button>
+                   <!-- <button class="btn btn-primary" id="mask-num">Masquer les numéros de Téléphone</button> -->
+                    <button class="btn btn-primary" id="mask-zone" disabled>Masquer une zone précise</button>
                 </div>
         </form>
 
@@ -134,7 +134,10 @@ $(document).ready(function () {
                 pages.push({ number: i, rendered: false });
             }
 
-            displayPages(0);                      
+            displayPages(0);
+            if ($('#mask-zone').prop('disabled')) {
+        $('#mask-zone').prop('disabled', false);
+        $('#mask-email').prop('disabled', false);}
         });
     };
 
