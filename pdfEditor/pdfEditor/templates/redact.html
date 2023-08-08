@@ -1,17 +1,10 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>TurboPDF</title>
-        <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
-        <link rel="stylesheet" href="{%static 'css/style.css' %}">
-
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
-            integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
-            crossorigin="anonymous"></script>   
-        
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+            <script src="{%static 'fabric/fabric.min.js' %}"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
         <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -23,203 +16,243 @@
             integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ=="
             crossorigin="anonymous" referrerpolicy="no-referrer">
         </script>
-        <style>
-            #pdf-container {
-                width: 100%;
-                height: 600px;
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+                <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
+        <link rel="stylesheet" href="{%static 'css/style.css' %}">
+        <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
+        <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="https://mozilla.github.io/pdf.js/build/pdf.worker.js"></script>
+    <style>
+          .controls {
+  	        display: inline-block;
+
             }
-            .btn-primary{
-            margin-bottom: 5px;
-            background-color: #2A3944ff;
-            border-color:black;
-            
-            }
-        </style>
-    </head>
-    <body>
-        {% include "main/includes/header.html" %}
+          #pdf-container{
+              display: flex;
+                justify-content: center;
+                align-items: center;
+          }
+          canvas {
 
-        <div id="app">
-            <h2>Masquer des information</h2>
-            <p>Protéger vos informations sensibles
-            </p>
-               
-            <form enctype="multipart/form-data" id="pdf-upload-form" method="post">
-                {% csrf_token %}
-                <div class="m-b-30">
-                    <input class="" type="file" id="pdf-input" name="pdf-upload" accept="application/pdf" value="upload">
-                </div>
-                <div>
-                    <button type="submit" name="mask-email" class="btn btn-primary" id="mask-email" disabled> Masquer les adresses email</button>
-                   <!-- <button class="btn btn-primary" id="mask-num">Masquer les numéros de Téléphone</button> -->
-                    <button class="btn btn-primary" id="mask-zone" disabled>Masquer une zone précise</button>
-                </div>
-        </form>
+              border: 1px solid black;}
+          .btn-primary {
+                margin-bottom: 5px;
+                background-color: #2A3944ff;
+                border-color: black;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 20px;
+          }
 
-        
-        </div>
+    </style>
+</head>
+<body id="body">
+{% include "main/includes/header.html" %}
 
+<div id="app">
 
-<div class="Mon-pdf-page" id="pdf-container"></div>
+  <div class="controls">
+    <p>
+        <button type="button" class="btn btn-primary " id="add" onclick="Add()">Add a rectangle</button>
+        <button type="button" id="save-button" disabled>Enregistrer vos modifications</button>
+    </p>
+  </div>
+    <div>
+    <input type="file" accept="application/pdf">
+  </div>
+<canvas id="c" width="300" height="200">
+</canvas>
+
+  <div id="pdf-container"></div> </div>
 
 <script>
-///////////////////////////// Initialisation ///////////////////
-let file = null;
-let numP = 0;
-let isDragging = false;
-let dragStartX = 0; // départ du déplacement
-let dragStartY = 0;
-let dragOffsetX = 0;
-let dragOffsetY = 0;
-let context = null;
-let canvasStock = [];
-let pages = [];
-let page = null;
-let canvas = null;
-let pageNumber = 1;
+     let numPages;
+  let width;
+  let heigth;
+  let listCanvas = [];
+      const Base64Prefix = "data:application/pdf;base64,";
+  function getPdfHandler() {
+      return window['pdfjs-dist/build/pdf'];
+  }
 
-///////////////////////////// Display PDF //////////////////////
-function displayPages(index) {
-    if (index >= pages.length) {
-        return true;
-    }
+  function readBlob(blob) {
+      return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.addEventListener('load', () => resolve(reader.result));
+          reader.addEventListener('error', reject)
+          reader.readAsDataURL(blob);
+      })
+  }
 
-    page = pages[index];
-    pdfDoc.getPage(page.number).then(function (pdfPage) {
-    let scale = 2;
-    let viewport = pdfPage.getViewport({ scale: scale });
+  async function printPDF(pdfData, pages) {
+      const pdfjsLib = await getPdfHandler();
+      pdfData = pdfData instanceof Blob ? await readBlob(pdfData) : pdfData;
+      const data = atob(pdfData.startsWith(Base64Prefix) ? pdfData.substring(Base64Prefix.length) : pdfData);
+      // Using DocumentInitParameters object to load binary data.
+      const loadingTask = pdfjsLib.getDocument({ data });
+      return loadingTask.promise
+          .then((pdf) => {
+              numPages = pdf.numPages;
+              return new Array(numPages).fill(0)
+                  .map((__, i) => {
+                      const pageNumber = i + 1;
+                      if (pages && pages.indexOf(pageNumber) == -1) {
+                          return;
+                      }
+                      return pdf.getPage(pageNumber)
+                          .then((page) => {
+                              //  retina scaling
+                              const viewport = page.getViewport({ scale: window.devicePixelRatio });
+                              // Prepare canvas using PDF page dimensions
+                              const canvas = document.createElement('canvas');
+                              const context = canvas.getContext('2d');
+                              canvas.height = viewport.height
+                              canvas.width = viewport.width;
+                              canvas.id = i+1;
 
-    let canvas = document.createElement('canvas');
-    canvas.classList.add('Mon-pdf-page');
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-    canvas.dataset.pageNumber = page.number;
-    canvas.id = page.number;
+                              width = canvas.width;
+                              heigth = canvas.height;
+                              // Render PDF page into canvas context
+                              const renderContext = {
+                                  canvasContext: context,
+                                  viewport: viewport
+                              };
 
-    canvasStock.push(canvas);
+                              const renderTask = page.render(renderContext);
+                              return renderTask.promise.then(() => canvas);
+                          });
+                  });
+          });
+  }
 
-    let context = canvas.getContext('2d');
-    let renderContext = {
-        canvasContext: context,
-        viewport: viewport
-        };
+  // async function pdfToImage(pdfData, canvas) {
+  //     //canvas.setWidth(600);
+  //     const scale = 1 / window.devicePixelRatio;
+  //     let yOffset = 0;
+  //     return (await printPDF(pdfData))
+  //         .map(async c => {
+  //             fabricImage = new fabric.Image(await c, {
+  //                 left: 100,
+  //                 top: yOffset,
+  //                 scaleX: scale,
+  //                 scaleY: scale,
+  //                // selectable: false,
+  //             });
+  //             canvas.add(fabricImage);
+  //            //await  canvas.setHeight(canvas.getHeight() + fabricImage.height*scale + 2);
+  //            //yOffset += fabricImage.height * scale + 5;
+  //         });
+  // }
 
-    pdfPage.render(renderContext).promise.then(function () {
-                                    
 
-        $('#pdf-container').append(canvas);
-        page.rendered = true;
-        // Afficher la page suivante
-        displayPages(index + 1);
-        });
+async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
+    const scale = 1 / window.devicePixelRatio;
+
+   /// this is let singleCanvas = await printSinglePDFPage(pdfData, pageIndex);
+
+    const imageData = await pdfDataArray[pageIndex];
+
+    const fabricImage = new fabric.Image(imageData, {
+        left: 0,
+        top: 0,
+        scaleX: scale,
+        scaleY: scale,
+        selectable: false,
     });
-    }
 
-
-/////////////////// Load PDF ////////////////////
-
-$(document).ready(function () {
-    $('#pdf-input').change(async function (e) {
-    file = e.target.files[0];
-                
-    let fileReader = new FileReader();
-    fileReader.onload = async function () {
-        typedarray = new Uint8Array(await this.result);
-        MypdfDoc = pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
-            let numPages = pdf.numPages;
-            pdfDoc = pdf;
-
-            pages = [];
-            for (let i = 1; i <= numPages; i++) {
-                pages.push({ number: i, rendered: false });
-            }
-
-            displayPages(0);
-            if ($('#mask-zone').prop('disabled')) {
-        $('#mask-zone').prop('disabled', false);
-        $('#mask-email').prop('disabled', false);}
-        });
-    };
-
-    fileReader.readAsArrayBuffer(file);
-                
-    });
-});
-
-/////////////////////////// redact file ///////////////////////////////////
-function redact(){
-    let canvasMerge = null;
-     canvasPage = document.getElementById(numP);
-     canvasPagePourMerge = canvasStock[Number(numP) - 1];
-     canvasMerge = document.createElement('canvas');
-     canvasMerge.height = canvasPage.height;
-     canvasMerge.width = canvasPage.width;
-     contextmerge = canvasMerge.getContext('2d');
-     contextmerge.drawImage(canvasPagePourMerge, 0, 0);
-     contextmerge.fillRect( dragOffsetX, dragOffsetY, 100, 100);
-     canvasMerge.id = numP;
-     canvasMerge.classList.add("redacted-page");
-     canvasPage.replaceWith(canvasMerge);
-
-    canvasMerge.addEventListener('mousedown', function (e) {
-                isDragging = true;
-                dragStartX = e.clientX;
-                dragStartY = e.clientY;
-        });
-
-        canvasMerge.addEventListener('mousemove', function (e) {
-            if (isDragging) {
-
-                var offsetX = e.clientX - dragStartX;
-                var offsetY = e.clientY - dragStartY;
-                dragOffsetX += offsetX;
-                dragOffsetY += offsetY;
-                dragStartX = e.clientX;
-                dragStartY = e.clientY;
-                redact();
-            }
-        });
-
-        canvasMerge.addEventListener('mouseup', function () {
-            isDragging = false;
-        });
-
-
+    canvas.add(fabricImage);
 }
-// fillRect(x, y, largeur, hauteur)
-document.getElementById('mask-zone').addEventListener('click', (e) => {
-    e.preventDefault();
-    const lesCanvas = document.querySelectorAll('canvas');
-    let j = 0;
-    if (lesCanvas) {
-        lesCanvas.forEach(cvn => {
-            canvasStock[j] = cvn;
-            j++;
-        });
-    }
-
-    redact();
-});
 
 
+  async  function createCanvas(i, pdfDataArray){
+      const canvas2e = document.createElement('canvas');
+      const context2e = canvas2e.getContext('2d');
+      canvas2e.height = 900;
+      canvas2e.width = 700;
+      canvas2e.id = i;
+      document.getElementById("body").appendChild(canvas2e);
+      let canvas2 = this.__canvas = new fabric.Canvas(`${i}`);
+      listCanvas.push(canvas2);
 
 
-let pdfContainer = document.getElementById('pdf-container');
-pdfContainer.addEventListener('mouseover', function () {
-    const lesCanvas = document.querySelectorAll('canvas');
-    lesCanvas.forEach(cnv => {
-        cnv.addEventListener("click", (e) => {
-            if ((numP != 0) && (numP != cnv.id)){
-                document.getElementById(numP).classList.remove("redacted-page");
-            }
-            numP = cnv.id;
-            cnv.classList.add("redacted-page");
-        });
+      await pdfPageToImage( i, canvas2, pdfDataArray);
+      canvas2.requestRenderAll();
+
+  }
+    var canvas = this.__canvas = new fabric.Canvas('c');
+
+    canvas.getElement().removeAttribute("style");
+    const text = new fabric.Text('Upload PDF');
+    canvas.add(new fabric.Circle({ radius: 100, fill: 'green' }), text);
+    document.querySelector('input').addEventListener('change', async (e) => {
+        text.set('text', 'loading...');
+        canvas.requestRenderAll();
+        const pdfDataArray = await printPDF(e.target.files[0]);
+         await numPages;
+        console.log("numPages : ", numPages);
+        for (let i =1; i<= numPages; i++){
+
+            await createCanvas(i, pdfDataArray);
+        }
+
+        canvas.remove(text);
     });
-});
-        
 
+	// create a rect object
+  var deleteIcon = "data:image/svg+xml,%3C%3Fxml version='1.0' encoding='utf-8'%3F%3E%3C!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'%3E%3Csvg version='1.1' id='Ebene_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='595.275px' height='595.275px' viewBox='200 215 230 470' xml:space='preserve'%3E%3Ccircle style='fill:%23F44336;' cx='299.76' cy='439.067' r='218.516'/%3E%3Cg%3E%3Crect x='267.162' y='307.978' transform='matrix(0.7071 -0.7071 0.7071 0.7071 -222.6202 340.6915)' style='fill:white;' width='65.545' height='262.18'/%3E%3Crect x='266.988' y='308.153' transform='matrix(0.7071 0.7071 -0.7071 0.7071 398.3889 -83.3116)' style='fill:white;' width='65.544' height='262.179'/%3E%3C/g%3E%3C/svg%3E";
+
+  var img = document.createElement('img');
+  img.src = deleteIcon;
+
+  fabric.Object.prototype.transparentCorners = false;
+  fabric.Object.prototype.cornerColor = 'blue';
+  fabric.Object.prototype.cornerStyle = 'circle';
+
+  function Add() {
+    var rect = new fabric.Rect({
+      left: 100,
+      top: 50,
+      fill: 'yellow',
+      width: 200,
+      height: 100,
+      objectCaching: false,
+      stroke: 'lightgreen',
+      strokeWidth: 4,
+    });
+
+    canvas.add(rect);
+    //canvas.setActiveObject(rect);
+  }
+
+  fabric.Object.prototype.controls.deleteControl = new fabric.Control({
+    x: 0.5,
+    y: -0.5,
+    offsetY: 16,
+    cursorStyle: 'pointer',
+    mouseUpHandler: deleteObject,
+    render: renderIcon,
+    cornerSize: 24
+  });
+
+
+  function deleteObject(eventData, transform) {
+		var target = transform.target;
+		var canvas = target.canvas;
+		    canvas.remove(target);
+        canvas.requestRenderAll();
+	}
+
+  function renderIcon(ctx, left, top, styleOverride, fabricObject) {
+    var size = this.cornerSize;
+    ctx.save();
+    ctx.translate(left, top);
+    ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
+    ctx.drawImage(img, -size/2, -size/2, size, size);
+    ctx.restore();
+  }
 </script>
 
-    </body>
+
+</body>
+
 </html>
