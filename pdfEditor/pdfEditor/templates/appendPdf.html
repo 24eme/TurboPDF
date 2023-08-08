@@ -36,6 +36,9 @@
 
 <div id="app">
     <h2>Fusion des PDF</h2>
+    <p>Fuisionner deux ou plusieurs fichiers PDFs.<br>
+       Cliquez sur le bouton ci-dessous pour charger vos PDFs.
+    </p>
     <form enctype="multipart/form-data" id="upload-pdf" method="post">
         {% csrf_token %}
         <input type="file" name="pdf-upload[]" id="pdf-upload" accept=".pdf" multiple><br /><br />
