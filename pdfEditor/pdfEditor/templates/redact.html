@@ -24,17 +24,17 @@
     <script src="https://mozilla.github.io/pdf.js/build/pdf.worker.js"></script>
     <style>
           .controls {
+
   	        display: inline-block;
 
             }
           #pdf-container{
-              display: flex;
-                justify-content: center;
-                align-items: center;
+
           }
           canvas {
 
-              border: 1px solid black;}
+              border: 1px solid black;
+          }
           .btn-primary {
                 margin-bottom: 5px;
                 background-color: #2A3944ff;
@@ -44,6 +44,9 @@
                 font-size: 20px;
           }
 
+
+
+
     </style>
 </head>
 <body id="body">
@@ -51,19 +54,21 @@
 
 <div id="app">
 
-  <div class="controls">
-    <p>
-        <button type="button" class="btn btn-primary " id="add" onclick="Add()">Add a rectangle</button>
-        <button type="button" id="save-button" disabled>Enregistrer vos modifications</button>
-    </p>
-  </div>
+<div class="floating-menu">
+    <div class="controls">
+        <p>
+            <button type="button" class="btn btn-primary" id="add" onclick="Add()">Add a rectangle</button>
+            <button type="button" id="save-button" disabled>Enregistrer vos modifications</button>
+        </p>
+    </div>
+</div>
     <div>
     <input type="file" accept="application/pdf">
   </div>
 <canvas id="c" width="300" height="200">
-</canvas>
+</canvas> </div>
 
-  <div id="pdf-container"></div> </div>
+  <div id="pdf-container"></div>
 
 <script>
      let numPages;
@@ -125,24 +130,6 @@
           });
   }
 
-  // async function pdfToImage(pdfData, canvas) {
-  //     //canvas.setWidth(600);
-  //     const scale = 1 / window.devicePixelRatio;
-  //     let yOffset = 0;
-  //     return (await printPDF(pdfData))
-  //         .map(async c => {
-  //             fabricImage = new fabric.Image(await c, {
-  //                 left: 100,
-  //                 top: yOffset,
-  //                 scaleX: scale,
-  //                 scaleY: scale,
-  //                // selectable: false,
-  //             });
-  //             canvas.add(fabricImage);
-  //            //await  canvas.setHeight(canvas.getHeight() + fabricImage.height*scale + 2);
-  //            //yOffset += fabricImage.height * scale + 5;
-  //         });
-  // }
 
 
 async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
@@ -169,9 +156,13 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
       const context2e = canvas2e.getContext('2d');
       canvas2e.height = 900;
       canvas2e.width = 700;
-      canvas2e.id = i;
+      canvas2e.id = i+1;
+      canvas2e.style.left = "50%";
       document.getElementById("body").appendChild(canvas2e);
-      let canvas2 = this.__canvas = new fabric.Canvas(`${i}`);
+      let canvas2 = this.__canvas = new fabric.Canvas(`${i+1}`);
+      canvas2.getElement().style.left = "50%";
+      let upperCanvas = canvas2.upperCanvasEl;
+      upperCanvas.style.left = "50%";
       listCanvas.push(canvas2);
 
 
@@ -179,7 +170,8 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
       canvas2.requestRenderAll();
 
   }
-    var canvas = this.__canvas = new fabric.Canvas('c');
+
+  var canvas = this.__canvas = new fabric.Canvas('c');
 
     canvas.getElement().removeAttribute("style");
     const text = new fabric.Text('Upload PDF');
@@ -190,7 +182,7 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
         const pdfDataArray = await printPDF(e.target.files[0]);
          await numPages;
         console.log("numPages : ", numPages);
-        for (let i =1; i<= numPages; i++){
+        for (let i =0; i< numPages; i++){
 
             await createCanvas(i, pdfDataArray);
         }
@@ -209,10 +201,33 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
   fabric.Object.prototype.cornerStyle = 'circle';
 
   function Add() {
+      let indexActiveCanvas;
+
+      const canvasElements = document.querySelectorAll('canvas');
+      const canvasToRemove = document.getElementById('c');
+     const updatedCanvasElements = Array.from(canvasElements).filter(canvas => canvas !== canvasToRemove && !canvas.classList.contains('upper-canvas'));
+      console.log("listCanvas", updatedCanvasElements);
+      for (let i = 0; i < updatedCanvasElements.length; i++) {
+    const canvas = updatedCanvasElements[i];
+    const canvasRect = canvas.getBoundingClientRect();
+
+    if (
+
+      canvasRect.left >= 0 &&
+      Math.abs(canvasRect.top) <= window.innerHeight &&
+      canvasRect.right <= window.innerWidth
+    ) {
+      console.log('Canvas visible:', canvas.id);
+      indexActiveCanvas = canvas.id;
+      break; // Sortir de la boucle dès que le canvas est trouvé
+    }}
+
+
+      let convasFabricActive = listCanvas[indexActiveCanvas-1];
     var rect = new fabric.Rect({
       left: 100,
       top: 50,
-      fill: 'yellow',
+      fill: 'black',
       width: 200,
       height: 100,
       objectCaching: false,
@@ -220,7 +235,7 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
       strokeWidth: 4,
     });
 
-    canvas.add(rect);
+    convasFabricActive.add(rect);
     //canvas.setActiveObject(rect);
   }
 

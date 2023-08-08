@@ -160,3 +160,14 @@
 .redacted-page {
     border: 6px solid blue;
 }
+
+ .floating-menu {
+    position: fixed;
+    top: 60px; /* Position from the top */
+    right: 20px; /* Position from the right */
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000; /* Ensure the menu is above other elements */
+}
