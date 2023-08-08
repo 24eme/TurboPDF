@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
         crossorigin="anonymous"></script>
-   
+
 
     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
     <link rel="stylesheet" href="{%static 'css/style.css' %}">
@@ -39,13 +39,13 @@
     <form enctype="multipart/form-data" id="upload-pdf" method="post">
         {% csrf_token %}
         <input type="file" name="pdf-upload[]" id="pdf-upload" accept=".pdf" multiple><br /><br />
+        <div id="pdf-previews"></div>
+        <div id="pdf-order-inputs"></div>
+        <div id="app" style="margin-bottom: 10%">
+            <button type="submit" id="save-button">Fusionner</button>
+        </div>
+    </form>
 </div>
-<div id="pdf-previews"></div>
-<div id="pdf-order-inputs"></div>
-<div id="app" style="margin-bottom: 10%">
-    <button type="submit" id="save-button">Fusionner</button>
-</div>
-</form>
 
 
 <style>
@@ -56,12 +56,11 @@
 
     .pdf-preview {
         position: relative;
-        flex-basis: calc(33% - 2%);
+        flex-basis: calc(25% - 2%);
         padding: 8px;
         margin-bottom: 20px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-        margin-left: 5px;
-        margin-right: 5px;
+        margin-left: 30px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -84,7 +83,7 @@
 
     .pdf-page-number {
         position: absolute;
-        top: 8px;
+        bottom: 8px;
         right: 8px;
         background-color: #f0f0f0;
         padding: 4px;
@@ -264,6 +263,8 @@
             input.value = index;
             pdfOrderInputs.appendChild(input);
         });
+
+        console.log("Hidden Inputs Content:", pdfOrderInputs.innerHTML);
     }
 
     function updatePageNumbers() {
@@ -318,6 +319,9 @@
             pdfOrderInputs.appendChild(input);
         });
     }
+
+
+
 
 
 </script>

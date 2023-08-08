@@ -115,10 +115,7 @@ def download_compressed(request):
 def appendPdf(request):
     if request.method == 'POST':
         merged_file_path = 'grouped_file.pdf'
-        uploaded_files = []
-
-        print(">>>", request.FILES)
-
+        uploaded_files_dict = {}
         files = request.FILES.getlist('pdf-upload[]')
 
         for file in files:
@@ -126,17 +123,23 @@ def appendPdf(request):
             with open(file_name, 'wb') as destination:
                 for chunk in file.chunks():
                     destination.write(chunk)
-            uploaded_files.append(file_name)
+            uploaded_files_dict[file_name] = file_name
 
-        uploaded_files.reverse()
+        file_order = {name: order for name, order in request.POST.items() if name in uploaded_files_dict}
+
+        uploaded_files = sorted(uploaded_files_dict.values(), key=lambda file: int(file_order.get(file, 0)))
+
         if not uploaded_files:
             return render(request, 'appendPdf.html')
 
+        uploaded_files.reverse()
         append_pdf_file(uploaded_files, merged_file_path)
 
         return download_append_file(merged_file_path, uploaded_files)
 
     return render(request, 'appendPdf.html')
+
+
 
 
 
