@@ -298,8 +298,8 @@
 
 
         let i = 1;
-        let j = 0;
         for (let Monpage of copiedPages) {
+            let j = 0;
             for (n of listNbrPages) {
                 if (Number(n) == i) {
                     let pngImageBytes = new Uint8Array(await imageStock[j].arrayBuffer());
@@ -313,10 +313,8 @@
                         width: pngDims.width,
                         height: pngDims.height,
                     });
-                    j++;
-
                 }
-
+                j++;
 
             }
             i++;
