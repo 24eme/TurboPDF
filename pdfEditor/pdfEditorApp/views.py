@@ -117,9 +117,9 @@ def appendPdf(request):
     if request.method == 'POST':
         merged_file_path = 'grouped_file.pdf'
         uploaded_files_dict = {}
-        files = request.FILES.getlist('pdf-upload[]')
+        uploaded_files_list = [file for key, file in request.FILES.items() if 'pdf-upload[' in key]
 
-        for file in files:
+        for file in uploaded_files_list:
             file_name = file.name
             with open(file_name, 'wb') as destination:
                 for chunk in file.chunks():
@@ -131,32 +131,38 @@ def appendPdf(request):
         uploaded_files = sorted(uploaded_files_dict.values(), key=lambda file: int(file_order.get(file, 0)))
 
         if not uploaded_files:
-            return render(request, 'appendPdf.html')
+            response_data = {
+                'error': 'No files were uploaded'
+            }
+            return JsonResponse(response_data)
+
+        for input_file in uploaded_files:
+            if is_pdf_encrypted(input_file):
+                return HttpResponse("Un des fichiers que vous avez fourni est verrouillé")
 
         uploaded_files.reverse()
         append_pdf_file(uploaded_files, merged_file_path)
 
-        return download_append_file(merged_file_path, uploaded_files)
+        download_url = f"/download_append_file/{merged_file_path}"
 
+        response_data = {
+            'download_url': download_url,
+            'individual_files': uploaded_files
+        }
+        print("Response Data:", response_data)
+        return JsonResponse(response_data)
     return render(request, 'appendPdf.html')
 
-def download_append_file(file_path, uploaded_files):
+def download_append_file(request, file_name):
+    file_path = os.path.join(file_name)
+
     if os.path.exists(file_path):
-        sorted_uploaded_files = uploaded_files
-
-        append_pdf_file(sorted_uploaded_files, file_path)
-
         with open(file_path, 'rb') as f:
             response = HttpResponse(f.read(), content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="{os.path.basename(file_path)}"'
+            response['Content-Disposition'] = f'attachment; filename="{file_name}"'
             response['Content-Length'] = os.path.getsize(file_path)
-            response['Content-Disposition'] += f'attachment; filename*=UTF-8\'\'{os.path.basename(file_path)}'
-
+            response['Content-Disposition'] += f'attachment; filename*=UTF-8\'\'{file_name}'
         os.remove(file_path)
-
-        for uploaded_file in uploaded_files:
-            os.remove(uploaded_file)
-
         return response
     else:
         return HttpResponse("Error while downloading the file")

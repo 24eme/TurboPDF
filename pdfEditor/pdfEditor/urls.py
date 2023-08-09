@@ -15,14 +15,12 @@ urlpatterns = [
     path('fillFormPdf/', fillFormPdf, name='fillFormPdf'),
 
     path('appendPdf/', appendPdf, name='appendPdf'),
-    path('download_append_file', download_append_file, name='download_append_file'),
+    path('download_append_file/<str:file_name>/', download_append_file, name='download_append_file'),
     path('download_compressed', download_compressed, name='download_compressed'),
     path('extractPagesToPng/', extractPagesToPng, name='extractPagesToPng'),
     path('pdfToImage/', pdfToImage, name='pdfToImage'),   
 
     path('compressPdf/', compressPdf, name='compressPdf'),
-    path('appendPdf/', appendPdf, name='appendPdf'),
-    path('download_append_file', download_append_file, name='download_append_file'),
     path('unlockPdf/', unlockPdf, name='unlockPdf'),
     path('lockPdf/', lockPdf, name='lockPdf'),
     path('splitPdf/', splitPdf, name='splitPdf'),
