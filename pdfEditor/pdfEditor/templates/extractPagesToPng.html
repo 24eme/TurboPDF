@@ -22,14 +22,14 @@
         {% include "main/includes/header.html" %}
 
         <div id="app">
-            <h2>Convertissez les pages de vos fichiers PDF en PNG</h2>
+            <h2>Convertissez les pages de vos fichiers PDF en PNG pour les partager.</h2>
             <p>Cliquez sur le bouton ci-dessous pour charger votre PDF.</p>
 
             <form enctype="multipart/form-data" method="post">
                 {% csrf_token %}
                 <input type="file" name="input_file" accept="application/pdf" /><br /><br />
                 <div id="lockDiv">
-                    <button type="submit" name="filename" id="save-button">Extraire pages en PNG</button>
+                    <button type="submit" name="filename" id="save-button">Convertir pages en PNG</button>
                 </div>
             </form>
         </div>

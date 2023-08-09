@@ -23,17 +23,19 @@
         <div id="app">
             <h2>Deverrouiller vos fichiers PDF en un click</h2>
             <p>Deverrouiller votre fichier PDF. Cliquez sur le bouton ci-dessous pour charger votre
-                fichier.
+                fichier.<br>Ensuite saisissez le mot de passe du fichier pour le déverrouiller définitivement.
             </p>
 
             <form enctype="multipart/form-data" method="post">
                 {% csrf_token %}
+                <input type="file" name="input_file" accept="application/pdf"/><br /><br />
+                
                 <label for="password">Entrer le mot de passe:</label>
                 <div class="password-container">
                     <input type="password" id="pass" name="password" placeholder="password" required>
                     <i class="fa-solid fa-eye" id="eye"></i><br /><br />
                 </div>
-                <input type="file" name="input_file" accept="application/pdf"/><br /><br />
+
                 <div id="unlockDiv">
                     <button type="submit" name="filename" id="save-button">deverrouiller le fichier</button>
                 </div>

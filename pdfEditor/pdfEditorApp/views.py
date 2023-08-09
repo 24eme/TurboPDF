@@ -1,9 +1,10 @@
 from PyPDF2 import PdfReader, PdfWriter
+import PyPDF2
 from django.http import HttpResponse, FileResponse, Http404, JsonResponse
 from django.shortcuts import render
 from pdfEditorApp.listing.forms import inputForm
 from pdfEditorApp.lockPdf import lock_pdf_file, save_input_file
-from pdfEditorApp.unlockPdf import unlock_pdf_file
+from pdfEditorApp.unlockPdf import unlock_pdf_file, is_pdf_encrypted
 from pdfEditorApp.appendPdf import append_pdf_file
 from pdfEditorApp.deletePagePdf import removePageFromPdf
 from pdfEditorApp.compressPdf import compress
@@ -139,10 +140,6 @@ def appendPdf(request):
 
     return render(request, 'appendPdf.html')
 
-
-
-
-
 def download_append_file(file_path, uploaded_files):
     if os.path.exists(file_path):
         sorted_uploaded_files = uploaded_files
@@ -166,13 +163,21 @@ def download_append_file(file_path, uploaded_files):
 
 
 def lockPdf(request):
+    is_encrypted = False
     if request.method == 'POST':
         if not request.FILES:
             return render(request, 'lockPdf.html')
+
         password = request.POST['password']
-        input_path = save_input_file(request.FILES['input_file'])
+        input_file = request.FILES['input_file']
+
+        # Vérifier si le fichier est déjà verrouillé
+        if is_pdf_encrypted(input_file):
+            return HttpResponse("Le fichier que vous avez fourni est déjà verrouillé")
+
+        input_path = save_input_file(input_file)
         lock_pdf_file(input_path, password)
-        # Renvoyer le fichier verrouillé en téléchargement
+
         encrypted_file_path = "encrypted_File.pdf"
         if os.path.exists(encrypted_file_path):
             with open(encrypted_file_path, 'rb') as f:
@@ -180,7 +185,7 @@ def lockPdf(request):
                 response['Content-Disposition'] = 'attachment; filename="encrypted_File.pdf"'
                 response['Content-Length'] = os.path.getsize(encrypted_file_path)
                 response['Content-Disposition'] += 'attachment; filename*=UTF-8\'\'encrypted_File.pdf'
-                os.remove(encrypted_file_path)  
+                os.remove(encrypted_file_path)
                 return response
         else:
             return HttpResponse("Error while locking and downloading the file")
@@ -188,27 +193,33 @@ def lockPdf(request):
     return render(request, 'lockPdf.html')
 
 
-
 def unlockPdf(request):
+    unlocked = False
+    password_required = False 
     if request.method == 'POST':
         if not request.FILES:
             return render(request, 'unlockPdf.html')
-        password = request.POST['password']
-        unlock_pdf_file(request.FILES['input_file'], password)
-
-        decrypted_file_path = "savedFile.pdf"
-        if os.path.exists(decrypted_file_path):
-            with open("savedFile.pdf", 'rb') as f:
-                response = HttpResponse(f.read(), content_type='application/pdf')
-                response['Content-Disposition'] = 'attachment; filename="savedFile.pdf"'
-                response['Content-Length'] = os.path.getsize(decrypted_file_path)
-                response['Content-Disposition'] += 'attachment; filename*=UTF-8\'\'savedFile.pdf'
-                os.remove(decrypted_file_path)
-                return response
+        if is_pdf_encrypted(request.FILES['input_file']):
+            password = request.POST['password']
+            if unlock_pdf_file(request.FILES['input_file'], password):
+                print("ouiiiiii")
+                decrypted_file_path = "savedFile.pdf"
+                if os.path.exists(decrypted_file_path):
+                    with open("savedFile.pdf", 'rb') as f:
+                        response = HttpResponse(f.read(), content_type='application/pdf')
+                        response['Content-Disposition'] = 'attachment; filename="savedFile.pdf"'
+                        response['Content-Length'] = os.path.getsize(decrypted_file_path)
+                        response['Content-Disposition'] += 'attachment; filename*=UTF-8\'\'savedFile.pdf'
+                        os.remove(decrypted_file_path)
+                        return response
+                else:
+                    return HttpResponse("Error while downloading the file")
+            else:
+                return HttpResponse("Le mot de passe que vous avez fourni pour déverrouiller votre fichier est incorrect.")
         else:
-            return HttpResponse("Error while downloading the file")
+            return HttpResponse("Le fichier que vous avez fourni n'est pas verrouillé.")
             
-    return render(request, 'unlockPdf.html')
+    return render(request, 'unlockPdf.html', {'password_required': password_required})
 
 
 def displayPdf(request):
