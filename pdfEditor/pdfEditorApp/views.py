@@ -12,6 +12,7 @@ from pdfEditorApp.pdfToImage import pdf_to_png, zip_folder, extract_images_from_
 from pdfEditorApp.maskInformationpdf import Redactor
 import os, uuid, zipfile, json
 import datetime
+import json
 
 
 # Create your views here.
@@ -283,9 +284,45 @@ def modifyText(request):
 fichier_finale = ""
 pdf_name = ""
 def redact(request) :
+    #("save-button" in request.POST)
+    if request.method == 'POST':
+        if "save-button" in request.POST:
+            list_objet_json = request.POST.get('listObjet')
+            list_objet = json.loads(list_objet_json)
+            list_page_json = request.POST.get('listPage')
+            list_page = json.loads(list_page_json)
+            print("list_objet : ",list_objet)
+            print("list_page_json", list_page)
+            pdf_file = request.FILES.get('pdf-upload')
+            pdf_name = pdf_file.name
+            reader = PdfReader(pdf_file)
+            writer = PdfWriter()
+
+            for page in reader.pages:
+                writer.add_page(page)
+
+            current_datetime = datetime.datetime.now()
+            myFile = f"myZoneFileredact_{current_datetime.strftime('%Y-%m-%d_%H%M%S')}.pdf"
+            with open(myFile, "wb") as f:
+                writer.write(f)
+            redactor = Redactor(myFile)
+            for elt in list_page:
+                fichier_finale = redactor.redact_pdf_page(list_page, list_objet)
+            os.remove(myFile)
+            return download_pdf(request, fichier_finale, pdf_name)
+       # data = json.loads(request.body.decode('utf-8'))['listObject']
+        #for item in data:
+           # print(item)
+
+
+
+
+    return render(request, 'redact.html')
+
+
+def mailRedact(request):
     global fichier_finale
     global pdf_name
-    #("save-button" in request.POST)
     if request.method == 'POST':
         if ("mask-email" in request.POST):
             pdf_file = request.FILES['pdf-upload']
@@ -305,7 +342,7 @@ def redact(request) :
             fichier_finale = redactor.email_redaction()
             os.remove(myFile)
             return download_pdf(request, fichier_finale, pdf_name)
-    return render(request, 'redact.html', {'fichier_finale': fichier_finale, 'pdf_name' : pdf_name})
+    return render(request, 'redact.html', {'fichier_finale': fichier_finale, 'pdf_name': pdf_name})
 
 def download_pdf(request, fichier_finale, pdf_name):
     if os.path.exists(fichier_finale):

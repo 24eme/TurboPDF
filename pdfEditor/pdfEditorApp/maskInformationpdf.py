@@ -53,19 +53,39 @@ class Redactor:
         print("Successfully redacted")
         return myFile
 
-    def redact_pdf(self, output_path, redaction_areas):
+    def redact_pdf_page(self, page_num, redaction_areas):
         pdf = fitz.open(self.path)
 
-        # Iterate through each page of the PDF
-        for page_num in range(pdf.page_count):
-            page = pdf[page_num]
-            for area in redaction_areas:
-                x, y, width, height = area
+        #page = pdf[page_num]
+        lastnum = -1;
+        for num in page_num:
+            print("num page ", num)
+            if num != lastnum :
+                page = pdf[num-1]
+                x, y, width, height = redaction_areas[page_num.index(num)]
+                # redaction_rect = fitz.Rect(x, y, x + width, y + height)
+                print("x, y, width, height ", x, y, width, height)
+                # redaction_rect = fitz.Rect(89, 133, 89+150, 133+10)
                 redaction_rect = fitz.Rect(x, y, x + width, y + height)
-                page.add_redact_annot(redaction_rect, fill=(1, 1, 1))
-            page.apply_redactions()
+                page.add_redact_annot(redaction_rect, fill=(0, 0, 0))
+
+                page.apply_redactions()
+                lastnum = num
+            else :
+                x, y, width, height = redaction_areas[page_num.index(num)]
+           # redaction_rect = fitz.Rect(x, y, x + width, y + height)
+                print("x, y, width, height ", x, y, width, height)
+            #redaction_rect = fitz.Rect(89, 133, 89+150, 133+10)
+                redaction_rect = fitz.Rect(x, y, x + width, y + height)
+                page.add_redact_annot(redaction_rect, fill=(0, 0, 0))
+
+                page.apply_redactions()
+                lastnum = num
+        current_datetime = datetime.datetime.now()
+        output_path = f"Fileredacted_{current_datetime.strftime('%Y-%m-%d_%H%M%S')}.pdf"
         pdf.save(output_path)
         pdf.close()
+        return  output_path
 
 
 # if __name__ == "__main__":

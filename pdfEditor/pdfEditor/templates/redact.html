@@ -56,14 +56,20 @@
 
 <div class="floating-menu">
     <div class="controls">
-        <p>
+
             <button type="button" class="btn btn-primary" id="add" onclick="Add()">Add a rectangle</button>
-            <button type="button" id="save-button" disabled>Enregistrer vos modifications</button>
-        </p>
+
+
     </div>
 </div>
     <div>
-    <input type="file" accept="application/pdf">
+        <form enctype="multipart/form-data" id="pdf-upload-form" method="post">
+            {% csrf_token %}
+            <input name="pdf-upload" id="pdf-upload" type="file" accept="application/pdf">
+             <input type="hidden" id="listObjet-input" name="listObjet">
+            <input type="hidden" id="listPage-input" name="listPage">
+        <br> <button type="submit" name="save-button" id="save-button" disabled>Enregistrer et Télécharger</button>
+            </form>
   </div>
 <canvas id="c" width="300" height="200">
 </canvas> </div>
@@ -76,6 +82,8 @@
   let heigth = [];
   let listCanvas = [];
   let listObject = [];
+  let listObjetPage = [];
+  let file = null;
 
   const Base64Prefix = "data:application/pdf;base64,";
   function getPdfHandler() {
@@ -180,7 +188,9 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
     canvas.getElement().removeAttribute("style");
     const text = new fabric.Text('Upload PDF');
     canvas.add(new fabric.Circle({ radius: 100, fill: 'green' }), text);
-    document.querySelector('input').addEventListener('change', async (e) => {
+    document.getElementById("pdf-upload").addEventListener('change', async (e) => {
+        //e.preventDefault();
+        file = e.target.files[0];
         text.set('text', 'loading...');
         canvas.requestRenderAll();
         const pdfDataArray = await printPDF(e.target.files[0]);
@@ -239,8 +249,8 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
       left: 100,
       top: 50,
       fill: 'black',
-      width: 200,
-      height: 100,
+      width: 150,
+      height: 10,
       objectCaching: false,
       stroke: 'lightgreen',
       strokeWidth: 4,
@@ -276,6 +286,45 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
     ctx.drawImage(img, -size/2, -size/2, size, size);
     ctx.restore();
   }
+
+  document.getElementById("save-button").addEventListener('click', async (e)=> {
+
+      listObject = [];
+      listObjetPage = [];
+      const listObjetInput = document.getElementById('listObjet-input');
+      const listPageInput = document.getElementById('listPage-input');
+
+      // Parcours de chaque canevas dans la liste
+    for (let i = 0; i < listCanvas.length; i++) {
+        const canvas = listCanvas[i];
+
+        // Récupération de la liste des objets du canevas
+        const objects = canvas.getObjects();
+
+    // Parcours de chaque objet dans la liste
+        for (let j = 0; j < objects.length; j++) {
+            const object = objects[j];
+
+        // Vérification si l'objet est de type 'rect'
+            if (object.type === 'rect') {
+                const left = object.left; // Coordonnée horizontale
+                const top = object.top;   // Coordonnée verticale
+                const width = object.width; // Largeur
+                const height = object.height; // Hauteur
+                console.log("object.viewport ",width, height );
+                listObject.push([left, top, width, height])
+                listObjetPage.push(i+1);
+
+            //console.log(`Canevas ${i + 1}, Objet ${j + 1} - Coordonnées : (${left}, ${top})`);
+            }
+        }
+    }
+    listObjetInput.value = JSON.stringify(listObject);
+    listPageInput.value = JSON.stringify(listObjetPage);
+    console.log('list ', listObjetInput);
+
+  });
+
 </script>
 
 
