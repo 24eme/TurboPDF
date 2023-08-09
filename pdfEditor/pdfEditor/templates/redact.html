@@ -71,11 +71,13 @@
   <div id="pdf-container"></div>
 
 <script>
-     let numPages;
-  let width;
-  let heigth;
+  let numPages;
+  let width = [];
+  let heigth = [];
   let listCanvas = [];
-      const Base64Prefix = "data:application/pdf;base64,";
+  let listObject = [];
+
+  const Base64Prefix = "data:application/pdf;base64,";
   function getPdfHandler() {
       return window['pdfjs-dist/build/pdf'];
   }
@@ -115,8 +117,8 @@
                               canvas.width = viewport.width;
                               canvas.id = i+1;
 
-                              width = canvas.width;
-                              heigth = canvas.height;
+                              width.push(viewport.width);
+                              heigth.push(viewport.height);
                               // Render PDF page into canvas context
                               const renderContext = {
                                   canvasContext: context,
@@ -151,11 +153,13 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
 }
 
 
-  async  function createCanvas(i, pdfDataArray){
+  async  function createCanvas(i, pdfDataArray, width, heigth){
       const canvas2e = document.createElement('canvas');
       const context2e = canvas2e.getContext('2d');
-      canvas2e.height = 900;
-      canvas2e.width = 700;
+      canvas2e.height = heigth;
+      canvas2e.width = width;
+      //canvas2e.height = 900;
+      //canvas2e.width = 800;
       canvas2e.id = i+1;
       canvas2e.style.left = "50%";
       document.getElementById("body").appendChild(canvas2e);
@@ -182,12 +186,19 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
         const pdfDataArray = await printPDF(e.target.files[0]);
          await numPages;
         console.log("numPages : ", numPages);
+        //await width;
+        //await heigth;
         for (let i =0; i< numPages; i++){
+             while (typeof width[i] === 'undefined') {
+            await new Promise(resolve => setTimeout(resolve, 100)); // Attendre 100 millisecondes
+                }
 
-            await createCanvas(i, pdfDataArray);
+            await createCanvas(i, pdfDataArray, width[i], heigth[i]);
         }
 
         canvas.remove(text);
+        if ($('#save-button').prop('disabled')) {
+            $('#save-button').prop('disabled', false);}
     });
 
 	// create a rect object
@@ -214,7 +225,7 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
     if (
 
       canvasRect.left >= 0 &&
-      Math.abs(canvasRect.top) <= window.innerHeight &&
+      Math.abs(canvasRect.top) <= window.innerHeight/2 &&
       canvasRect.right <= window.innerWidth
     ) {
       console.log('Canvas visible:', canvas.id);
