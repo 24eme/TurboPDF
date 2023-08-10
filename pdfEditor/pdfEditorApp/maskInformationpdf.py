@@ -28,7 +28,6 @@ class Redactor:
     def email_redaction(self):
 
         """ main redactor code """
-        print("heloo ")
 
         # opening the pdf
         doc = fitz.open(self.path)
@@ -56,31 +55,23 @@ class Redactor:
     def redact_pdf_page(self, page_num, redaction_areas):
         pdf = fitz.open(self.path)
 
-        #page = pdf[page_num]
-        lastnum = -1;
-        for num in page_num:
-            print("num page ", num)
-            if num != lastnum :
-                page = pdf[num-1]
-                x, y, width, height = redaction_areas[page_num.index(num)]
-                # redaction_rect = fitz.Rect(x, y, x + width, y + height)
-                print("x, y, width, height ", x, y, width, height)
-                # redaction_rect = fitz.Rect(89, 133, 89+150, 133+10)
+        # Créer une liste pour stocker les rédactions par page
+        redactions_by_page = {}
+
+        for num, (x, y, width, height) in zip(page_num, redaction_areas):
+            if num not in redactions_by_page:
+                redactions_by_page[num] = []
+
+            # Ajouter la rédaction à la liste des rédactions pour cette page
+            redactions_by_page[num].append((x, y, width, height))
+
+        for page_num, redactions_list in redactions_by_page.items():
+            page = pdf[page_num - 1]
+            for x, y, width, height in redactions_list:
                 redaction_rect = fitz.Rect(x, y, x + width, y + height)
                 page.add_redact_annot(redaction_rect, fill=(0, 0, 0))
 
-                page.apply_redactions()
-                lastnum = num
-            else :
-                x, y, width, height = redaction_areas[page_num.index(num)]
-           # redaction_rect = fitz.Rect(x, y, x + width, y + height)
-                print("x, y, width, height ", x, y, width, height)
-            #redaction_rect = fitz.Rect(89, 133, 89+150, 133+10)
-                redaction_rect = fitz.Rect(x, y, x + width, y + height)
-                page.add_redact_annot(redaction_rect, fill=(0, 0, 0))
-
-                page.apply_redactions()
-                lastnum = num
+            page.apply_redactions()
         current_datetime = datetime.datetime.now()
         output_path = f"Fileredacted_{current_datetime.strftime('%Y-%m-%d_%H%M%S')}.pdf"
         pdf.save(output_path)
