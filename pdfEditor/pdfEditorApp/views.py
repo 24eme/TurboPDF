@@ -285,6 +285,8 @@ fichier_finale = ""
 pdf_name = ""
 def redact(request) :
     #("save-button" in request.POST)
+    global fichier_finale
+    global pdf_name
     if request.method == 'POST':
         if "save-button" in request.POST:
             list_objet_json = request.POST.get('listObjet')
@@ -306,21 +308,12 @@ def redact(request) :
             with open(myFile, "wb") as f:
                 writer.write(f)
             redactor = Redactor(myFile)
-            for elt in list_page:
-                fichier_finale = redactor.redact_pdf_page(list_page, list_objet)
+            fichier_finale = redactor.redact_pdf_page(list_page, list_objet)
             os.remove(myFile)
             return download_pdf(request, fichier_finale, pdf_name)
-       # data = json.loads(request.body.decode('utf-8'))['listObject']
-        #for item in data:
-           # print(item)
+    return render(request, 'redact.html', {'fichier_finale': fichier_finale, 'pdf_name': pdf_name})
 
-
-
-
-    return render(request, 'redact.html')
-
-
-def mailRedact(request):
+def maskEmail(request):
     global fichier_finale
     global pdf_name
     if request.method == 'POST':
@@ -342,8 +335,10 @@ def mailRedact(request):
             fichier_finale = redactor.email_redaction()
             os.remove(myFile)
             return download_pdf(request, fichier_finale, pdf_name)
-    return render(request, 'redact.html', {'fichier_finale': fichier_finale, 'pdf_name': pdf_name})
+    return render(request, 'maskEmail.html', {'fichier_finale': fichier_finale, 'pdf_name': pdf_name})
 
+def redactHomePage(request):
+    return render(request, 'redactHomePage.html')
 def download_pdf(request, fichier_finale, pdf_name):
     if os.path.exists(fichier_finale):
 
