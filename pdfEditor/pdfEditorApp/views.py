@@ -13,6 +13,7 @@ from pdfEditorApp.pdfToImage import pdf_to_png, zip_folder, extract_images_from_
 from pdfEditorApp.maskInformationpdf import Redactor
 import os, uuid, zipfile, json
 import datetime
+import json
 
 
 # Create your views here.
@@ -211,7 +212,6 @@ def unlockPdf(request):
         if is_pdf_encrypted(request.FILES['input_file']):
             password = request.POST['password']
             if unlock_pdf_file(request.FILES['input_file'], password):
-                print("ouiiiiii")
                 decrypted_file_path = "savedFile.pdf"
                 if os.path.exists(decrypted_file_path):
                     with open("savedFile.pdf", 'rb') as f:
@@ -303,9 +303,36 @@ def modifyText(request):
 fichier_finale = ""
 pdf_name = ""
 def redact(request) :
+    #("save-button" in request.POST)
     global fichier_finale
     global pdf_name
-    #("save-button" in request.POST)
+    if request.method == 'POST':
+        if "save-button" in request.POST:
+            list_objet_json = request.POST.get('listObjet')
+            list_objet = json.loads(list_objet_json)
+            list_page_json = request.POST.get('listPage')
+            list_page = json.loads(list_page_json)
+            pdf_file = request.FILES.get('pdf-upload')
+            pdf_name = pdf_file.name
+            reader = PdfReader(pdf_file)
+            writer = PdfWriter()
+
+            for page in reader.pages:
+                writer.add_page(page)
+
+            current_datetime = datetime.datetime.now()
+            myFile = f"myZoneFileredact_{current_datetime.strftime('%Y-%m-%d_%H%M%S')}.pdf"
+            with open(myFile, "wb") as f:
+                writer.write(f)
+            redactor = Redactor(myFile)
+            fichier_finale = redactor.redact_pdf_page(list_page, list_objet)
+            os.remove(myFile)
+            return download_pdf(request, fichier_finale, pdf_name)
+    return render(request, 'redact.html', {'fichier_finale': fichier_finale, 'pdf_name': pdf_name})
+
+def maskEmail(request):
+    global fichier_finale
+    global pdf_name
     if request.method == 'POST':
         if ("mask-email" in request.POST):
             pdf_file = request.FILES['pdf-upload']
@@ -325,8 +352,10 @@ def redact(request) :
             fichier_finale = redactor.email_redaction()
             os.remove(myFile)
             return download_pdf(request, fichier_finale, pdf_name)
-    return render(request, 'redact.html', {'fichier_finale': fichier_finale, 'pdf_name' : pdf_name})
+    return render(request, 'maskEmail.html', {'fichier_finale': fichier_finale, 'pdf_name': pdf_name})
 
+def redactHomePage(request):
+    return render(request, 'redactHomePage.html')
 def download_pdf(request, fichier_finale, pdf_name):
     if os.path.exists(fichier_finale):
 

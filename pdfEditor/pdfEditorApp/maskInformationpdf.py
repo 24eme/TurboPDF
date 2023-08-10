@@ -28,7 +28,6 @@ class Redactor:
     def email_redaction(self):
 
         """ main redactor code """
-        print("heloo ")
 
         # opening the pdf
         doc = fitz.open(self.path)
@@ -53,19 +52,31 @@ class Redactor:
         print("Successfully redacted")
         return myFile
 
-    def redact_pdf(self, output_path, redaction_areas):
+    def redact_pdf_page(self, page_num, redaction_areas):
         pdf = fitz.open(self.path)
 
-        # Iterate through each page of the PDF
-        for page_num in range(pdf.page_count):
-            page = pdf[page_num]
-            for area in redaction_areas:
-                x, y, width, height = area
+        # Créer une liste pour stocker les rédactions par page
+        redactions_by_page = {}
+
+        for num, (x, y, width, height) in zip(page_num, redaction_areas):
+            if num not in redactions_by_page:
+                redactions_by_page[num] = []
+
+            # Ajouter la rédaction à la liste des rédactions pour cette page
+            redactions_by_page[num].append((x, y, width, height))
+
+        for page_num, redactions_list in redactions_by_page.items():
+            page = pdf[page_num - 1]
+            for x, y, width, height in redactions_list:
                 redaction_rect = fitz.Rect(x, y, x + width, y + height)
-                page.add_redact_annot(redaction_rect, fill=(1, 1, 1))
+                page.add_redact_annot(redaction_rect, fill=(0, 0, 0))
+
             page.apply_redactions()
+        current_datetime = datetime.datetime.now()
+        output_path = f"Fileredacted_{current_datetime.strftime('%Y-%m-%d_%H%M%S')}.pdf"
         pdf.save(output_path)
         pdf.close()
+        return  output_path
 
 
 # if __name__ == "__main__":

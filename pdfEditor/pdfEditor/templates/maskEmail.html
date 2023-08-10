@@ -1,0 +1,160 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TurboPDF</title>
+
+
+        <script src="{%static 'fabric/fabric.min.js' %}"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+        <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"
+            integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer">
+            </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"
+            integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer">
+        </script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+                <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
+        <link rel="stylesheet" href="{%static 'css/style.css' %}">
+        <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
+        <script src="{% static 'js/bootstrap.min.js' %}"></script>
+        <style>
+            .controls {
+  	    display: inline-block;
+            }
+            #pdf-container {
+                width: 100%;
+
+            }
+            .btn-primary {
+                margin-bottom: 5px;
+                background-color: #2A3944ff;
+                border-color: black;
+
+            }
+            canvas {
+                margin-bottom: 50px;
+            }
+        </style>
+    </head>
+    <body>
+        {% include "main/includes/header.html" %}
+
+        <div id="app">
+            <h2>Masquer des information</h2>
+            <p>Pour protéger vos informations sensibles, , TurboPdf est le bon choix
+            </p>
+               
+            <form enctype="multipart/form-data" id="pdf-upload-form" method="post">
+                {% csrf_token %}
+                <div class="m-b-30">
+                    <input class="" type="file" id="pdf-input" name="pdf-upload" accept="application/pdf" value="upload">
+                </div>
+                <div>
+                    <button type="submit" name="mask-email" class="btn btn-primary" id="mask-email">Masquer les adresses email</button
+
+                </div>
+        </form>
+
+        
+        </div>
+
+<div class="Mon-pdf-page" id="pdf-container"></div>
+
+
+<script>
+///////////////////////////// Initialisation ///////////////////
+let file = null;
+let numP = 0;
+let context = null;
+let canvasStock = [];
+let pages = [];
+let page = null;
+let canvas = null;
+let pageNumber = 1;
+
+///////////////////////////// Display PDF //////////////////////
+function displayPages(index) {
+    let fabricCanvas;
+    if (index >= pages.length) {
+        return;
+    }
+
+    const page = pages[index];
+    pdfDoc.getPage(page.number).then(function (pdfPage) {
+        let scale = 2;
+        let viewport = pdfPage.getViewport({ scale: scale });
+
+        fabricCanvas = new fabric.Canvas(`${page.number}`, {
+            width: viewport.width,
+            height: viewport.height,
+            selectionColor: 'blue',
+            selectionLineWidth: 2
+        });
+
+        const canvasElement = fabricCanvas.getElement();
+        canvasElement.removeAttribute("style");
+
+        canvasElement.dataset.pageNumber = page.number;
+        canvasElement.id = page.number
+        canvasElement.classList.add('Mon-pdf-page');
+       //canvasElement.classList.remove('lower-canvas');
+
+        context = fabricCanvas.getContext('2d');
+        let renderContext = {
+            canvasContext: context,
+            viewport: viewport
+        };
+
+        pdfPage.render(renderContext).promise.then(function () {
+
+            // Add the canvas to the PDF container
+            const pdfContainer = document.getElementById('pdf-container');
+            pdfContainer.appendChild(canvasElement);
+            page.rendered = true;
+
+            // Display the next page
+            displayPages(index + 1);
+        });
+    });
+}
+
+
+
+/////////////////// Load PDF ////////////////////
+
+$(document).ready(function () {
+    $('#pdf-input').change(async function (e) {
+    file = e.target.files[0];
+                
+    let fileReader = new FileReader();
+    fileReader.onload = async function () {
+        typedarray = new Uint8Array(await this.result);
+        MypdfDoc = pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
+            let numPages = pdf.numPages;
+            pdfDoc = pdf;
+
+            pages = [];
+            for (let i = 1; i <= numPages; i++) {
+                pages.push({ number: i, rendered: false });
+            }
+
+            displayPages(0);                      
+        });
+    };
+
+    fileReader.readAsArrayBuffer(file);
+                
+    });
+});
+
+
+
+    </script>
+
+    </body>
+</html>
