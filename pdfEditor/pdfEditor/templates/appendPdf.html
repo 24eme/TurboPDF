@@ -146,6 +146,16 @@
                             pdfInfoDiv.classList.add('pdf-info');
                             pdfInfoDiv.innerHTML += '<p>Nom : ' + truncateFileName(file.name, 20) + '</p>';
                             pdfInfoDiv.innerHTML += '<p>Nombre de pages : ' + pdf.numPages + '</p>';
+                            pdfInfoDiv.innerHTML += '<button class="remove-pdf" data-index';
+                            const removeButton = document.createElement('span');
+                            removeButton.innerText = '×';
+                            removeButton.style.position = 'absolute';
+                            removeButton.style.bottom = '8px';
+                            removeButton.style.left = '8px';
+                            removeButton.style.cursor = 'pointer';
+                            removeButton.addEventListener('click', removePdfPreview);
+                            pdfInfoDiv.appendChild(removeButton);
+
 
                             pdfPreviewDiv.setAttribute('data-index', index);
                             pdfPreviewDiv.setAttribute('data-filename', file.name);
@@ -167,6 +177,34 @@
             fileReader.readAsArrayBuffer(file);
         }
     }
+
+    function removePdfPreview(event) {
+        const pdfPreview = event.target.closest('.pdf-preview');
+        if (pdfPreview) {
+            const dataIndex = parseInt(pdfPreview.getAttribute('data-index'));
+            const fileIndex = fileArray.length - 1 - dataIndex;
+
+            if (fileIndex >= 0 && fileIndex < fileArray.length) {
+                fileArray.splice(fileIndex, 1);
+            }
+
+            pdfPreview.remove();
+
+            const allPreviews = document.querySelectorAll('.pdf-preview');
+            allPreviews.forEach((preview, index) => {
+                preview.setAttribute('data-index', index);
+                const pageNumberDiv = preview.querySelector('.pdf-page-number');
+                pageNumberDiv.innerText = index + 1;
+            });
+
+            updateHiddenInputs();
+            updateFileOrder();
+        }
+    }
+
+
+
+
 
     document.getElementById('pdf-upload').addEventListener('change', handleFileUpload);
 
@@ -199,6 +237,10 @@
         createPreview(newFiles, 0);
 
         document.getElementById('add-more').hidden = false;
+
+        setTimeout(() => {
+            document.getElementById('pdf-upload').hidden = true;
+        }, 500);
     }
 
     document.getElementById('upload-pdf').addEventListener('submit', function(e) {
@@ -229,7 +271,7 @@
                     a.click();
                     document.body.removeChild(a);
                 } else {
-                    console.log("else case idk")
+                    console.error("Erreur dans la generation du fichier")
                 }
             })
             .catch(error => {
@@ -260,6 +302,10 @@
             targetElement.classList.remove('dragover');
         }
     });
+
+    function addRemoveEventListener(removeButton) {
+        removeButton.addEventListener('click', removePdfPreview);
+    }
 
 
     pdfPreviews.addEventListener('drop', function (event) {
@@ -293,10 +339,21 @@
             pdfPreviews.replaceChild(clonedDraggedElement, targetElement);
             pdfPreviews.replaceChild(clonedTargetElement, draggedElement);
 
-            const pdfPreviewDivs = document.querySelectorAll('.pdf-preview');
-            pdfPreviewDivs.forEach((div, index) => {
-                div.setAttribute('data-index', index);
-            });
+            const clonedDraggedRemoveButton = clonedDraggedElement.querySelector('span');
+            const clonedTargetRemoveButton = clonedTargetElement.querySelector('span');
+            addRemoveEventListener(clonedDraggedRemoveButton);
+            addRemoveEventListener(clonedTargetRemoveButton);
+
+            if (draggedIndex > targetIndex) {
+                draggedElement.setAttribute('data-index', targetIndex);
+                targetElement.setAttribute('data-index', draggedIndex + 1);
+            } else {
+                draggedElement.setAttribute('data-index', targetIndex - 1);
+                targetElement.setAttribute('data-index', draggedIndex);
+            }
+
+
+
             updatePageNumbers();
             updateHiddenInputs();
             updateFileOrder();

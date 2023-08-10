@@ -118,6 +118,10 @@ def appendPdf(request):
         merged_file_path = 'grouped_file.pdf'
         uploaded_files_dict = {}
         uploaded_files_list = [file for key, file in request.FILES.items() if 'pdf-upload[' in key]
+        print(">>>>", uploaded_files_list)
+        if not uploaded_files_list:
+            return HttpResponse("Aucun fichier")
+
 
         for file in uploaded_files_list:
             file_name = file.name
@@ -149,7 +153,6 @@ def appendPdf(request):
             'download_url': download_url,
             'individual_files': uploaded_files
         }
-        print("Response Data:", response_data)
         return JsonResponse(response_data)
     return render(request, 'appendPdf.html')
 
