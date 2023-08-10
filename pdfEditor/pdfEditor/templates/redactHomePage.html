@@ -46,30 +46,33 @@
 
         <div id="app">
             <h2>Masquer des information</h2>
-            <p>Pour protéger vos informations sensibles, , TurboPdf est le bon choix
+            <p>Pour protéger vos informations sensibles, TurboPdf est le bon choix
             </p>
                  <div>
-                    <form enctype="multipart/form-data" action="maskEmail/" method="GET">
+                    <form id="mask" enctype="multipart/form-data" action="maskEmail/" method="GET">
                 {% csrf_token %}
 
-                    <button type="submit" name="mask-email" class="btn btn-primary" id="mask-email">Masquer les adresses email</button
+                    <button type="submit" name="mask-email" class="btn btn-primary" id="mask-email">Masquer les adresses email</button>
 
 
                      </form>
-                </div>
-            <div>
-              <form enctype="multipart/form-data" action="/redact/" method="GET">
-                {% csrf_token %}
-
-                    <button type="submit" name="mask-zone" id="mask-zone"  class="btn btn-primary" >Masquer une zone dans un pdf</button>
 
 
-        </form>
+                   <button name="mask-zone" id="mask-zone" class="btn btn-primary">Masquer une zone dans un pdf</button>
+
              </div>
 
         
         </div>
+<script>
 
+    document.getElementById("mask-zone").addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.href = "redact/";
+    });
+
+
+</script>
 
     </body>
 </html>

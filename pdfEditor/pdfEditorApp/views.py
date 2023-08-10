@@ -209,7 +209,6 @@ def unlockPdf(request):
         if is_pdf_encrypted(request.FILES['input_file']):
             password = request.POST['password']
             if unlock_pdf_file(request.FILES['input_file'], password):
-                print("ouiiiiii")
                 decrypted_file_path = "savedFile.pdf"
                 if os.path.exists(decrypted_file_path):
                     with open("savedFile.pdf", 'rb') as f:
@@ -310,8 +309,6 @@ def redact(request) :
             list_objet = json.loads(list_objet_json)
             list_page_json = request.POST.get('listPage')
             list_page = json.loads(list_page_json)
-            print("list_objet : ",list_objet)
-            print("list_page_json", list_page)
             pdf_file = request.FILES.get('pdf-upload')
             pdf_name = pdf_file.name
             reader = PdfReader(pdf_file)
