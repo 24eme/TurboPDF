@@ -280,7 +280,7 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
                              const fabricimage = new fabric.Image(image, {
                                  left: 100,
                                  top: 50,
-                                 caleX: scale,
+                                 scaleX: scale,
                                  scaleY: scale,
                                  objectCaching: false,
                                 });
@@ -384,9 +384,13 @@ function renderIcon(icon) {
                 const top = object.top;   // Coordonnée verticale
                 const width = object.width; // Largeur
                 const height = object.height; // Hauteur
-                const imageDataURL = object.toDataURL();
-                listObject.push({ imageDataURL, left, top, width, height });
-                listObjetPage.push(i+1);
+                if (object.selectable){
+                    const imageDataURL = object.toDataURL();
+                    listObject.push({ imageDataURL, left, top, width, height });
+                    listObjetPage.push(i+1);
+
+                }
+
 
             }
         }
