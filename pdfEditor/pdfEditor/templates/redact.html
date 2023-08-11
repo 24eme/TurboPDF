@@ -21,7 +21,7 @@
         <link rel="stylesheet" href="{%static 'css/style.css' %}">
         <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
         <script src="{% static 'js/bootstrap.min.js' %}"></script>
-    <script src="https://mozilla.github.io/pdf.js/build/pdf.worker.js"></script>
+        <script src="https://mozilla.github.io/pdf.js/build/pdf.worker.js"></script>
     <style>
           .controls {
 
@@ -34,6 +34,9 @@
           canvas {
 
               border: 1px solid black;
+          }
+          canvas.no-border {
+            border: none;
           }
           .btn-primary {
                 margin-bottom: 5px;
@@ -57,21 +60,21 @@
 <div class="floating-menu">
     <div class="controls">
 
-            <button type="button" class="btn btn-primary" id="add" onclick="Add()">Add a rectangle</button>
+            <button type="button" class="btn btn-primary" id="add" onclick="Add()">🌸 Ajouter un rectangle</button>
 
 
     </div>
 
         <form enctype="multipart/form-data" id="pdf-upload-form" method="post">
             {% csrf_token %}
-            <button type="submit" name="save-button" id="save-button" disabled>Enregistrer et Télécharger</button>
+            <button type="submit" name="save-button" id="save-button" disabled>🌸 Enregistrer et Télécharger</button>
 </div>
             <input name="pdf-upload" id="pdf-upload" type="file" accept="application/pdf">
              <input type="hidden" id="listObjet-input" name="listObjet">
             <input type="hidden" id="listPage-input" name="listPage">
             </form>
 
-<canvas id="c" width="300" height="200">
+<canvas class="no-border" id="c" width="300" height="200">
 </canvas> </div>
 
   <div id="pdf-container"></div>
@@ -187,7 +190,7 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
 
     canvas.getElement().removeAttribute("style");
     const text = new fabric.Text('Upload PDF');
-    canvas.add(new fabric.Circle({ radius: 100, fill: 'green' }), text);
+    canvas.add(new fabric.Circle({ radius: 100, fill: 'green', selectable : false  }), text);
     document.getElementById("pdf-upload").addEventListener('change', async (e) => {
         //e.preventDefault();
             listCanvas = [];
@@ -214,6 +217,7 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
         }
 
         canvas.remove(text);
+        canvas.add( new fabric.Text('🌸 loaded 🌸', {selectable : false }));
         if ($('#save-button').prop('disabled')) {
             $('#save-button').prop('disabled', false);}
     });
