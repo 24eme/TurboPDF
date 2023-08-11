@@ -61,16 +61,16 @@
 
 
     </div>
-</div>
-    <div>
+
         <form enctype="multipart/form-data" id="pdf-upload-form" method="post">
             {% csrf_token %}
+            <button type="submit" name="save-button" id="save-button" disabled>Enregistrer et Télécharger</button>
+</div>
             <input name="pdf-upload" id="pdf-upload" type="file" accept="application/pdf">
              <input type="hidden" id="listObjet-input" name="listObjet">
             <input type="hidden" id="listPage-input" name="listPage">
-        <br> <button type="submit" name="save-button" id="save-button" disabled>Enregistrer et Télécharger</button>
             </form>
-  </div>
+
 <canvas id="c" width="300" height="200">
 </canvas> </div>
 

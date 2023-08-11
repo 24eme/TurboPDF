@@ -30,12 +30,14 @@
                 width: 100%;
 
             }
-            .btn-primary {
+                .btn-primary {
                 margin-bottom: 5px;
                 background-color: #2A3944ff;
                 border-color: black;
-
-            }
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 20px;
+          }
             canvas {
                 margin-bottom: 50px;
             }
@@ -49,7 +51,7 @@
             <p>Pour protéger vos informations sensibles, TurboPdf est le bon choix
             </p>
                  <div>
-                    <form id="mask" enctype="multipart/form-data" action="maskEmail/" method="GET">
+                    <form id="mask" action="maskEmail/" method="GET">
                 {% csrf_token %}
 
                     <button type="submit" name="mask-email" class="btn btn-primary" id="mask-email">Masquer les adresses email</button>

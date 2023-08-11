@@ -1,254 +1,279 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
-    <head>
-       
-        <title>TurboPDF</title>
-
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
-            integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
-            crossorigin="anonymous"></script>
-
-        <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+            <script src="{%static 'fabric/fabric.min.js' %}"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+        <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"
+            integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer">
+            </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"
+            integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer">
+        </script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+                <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}">
         <link rel="stylesheet" href="{%static 'css/style.css' %}">
-    </head>
-    <body>
+        <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
+        <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="https://mozilla.github.io/pdf.js/build/pdf.worker.js"></script>
+    <style>
+          .controls {
 
+  	        display: inline-block;
+
+            }
+          #pdf-container{
+
+          }
+          canvas {
+
+              border: 1px solid black;
+          }
+          .btn-primary {
+                margin-bottom: 5px;
+                background-color: #2A3944ff;
+                border-color: black;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 20px;
+          }
+
+
+
+
+    </style>
+</head>
+<body id="body">
 {% include "main/includes/header.html" %}
 
 <div id="app">
-    <h2>Insérer une image</h2>
-    <p>Insérer une image à votre fichier PDF. <br> <B> Cliquer sur la page dans laquelle vous voulez importer votre image et puis cliquer sur le boutton Insérer une image </B></p>
-    <form id="pdf-upload-form">
-        <input class="" type="file" id="pdf-input" name="pdf-upload" accept=".pdf" value="upload">
-    </form>
+     <h2>Insérer des images</h2>
+    <p>Insérer des images à votre fichier PDF.</p>
 
-    <div class="floating-menu">
-        <button class="btn btn-primary add-image" id="add-image-btn">Insérer une image</button>
+<div class="floating-menu">
+    <div class="controls">
 
-        <!-- <button class="btn btn-primary" id="download-pdf-btn" >Télécharger le PDF</button> -->
-        <button type="button" id="save-button" disabled>Enregistrer vos modifications</button>
+          <button  type="button" class="btn btn-primary add-image" id="add-image-btn" onclick="Add()">Insérer une image</button>
+
 
     </div>
 
+        <form enctype="multipart/form-data" id="pdf-upload-form" method="post">
+            {% csrf_token %}
+            <button type="submit" name="save-button" id="save-button" disabled>Enregistrer et Télécharger</button>
 </div>
+            <input name="pdf-upload" id="pdf-upload" type="file" accept="application/pdf">
+             <input type="hidden" id="listObjet-input" name="listObjet">
+            <input type="hidden" id="listPage-input" name="listPage">
+            </form>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
-<script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+<canvas id="c" width="300" height="200">
+</canvas> </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"
-        integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer">
-</script>
-<!-- <script src="{%static 'pdf-lib/pdf-lib.min.js' %}"></script> -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"
-        integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer">
-
-</script>
-
-<div class="Mon-pdf-page pdf-container-add-image" id="pdf-container"></div>
+  <div id="pdf-container"></div>
 
 <script>
-    ///////////////////////////// Initialisation variable /////////////////////////
-    let MypdfDoc = null;
-    let isDragging = false;
-    let dragStartX = 0; // départ du déplacement
-    let dragStartY = 0;
-    let dragOffsetX = 0;
-    let dragOffsetY = 0;
-    let context = null;
-    let pdfDoc = null;
-    let pages = [];
-    let page = null;
-    let canvas = null;
-    let canvasImage = null;
-    let image = null;
-    let pageNumber = 1;
-    let canvasStock = [];
-    let numP = "1";
-    let file = null;
-    let imageFile = null;
-    let imageStock = [];
-    let imageStockX = [];
-    let imageStockY = [];
-    let listNbrPages = [];
-    //let typedarray = null
-    let typedarrayPdf;
+  let numPages;
+  let width = [];
+  let heigth = [];
+  let listCanvas = [];
+  let listObject = [];
+  let listObjetPage = [];
+  let file = null;
+   let imageFile = null;
 
-    ////////////// Function add image ///////////////////////
+  const Base64Prefix = "data:application/pdf;base64,";
+  function getPdfHandler() {
+      return window['pdfjs-dist/build/pdf'];
+  }
 
-    function addImage(image) {
-        let canvasMerge = null;
+  function readBlob(blob) {
+      return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.addEventListener('load', () => resolve(reader.result));
+          reader.addEventListener('error', reject)
+          reader.readAsDataURL(blob);
+      })
+  }
 
-        function addIm(image) {
+  async function printPDF(pdfData, pages) {
+      const pdfjsLib = await getPdfHandler();
+      pdfData = pdfData instanceof Blob ? await readBlob(pdfData) : pdfData;
+      const data = atob(pdfData.startsWith(Base64Prefix) ? pdfData.substring(Base64Prefix.length) : pdfData);
+      // Using DocumentInitParameters object to load binary data.
+      const loadingTask = pdfjsLib.getDocument({ data });
+      return loadingTask.promise
+          .then((pdf) => {
+              numPages = pdf.numPages;
+              return new Array(numPages).fill(0)
+                  .map((__, i) => {
+                      const pageNumber = i + 1;
+                      if (pages && pages.indexOf(pageNumber) == -1) {
+                          return;
+                      }
+                      return pdf.getPage(pageNumber)
+                          .then((page) => {
+                              //  retina scaling
+                              const viewport = page.getViewport({ scale: window.devicePixelRatio });
+                              // Prepare canvas using PDF page dimensions
+                              const canvas = document.createElement('canvas');
+                              const context = canvas.getContext('2d');
+                              canvas.height = viewport.height
+                              canvas.width = viewport.width;
+                              canvas.id = i+1;
 
-            canvasPage1 = document.getElementById(numP);
+                              width.push(viewport.width);
+                              heigth.push(viewport.height);
+                              // Render PDF page into canvas context
+                              const renderContext = {
+                                  canvasContext: context,
+                                  viewport: viewport
+                              };
 
-            canvasPagePourMerge = canvasStock[Number(numP) - 1];
-
-            canvasMerge = document.createElement('canvas');
-            canvasMerge.height = canvasPage1.height;
-            canvasMerge.width = canvasPage1.width;
-            contextmerge = canvasMerge.getContext('2d')
-
-            contextmerge.drawImage(canvasPagePourMerge, 0, 0);
-            contextmerge.drawImage(image, dragOffsetX, dragOffsetY);
-            canvasMerge.id = numP;
-
-            canvasPage1.replaceWith(canvasMerge);
-        }
-
-        addIm(image);
-
-
-        canvasMerge.addEventListener('mousedown', function (e) {
-            if (image) {
-                isDragging = true;
-                dragStartX = e.clientX;
-                dragStartY = e.clientY;
-            }
-        });
-
-        canvasMerge.addEventListener('mousemove', function (e) {
-            if (isDragging) {
-
-                var offsetX = e.clientX - dragStartX;
-                var offsetY = e.clientY - dragStartY;
-                dragOffsetX += offsetX;
-                dragOffsetY += offsetY;
-                dragStartX = e.clientX;
-                dragStartY = e.clientY;
-                addImage(image);
-            }
-        });
-
-        canvasMerge.addEventListener('mouseup', function () {
-            isDragging = false;
-        });
-
-    }
+                              const renderTask = page.render(renderContext);
+                              return renderTask.promise.then(() => canvas);
+                          });
+                  });
+          });
+  }
 
 
-    ///////////////////////////// Display PDF //////////////////////
-    function displayPages(index) {
-        if (index >= pages.length) {
-            return true;
-        }
 
-        page = pages[index];
-        pdfDoc.getPage(page.number).then(function (pdfPage) {
-            let scale = 2;
-            let viewport = pdfPage.getViewport({scale: scale});
+async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
+    const scale = 1 / window.devicePixelRatio;
 
-            let canvas = document.createElement('canvas');
-            canvas.classList.add('Mon-pdf-page');
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-            canvas.dataset.pageNumber = page.number;
-            canvas.id = page.number;
+   /// this is let singleCanvas = await printSinglePDFPage(pdfData, pageIndex);
 
-            canvasStock.push(canvas);
+    const imageData = await pdfDataArray[pageIndex];
 
-
-            let context = canvas.getContext('2d');
-            let renderContext = {
-                canvasContext: context,
-                viewport: viewport
-            };
-
-            pdfPage.render(renderContext).promise.then(function () {
-
-
-                $('#pdf-container').append(canvas);
-                page.rendered = true;
-                // Afficher la page suivante
-                displayPages(index + 1);
-            });
-        });
-    }
-
-    /////////////////// Load PDF ////////////////////
-
-
-    $(document).ready(function () {
-        $('#pdf-input').change(async function (e) {
-            file = e.target.files[0];
-
-            let fileReader = new FileReader();
-            fileReader.onload = async function () {
-                typedarray = new Uint8Array(await this.result);
-                console.log("this typedarray", typedarray);
-                typedarrayPdf = await new Uint8Array();
-                typedarrayPdf = await typedarray;
-
-                console.log("this typedarrayPdf", typedarrayPdf);
-                MypdfDoc = pdfjsLib.getDocument(typedarray).promise.then(function (pdf) {
-                    let numPages = pdf.numPages;
-                    pdfDoc = pdf;
-
-                    pages = [];
-                    for (let i = 1; i <= numPages; i++) {
-                        pages.push({number: i, rendered: false});
-                    }
-
-                    displayPages(0);
-                });
-            };
-
-            fileReader.readAsArrayBuffer(file);
-
-        });
+    const fabricImage = new fabric.Image(imageData, {
+        left: 0,
+        top: 0,
+        scaleX: scale,
+        scaleY: scale,
+        selectable: false,
     });
 
+    canvas.add(fabricImage);
+}
 
-    let pdfContainer = document.getElementById('pdf-container');
-    pdfContainer.addEventListener('mouseover', function () {
-        const lesCanvas = document.querySelectorAll('canvas');
-        lesCanvas.forEach(cnv => {
-            cnv.addEventListener("click", (e) => {
-                if ((numP != 0) && (numP != cnv.id)){
-                    document.getElementById(numP).classList.remove("redacted-page");
+
+  async  function createCanvas(i, pdfDataArray, width, heigth){
+      const canvas2e = document.createElement('canvas');
+      const context2e = canvas2e.getContext('2d');
+      canvas2e.height = heigth;
+      canvas2e.width = width;
+      //canvas2e.height = 900;
+      //canvas2e.width = 800;
+      canvas2e.id = i+1;
+      canvas2e.style.left = "50%";
+      document.getElementById("body").appendChild(canvas2e);
+      let canvas2 = this.__canvas = new fabric.Canvas(`${i+1}`);
+      canvas2.on('object:scaled', function(event) {
+            console.log("scaled");
+   var scaledObject = event.target;
+    var scaledWidth = scaledObject.width * scaledObject.scaleX;
+   var scaledHeight = scaledObject.height * scaledObject.scaleY;
+   console.log('Scaled Width:', scaledWidth);
+   console.log('Scaled Height:', scaledHeight);
+     scaledObject.width = scaledWidth;
+     scaledObject.height = scaledHeight;
+  });
+      canvas2.getElement().style.left = "50%";
+      let upperCanvas = canvas2.upperCanvasEl;
+      upperCanvas.style.left = "50%";
+      listCanvas.push(canvas2);
+
+
+      await pdfPageToImage( i, canvas2, pdfDataArray);
+      canvas2.requestRenderAll();
+
+  }
+
+  var canvas = this.__canvas = new fabric.Canvas('c');
+
+    canvas.getElement().removeAttribute("style");
+    const text = new fabric.Text('Upload PDF');
+    canvas.add(new fabric.Circle({ radius: 100, fill: 'green' }), text);
+    document.getElementById("pdf-upload").addEventListener('change', async (e) => {
+        //e.preventDefault();
+            listCanvas = [];
+            numPages = 0;
+            width = [];
+            heigth = [];
+
+            listObject = [];
+            listObjetPage = [];
+
+        file = e.target.files[0];
+        text.set('text', 'loading...');
+        canvas.requestRenderAll();
+        const pdfDataArray = await printPDF(e.target.files[0]);
+         await numPages;
+        //await width;
+        //await heigth;
+        for (let i =0; i< numPages; i++){
+             while (typeof width[i] === 'undefined') {
+            await new Promise(resolve => setTimeout(resolve, 100)); // Attendre 100 millisecondes
                 }
-                numP = cnv.id;
-                cnv.classList.add("redacted-page");
-            });
-        });
+
+            await createCanvas(i, pdfDataArray, width[i], heigth[i]);
+        }
+
+        canvas.remove(text);
+        if ($('#save-button').prop('disabled')) {
+            $('#save-button').prop('disabled', false);}
     });
 
+	// create a rect object
+  var deleteIcon = "data:image/svg+xml,%3C%3Fxml version='1.0' encoding='utf-8'%3F%3E%3C!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'%3E%3Csvg version='1.1' id='Ebene_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='595.275px' height='595.275px' viewBox='200 215 230 470' xml:space='preserve'%3E%3Ccircle style='fill:%23F44336;' cx='299.76' cy='439.067' r='218.516'/%3E%3Cg%3E%3Crect x='267.162' y='307.978' transform='matrix(0.7071 -0.7071 0.7071 0.7071 -222.6202 340.6915)' style='fill:white;' width='65.545' height='262.18'/%3E%3Crect x='266.988' y='308.153' transform='matrix(0.7071 0.7071 -0.7071 0.7071 398.3889 -83.3116)' style='fill:white;' width='65.544' height='262.179'/%3E%3C/g%3E%3C/svg%3E";
+  var cloneIcon = "data:image/svg+xml,%3C%3Fxml version='1.0' encoding='iso-8859-1'%3F%3E%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 55.699 55.699' width='100px' height='100px' xml:space='preserve'%3E%3Cpath style='fill:%23010002;' d='M51.51,18.001c-0.006-0.085-0.022-0.167-0.05-0.248c-0.012-0.034-0.02-0.067-0.035-0.1 c-0.049-0.106-0.109-0.206-0.194-0.291v-0.001l0,0c0,0-0.001-0.001-0.001-0.002L34.161,0.293c-0.086-0.087-0.188-0.148-0.295-0.197 c-0.027-0.013-0.057-0.02-0.086-0.03c-0.086-0.029-0.174-0.048-0.265-0.053C33.494,0.011,33.475,0,33.453,0H22.177 c-3.678,0-6.669,2.992-6.669,6.67v1.674h-4.663c-3.678,0-6.67,2.992-6.67,6.67V49.03c0,3.678,2.992,6.669,6.67,6.669h22.677 c3.677,0,6.669-2.991,6.669-6.669v-1.675h4.664c3.678,0,6.669-2.991,6.669-6.669V18.069C51.524,18.045,51.512,18.025,51.51,18.001z M34.454,3.414l13.655,13.655h-8.985c-2.575,0-4.67-2.095-4.67-4.67V3.414z M38.191,49.029c0,2.574-2.095,4.669-4.669,4.669H10.845 c-2.575,0-4.67-2.095-4.67-4.669V15.014c0-2.575,2.095-4.67,4.67-4.67h5.663h4.614v10.399c0,3.678,2.991,6.669,6.668,6.669h10.4 v18.942L38.191,49.029L38.191,49.029z M36.777,25.412h-8.986c-2.574,0-4.668-2.094-4.668-4.669v-8.985L36.777,25.412z M44.855,45.355h-4.664V26.412c0-0.023-0.012-0.044-0.014-0.067c-0.006-0.085-0.021-0.167-0.049-0.249 c-0.012-0.033-0.021-0.066-0.036-0.1c-0.048-0.105-0.109-0.205-0.194-0.29l0,0l0,0c0-0.001-0.001-0.002-0.001-0.002L22.829,8.637 c-0.087-0.086-0.188-0.147-0.295-0.196c-0.029-0.013-0.058-0.021-0.088-0.031c-0.086-0.03-0.172-0.048-0.263-0.053 c-0.021-0.002-0.04-0.013-0.062-0.013h-4.614V6.67c0-2.575,2.095-4.67,4.669-4.67h10.277v10.4c0,3.678,2.992,6.67,6.67,6.67h10.399 v21.616C49.524,43.26,47.429,45.355,44.855,45.355z'/%3E%3C/svg%3E%0A";
 
-    ////////////////////////////////add button image///////////////////////////////////////////////////////
-    let i = 1;
-    document.getElementById('add-image-btn').addEventListener('click', function (e) {
-        const lesCanvas = document.querySelectorAll('canvas');
-        let j = 0;
-        if (lesCanvas) {
-            lesCanvas.forEach(cvn => {
-                canvasStock[j] = cvn;
-                j++;
+  var deleteImg = document.createElement('img');
+  deleteImg.src = deleteIcon;
 
-            });
-        }
+  var cloneImg = document.createElement('img');
+  cloneImg.src = cloneIcon;
 
-        if ($('#save-button').prop('disabled')) {
-            $('#save-button').prop('disabled', false);
-        }
+  fabric.Object.prototype.transparentCorners = false;
+  fabric.Object.prototype.cornerColor = 'blue';
+  fabric.Object.prototype.cornerStyle = 'circle';
 
-        if (pdfDoc) {
+  function Add() {
+      let indexActiveCanvas;
+
+      const canvasElements = document.querySelectorAll('canvas');
+      const canvasToRemove = document.getElementById('c');
+     const updatedCanvasElements = Array.from(canvasElements).filter(canvas => canvas !== canvasToRemove && !canvas.classList.contains('upper-canvas'));
+      for (let i = 0; i < updatedCanvasElements.length; i++) {
+    const canvas = updatedCanvasElements[i];
+    const canvasRect = canvas.getBoundingClientRect();
+
+    if (
+
+      canvasRect.left >= 0 &&
+      Math.abs(canvasRect.top) <= window.innerHeight/2 &&
+      canvasRect.right <= window.innerWidth
+    ) {
+      console.log('Canvas visible:', canvas.id);
+      indexActiveCanvas = canvas.id;
+      break; // Sortir de la boucle dès que le canvas est trouvé
+    }}
+
+
+      let convasFabricActive = listCanvas[indexActiveCanvas-1];
+       //document.getElementById('add-image-btn').addEventListener('click', function (e) {
             var imageInput = document.createElement('input');
             imageInput.type = 'file';
             imageInput.accept = 'image/*';
             imageInput.addEventListener('change', function () {
                 imageFile = imageInput.files[0];
-                imageStock.push(imageFile);
-                listNbrPages.push(numP);
-                if (dragOffsetX != 0) {
-                    imageStockX.push(dragOffsetX);
-                    imageStockY.push(dragOffsetY);
-                }
 
                 if (imageFile && imageFile.type.includes('image/')) {
                     var imageReader = new FileReader();
@@ -256,7 +281,19 @@
                         image = new Image();
                         image.onload = function () {
 
-                            addImage(image);
+                             const fabricimage = new fabric.Image(image, {
+                                 left: 100,
+                                    top: 50,
+                                     // scaleX: scale,
+                                         // scaleY: scale,
+                                objectCaching: false,
+                                });
+
+
+                                convasFabricActive.add(fabricimage);
+                                 convasFabricActive.setActiveObject(fabricimage);
+                                  convasFabricActive.renderAll();
+
                         };
                         image.src = e.target.result;
                     };
@@ -266,77 +303,86 @@
                 }
             });
             imageInput.click();
-
-        }
-    });
-
-    /////////////////////////// DOWNLOAD ////////////////////////////////
-    $('#save-button').click(async function () {
-
-            imageStockX.push(dragOffsetX);
-            imageStockY.push(dragOffsetY);
-
-
-        const typedArray = new Uint8Array(await file.arrayBuffer());
-
-
-        console.log('mon pdf array : ', typedArray);
-        const pdfDocLib = await PDFLib.PDFDocument.load(typedArray);
-
-        const copiedPages = [];
-        const modifiedPdfDoc = await PDFLib.PDFDocument.create();
-
-        for (let i = 0; i < pdfDocLib.getPageCount(); i++) {
-            const [copiedPage] = await modifiedPdfDoc.copyPages(pdfDocLib, [i]);
-            copiedPages.push(copiedPage);
-
-        }
+       //});
+   // var rect = new fabric.Rect({
+   //   left: 100,
+    //  top: 50,
+   //   fill: 'black',
+    //  width: 150,
+  //    height: 10,
+   //   objectCaching: false,
+      //stroke: 'lightgreen',
+  //    strokeWidth: 2,
+  //  });
 
 
-        console.log("imageStock ", imageStock);
-        console.log("listNbrPages ", listNbrPages);
+      convasFabricActive.on('object:scaled', function(event) {
+            console.log("scaled");
+   var scaledObject = event.target;
+    var scaledWidth = scaledObject.width * scaledObject.scaleX;
+   var scaledHeight = scaledObject.height * scaledObject.scaleY;
+   console.log('Scaled Width:', scaledWidth);
+   console.log('Scaled Height:', scaledHeight);
+     scaledObject.width = scaledWidth;
+     scaledObject.height = scaledHeight;
+  });
+  }
+
+fabric.Object.prototype.controls.deleteControl = new fabric.Control({
+    x: 0.5,
+    y: -0.5,
+    offsetY: -16,
+    offsetX: 16,
+    cursorStyle: 'pointer',
+    mouseUpHandler: deleteObject,
+    render: renderIcon(deleteImg),
+    cornerSize: 24
+  });
+
+  fabric.Object.prototype.controls.clone = new fabric.Control({
+    x: -0.5,
+    y: -0.5,
+    offsetY: -16,
+    offsetX: -16,
+    cursorStyle: 'pointer',
+    mouseUpHandler: cloneObject,
+    render: renderIcon(cloneImg),
+    cornerSize: 24
+  });
 
 
-        let i = 1;
-        for (let Monpage of copiedPages) {
-            let j = 0;
-            for (n of listNbrPages) {
-                if (Number(n) == i) {
-                    let pngImageBytes = new Uint8Array(await imageStock[j].arrayBuffer());
-                    console.log("pngImageBytes : ", pngImageBytes);
-                    const pngImage = await modifiedPdfDoc.embedPng(pngImageBytes);
-                    const pngDims = pngImage.scale(0.5);
+  function deleteObject(eventData, transform) {
+		var target = transform.target;
+		var canvas = target.canvas;
+		    canvas.remove(target);
+        canvas.requestRenderAll();
+	}
 
-                    Monpage.drawImage(pngImage, {
-                        x: imageStockX[j] / 2,
-                        y: Monpage.getHeight() - imageStockY[j] / 2 - pngDims.height,
-                        width: pngDims.width,
-                        height: pngDims.height,
-                    });
-                }
-                j++;
+      function cloneObject(eventData, transform) {
+    var target = transform.target;
+    var canvas = target.canvas;
+    target.clone(function(cloned) {
+      cloned.left += 10;
+      cloned.top += 10;
+      canvas.add(cloned);
+    });}
 
-            }
-            i++;
-
-            modifiedPdfDoc.addPage(Monpage);
-        }
-
-
-        const pdfDocLibBytes = await modifiedPdfDoc.save();
-
-        const blob = new Blob([pdfDocLibBytes], {type: 'application/pdf'});
-
-// Télécharger le fichier PDF modifié
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "modified_pdf.pdf";
-        a.click();
-        URL.revokeObjectURL(url);
+function renderIcon(icon) {
+    return function renderIcon(ctx, left, top, styleOverride, fabricObject) {
+      var size = this.cornerSize;
+      ctx.save();
+      ctx.translate(left, top);
+      ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
+      ctx.drawImage(icon, -size/2, -size/2, size, size);
+      ctx.restore();
+    }
+  }
 
 
-    });
+
 </script>
+
+
 </body>
+
 </html>
