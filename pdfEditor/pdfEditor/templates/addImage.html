@@ -60,18 +60,14 @@
     <div class="controls">
 
           <button  type="button" class="btn btn-primary add-image" id="add-image-btn" onclick="Add()">Insérer une image</button>
+        <button type="button" name="save-button" id="save-button" disabled>Enregistrer et Télécharger</button>
 
 
     </div>
 
-        <form enctype="multipart/form-data" id="pdf-upload-form" method="post">
-            {% csrf_token %}
-            <button type="submit" name="save-button" id="save-button" disabled>Enregistrer et Télécharger</button>
+
 </div>
             <input name="pdf-upload" id="pdf-upload" type="file" accept="application/pdf">
-             <input type="hidden" id="listObjet-input" name="listObjet">
-            <input type="hidden" id="listPage-input" name="listPage">
-            </form>
 
 <canvas id="c" width="300" height="200">
 </canvas> </div>
@@ -261,7 +257,6 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
       Math.abs(canvasRect.top) <= window.innerHeight/2 &&
       canvasRect.right <= window.innerWidth
     ) {
-      console.log('Canvas visible:', canvas.id);
       indexActiveCanvas = canvas.id;
       break; // Sortir de la boucle dès que le canvas est trouvé
     }}
@@ -280,15 +275,15 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
                     imageReader.onload = function (e) {
                         image = new Image();
                         image.onload = function () {
+                            const scale = 1 / window.devicePixelRatio;
 
                              const fabricimage = new fabric.Image(image, {
                                  left: 100,
-                                    top: 50,
-                                     // scaleX: scale,
-                                         // scaleY: scale,
-                                objectCaching: false,
+                                 top: 50,
+                                 caleX: scale,
+                                 scaleY: scale,
+                                 objectCaching: false,
                                 });
-
 
                                 convasFabricActive.add(fabricimage);
                                  convasFabricActive.setActiveObject(fabricimage);
@@ -303,18 +298,6 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
                 }
             });
             imageInput.click();
-       //});
-   // var rect = new fabric.Rect({
-   //   left: 100,
-    //  top: 50,
-   //   fill: 'black',
-    //  width: 150,
-  //    height: 10,
-   //   objectCaching: false,
-      //stroke: 'lightgreen',
-  //    strokeWidth: 2,
-  //  });
-
 
       convasFabricActive.on('object:scaled', function(event) {
             console.log("scaled");
@@ -379,6 +362,87 @@ function renderIcon(icon) {
   }
 
 
+    $('#save-button').click(async function () {
+
+              listObject = [];
+              listObjetPage = [];
+
+      // Parcours de chaque canevas dans la liste
+    for (let i = 0; i < listCanvas.length; i++) {
+        const canvas = listCanvas[i];
+
+        // Récupération de la liste des objets du canevas
+        const objects = canvas.getObjects();
+
+    // Parcours de chaque objet dans la liste
+        for (let j = 0; j < objects.length; j++) {
+            const object = objects[j];
+
+        // Vérification si l'objet est de type 'rect'
+            if (object.type ===  'image') {
+                const left = object.left; // Coordonnée horizontale
+                const top = object.top;   // Coordonnée verticale
+                const width = object.width; // Largeur
+                const height = object.height; // Hauteur
+                const imageDataURL = object.toDataURL();
+                listObject.push({ imageDataURL, left, top, width, height });
+                listObjetPage.push(i+1);
+
+            }
+        }
+    }
+
+        const typedArray = new Uint8Array(await file.arrayBuffer());
+
+        const pdfDocLib = await PDFLib.PDFDocument.load(typedArray);
+
+        const copiedPages = [];
+        const modifiedPdfDoc = await PDFLib.PDFDocument.create();
+
+        for (let i = 0; i < pdfDocLib.getPageCount(); i++) {
+            const [copiedPage] = await modifiedPdfDoc.copyPages(pdfDocLib, [i]);
+            copiedPages.push(copiedPage);
+
+        }
+
+        let i = 1;
+        for (let Monpage of copiedPages) {
+            let j = 0;
+            for (n of listObjetPage) {
+                if (Number(n) == i) {
+
+                    const pngImage = await modifiedPdfDoc.embedPng(listObject[j].imageDataURL);
+
+                    Monpage.drawImage(pngImage, {
+                        x: listObject[j].left ,
+                        y: Monpage.getHeight() - listObject[j].top - listObject[j].height,
+                        width: listObject[j].width,
+                        height: listObject[j].height,
+                    });
+                }
+                j++;
+
+            }
+            i++;
+
+            modifiedPdfDoc.addPage(Monpage);
+        }
+
+
+        const pdfDocLibBytes = await modifiedPdfDoc.save();
+
+        const blob = new Blob([pdfDocLibBytes], {type: 'application/pdf'});
+
+// Télécharger le fichier PDF modifié
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "modified_pdf.pdf";
+        a.click();
+        URL.revokeObjectURL(url);
+
+
+    });
 
 </script>
 
