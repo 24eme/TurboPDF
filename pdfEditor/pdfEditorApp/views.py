@@ -21,8 +21,8 @@ import json
 def homePagePdf(request):
     return render(request, 'homePagePdf.html')
 
-def addImage(request):
-    return render(request, 'addImage.html')
+def editerPDF(request):
+    return render(request, 'editerPDF.html')
 
 def deletePagePdf(request):
     return render(request, 'deletePagePdf.html')

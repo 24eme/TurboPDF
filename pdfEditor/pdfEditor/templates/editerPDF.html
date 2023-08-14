@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Modifier un pdf</title>
             <script src="{%static 'fabric/fabric.min.js' %}"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
         <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
@@ -53,14 +53,23 @@
 {% include "main/includes/header.html" %}
 
 <div id="app">
-     <h2>Insérer des images</h2>
-    <p>Insérer des images à votre fichier PDF.</p>
+     <h2>Modifier un pdf</h2>
+    <p>Insérer des images à votre fichier PDF ou ajouter des zones textes.</p>
 
 <div class="floating-menu">
     <div class="controls">
 
-          <button  type="button" class="btn btn-primary add-image" id="add-image-btn" onclick="Add()">🌸 Insérer une image</button>
-        <button type="button" name="save-button" id="save-button" disabled>🌸 Enregistrer et Télécharger</button>
+          <button  type="button" class="btn btn-primary add-image" id="add-image-btn" title="Insérer une image" onclick="Add()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-images" viewBox="0 0 16 16">
+  <path d="M4.502 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>
+  <path d="M14.002 13a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2V5A2 2 0 0 1 2 3a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-1.998 2zM14 2H4a1 1 0 0 0-1 1h9.002a2 2 0 0 1 2 2v7A1 1 0 0 0 15 11V3a1 1 0 0 0-1-1zM2.002 4a1 1 0 0 0-1 1v8l2.646-2.354a.5.5 0 0 1 .63-.062l2.66 1.773 3.71-3.71a.5.5 0 0 1 .577-.094l1.777 1.947V5a1 1 0 0 0-1-1h-10z"/>
+</svg> images </button>
+        <button type="button" class="btn btn-primary add-image"  id="add-text-button" title="Ajouter une zone texte" onclick="AddText()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cursor-text" viewBox="0 0 16 16">
+  <path d="M5 2a.5.5 0 0 1 .5-.5c.862 0 1.573.287 2.06.566.174.099.321.198.44.286.119-.088.266-.187.44-.286A4.165 4.165 0 0 1 10.5 1.5a.5.5 0 0 1 0 1c-.638 0-1.177.213-1.564.434a3.49 3.49 0 0 0-.436.294V7.5H9a.5.5 0 0 1 0 1h-.5v4.272c.1.08.248.187.436.294.387.221.926.434 1.564.434a.5.5 0 0 1 0 1 4.165 4.165 0 0 1-2.06-.566A4.561 4.561 0 0 1 8 13.65a4.561 4.561 0 0 1-.44.285 4.165 4.165 0 0 1-2.06.566.5.5 0 0 1 0-1c.638 0 1.177-.213 1.564-.434.188-.107.335-.214.436-.294V8.5H7a.5.5 0 0 1 0-1h.5V3.228a3.49 3.49 0 0 0-.436-.294A3.166 3.166 0 0 0 5.5 2.5.5.5 0 0 1 5 2zm3.352 1.355zm-.704 9.29z"/>
+</svg> Textes</button>
+        <button type="button" name="save-button" id="save-button" disabled><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+</svg> Enregistrer et Télécharger</button>
 
 
     </div>
@@ -82,7 +91,8 @@
   let listObject = [];
   let listObjetPage = [];
   let file = null;
-   let imageFile = null;
+  let imageFile = null;
+  let info;
 
   const Base64Prefix = "data:application/pdf;base64,";
   function getPdfHandler() {
@@ -104,9 +114,12 @@
       const data = atob(pdfData.startsWith(Base64Prefix) ? pdfData.substring(Base64Prefix.length) : pdfData);
       // Using DocumentInitParameters object to load binary data.
       const loadingTask = pdfjsLib.getDocument({ data });
+
       return loadingTask.promise
           .then((pdf) => {
               numPages = pdf.numPages;
+                const metadata = pdf.getMetadata();
+                info = metadata;
               return new Array(numPages).fill(0)
                   .map((__, i) => {
                       const pageNumber = i + 1;
@@ -174,8 +187,6 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
    var scaledObject = event.target;
     var scaledWidth = scaledObject.width * scaledObject.scaleX;
    var scaledHeight = scaledObject.height * scaledObject.scaleY;
-   console.log('Scaled Width:', scaledWidth);
-   console.log('Scaled Height:', scaledHeight);
      scaledObject.width = scaledWidth;
      scaledObject.height = scaledHeight;
   });
@@ -303,13 +314,46 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
    var scaledObject = event.target;
     var scaledWidth = scaledObject.width * scaledObject.scaleX;
    var scaledHeight = scaledObject.height * scaledObject.scaleY;
-   console.log('Scaled Width:', scaledWidth);
-   console.log('Scaled Height:', scaledHeight);
      scaledObject.width = scaledWidth;
      scaledObject.height = scaledHeight;
   });
   }
 
+  function AddText(){
+
+       let indexActiveCanvas;
+
+      const canvasElements = document.querySelectorAll('canvas');
+      const canvasToRemove = document.getElementById('c');
+     const updatedCanvasElements = Array.from(canvasElements).filter(canvas => canvas !== canvasToRemove && !canvas.classList.contains('upper-canvas'));
+      for (let i = 0; i < updatedCanvasElements.length; i++) {
+    const canvas = updatedCanvasElements[i];
+    const canvasRect = canvas.getBoundingClientRect();
+
+    if (
+
+      canvasRect.left >= 0 &&
+      Math.abs(canvasRect.top) <= window.innerHeight/2 &&
+      canvasRect.right <= window.innerWidth
+    ) {
+      indexActiveCanvas = canvas.id;
+      break; // Sortir de la boucle dès que le canvas est trouvé
+    }}
+
+
+      let convasFabricActive = listCanvas[indexActiveCanvas-1];
+      const text = new fabric.IText('entrer votre texte ici', {
+                left: 100,
+                top: 100,
+                fontFamily: 'Times New Roman',
+                fontSize: 14,
+                fill: 'black'
+            });
+
+    convasFabricActive.add(text);
+    convasFabricActive.setActiveObject(text);
+
+  }
 fabric.Object.prototype.controls.deleteControl = new fabric.Control({
     x: 0.5,
     y: -0.5,
@@ -376,20 +420,25 @@ function renderIcon(icon) {
     // Parcours de chaque objet dans la liste
         for (let j = 0; j < objects.length; j++) {
             const object = objects[j];
+            const left = object.left; // Coordonnée horizontale
+            const top = object.top;   // Coordonnée verticale
+            const width = object.width; // Largeur
+            const height = object.height; // Hauteur
+            const type = object.type; // type
 
         // Vérification si l'objet est de type 'rect'
             if (object.type ===  'image') {
-                const left = object.left; // Coordonnée horizontale
-                const top = object.top;   // Coordonnée verticale
-                const width = object.width; // Largeur
-                const height = object.height; // Hauteur
                 if (object.selectable){
-                    const imageDataURL = object.toDataURL();
-                    listObject.push({ imageDataURL, left, top, width, height });
+                    //const imageDataURL = object.toDataURL();
+                    listObject.push({ object, type, left, top, width, height });
                     listObjetPage.push(i+1);
 
                 }
 
+            }
+            else if (object.type ===  'i-text') {
+                 listObject.push({ object, type, left, top, width, height });
+                listObjetPage.push(i+1);
 
             }
         }
@@ -408,28 +457,35 @@ function renderIcon(icon) {
 
         }
 
-        let i = 1;
-        for (let Monpage of copiedPages) {
-            let j = 0;
-            for (n of listObjetPage) {
-                if (Number(n) == i) {
-
-                    const pngImage = await modifiedPdfDoc.embedPng(listObject[j].imageDataURL);
-
-                    Monpage.drawImage(pngImage, {
-                        x: listObject[j].left ,
-                        y: Monpage.getHeight() - listObject[j].top - listObject[j].height,
-                        width: listObject[j].width,
-                        height: listObject[j].height,
-                    });
-                }
-                j++;
-
+let i = 1;
+for (let Monpage of copiedPages) {
+    let j = 0;
+    for (n of listObjetPage) {
+        if (Number(n) == i) {
+            if (listObject[j].type === "i-text") {
+                // Si l'objet est de type "texte", ajoutez le texte à la page
+                Monpage.drawText(listObject[j].object.text, {
+                    x: listObject[j].left,
+                    y: Monpage.getHeight() - listObject[j].top - listObject[j].height,
+                    size: listObject[j].object.fontSize,
+                });
+            } else if (listObject[j].type === "image") {
+                // Si l'objet est de type "image", ajoutez l'image à la page
+                const pngImage = await modifiedPdfDoc.embedPng(listObject[j].object.toDataURL());
+                Monpage.drawImage(pngImage, {
+                    x: listObject[j].left,
+                    y: Monpage.getHeight() - listObject[j].top - listObject[j].height,
+                    width: listObject[j].width,
+                    height: listObject[j].height,
+                });
             }
-            i++;
-
-            modifiedPdfDoc.addPage(Monpage);
         }
+        j++;
+    }
+    i++;
+
+    modifiedPdfDoc.addPage(Monpage);
+}
 
 
         const pdfDocLibBytes = await modifiedPdfDoc.save();

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from pdfEditorApp.views import compressPdf, download_compressed, displayPdf, lockPdf, unlockPdf, addImage
+from pdfEditorApp.views import compressPdf, download_compressed, displayPdf, lockPdf, unlockPdf, editerPDF
 from pdfEditorApp.views import fillFormPdf, appendPdf, download_append_file, splitPdf,extractPagesToPng
 from pdfEditorApp.views import homePagePdf, deletePagePdf, pdfToImage, modifyText, redact, download_pdf, maskEmail, redactHomePage
 
@@ -10,7 +10,7 @@ urlpatterns = [
     path('', homePagePdf, name='homePagePdf'),
     path('admin/', admin.site.urls),
     path('displayPdf/', displayPdf, name='displayPdf'),
-    path('addImage/', addImage, name='addImage'),
+    path('editerPDF/', editerPDF, name='editerPDF'),
     path('deletePagePdf/', deletePagePdf, name='deletePagePdf'),
     path('fillFormPdf/', fillFormPdf, name='fillFormPdf'),
 
@@ -24,7 +24,6 @@ urlpatterns = [
     path('unlockPdf/', unlockPdf, name='unlockPdf'),
     path('lockPdf/', lockPdf, name='lockPdf'),
     path('splitPdf/', splitPdf, name='splitPdf'),
-    path('modifyText/', modifyText, name='modifyText'),
     path('redactHomePage/', redactHomePage, name='redactHomePage'),
     path('redactHomePage/maskEmail/', maskEmail, name='maskEmail'),
     path('redactHomePage/redact/', redact, name='redact'),
