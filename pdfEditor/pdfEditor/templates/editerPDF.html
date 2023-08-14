@@ -78,11 +78,11 @@
   <path d="M1.5 2.5A1.5 1.5 0 0 1 3 1h10a1.5 1.5 0 0 1 1.5 1.5v3.563a2 2 0 0 1 0 3.874V13.5A1.5 1.5 0 0 1 13 15H3a1.5 1.5 0 0 1-1.5-1.5V9.937a2 2 0 0 1 0-3.874V2.5zm1 3.563a2 2 0 0 1 0 3.874V13.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5V9.937a2 2 0 0 1 0-3.874V2.5A.5.5 0 0 0 13 2H3a.5.5 0 0 0-.5.5v3.563zM2 7a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm12 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
   <path d="M11.434 4H4.566L4.5 5.994h.386c.21-1.252.612-1.446 2.173-1.495l.343-.011v6.343c0 .537-.116.665-1.049.748V12h3.294v-.421c-.938-.083-1.054-.21-1.054-.748V4.488l.348.01c1.56.05 1.963.244 2.173 1.496h.386L11.434 4z"/>
 </svg> </button></li>
-    <li><button title="checkbox" class="dropdown-item" type="button"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check2-square" viewBox="0 0 16 16">
+    <li><button title="checkbox" class="dropdown-item" type="button" onclick="AddCheckBox()"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check2-square" viewBox="0 0 16 16">
   <path d="M3 14.5A1.5 1.5 0 0 1 1.5 13V3A1.5 1.5 0 0 1 3 1.5h8a.5.5 0 0 1 0 1H3a.5.5 0 0 0-.5.5v10a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5V8a.5.5 0 0 1 1 0v5a1.5 1.5 0 0 1-1.5 1.5H3z"/>
   <path d="m8.354 10.354 7-7a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/>
 </svg></button></li>
-    <li><button title="radio" class="dropdown-item" type="button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16">
+    <li><button title="radio" class="dropdown-item" type="button" onclick="AddRadio()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16">
   <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
   <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
 </svg> </button></li>
@@ -406,8 +406,9 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
   width: 200,
   fontSize: 16,
   fill: 'black',
-  stroke: 'black' ,
+   objectCaching: false,
   hasControls: false, // Hide controls (resizing handles)
+  backgroundColor: '#aaf'
 });
 
     convasFabricActive.add(input1);
@@ -415,6 +416,84 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
 
   }
 
+  function AddCheckBox(){
+
+       let indexActiveCanvas;
+
+      const canvasElements = document.querySelectorAll('canvas');
+      const canvasToRemove = document.getElementById('c');
+     const updatedCanvasElements = Array.from(canvasElements).filter(canvas => canvas !== canvasToRemove && !canvas.classList.contains('upper-canvas'));
+      for (let i = 0; i < updatedCanvasElements.length; i++) {
+    const canvas = updatedCanvasElements[i];
+    const canvasRect = canvas.getBoundingClientRect();
+
+    if (
+
+      canvasRect.left >= 0 &&
+      Math.abs(canvasRect.top) <= window.innerHeight/2 &&
+      canvasRect.right <= window.innerWidth
+    ) {
+      indexActiveCanvas = canvas.id;
+      break; // Sortir de la boucle dès que le canvas est trouvé
+    }}
+
+
+      let convasFabricActive = listCanvas[indexActiveCanvas-1];
+     // Create checkbox
+        const checkboxRect = new fabric.Rect({
+        left: 50,
+        top: 100,
+        width: 20,
+        height: 20,
+        fill: '#f0f0f0',
+        strokeWidth: 1,
+        stroke: 'black',
+        rx: 2, // Rounded corners
+        ry: 2,
+        });
+
+    convasFabricActive.add(checkboxRect);
+    convasFabricActive.setActiveObject(checkboxRect);
+
+  }
+
+  function AddRadio(){
+
+       let indexActiveCanvas;
+
+      const canvasElements = document.querySelectorAll('canvas');
+      const canvasToRemove = document.getElementById('c');
+     const updatedCanvasElements = Array.from(canvasElements).filter(canvas => canvas !== canvasToRemove && !canvas.classList.contains('upper-canvas'));
+      for (let i = 0; i < updatedCanvasElements.length; i++) {
+    const canvas = updatedCanvasElements[i];
+    const canvasRect = canvas.getBoundingClientRect();
+
+    if (
+
+      canvasRect.left >= 0 &&
+      Math.abs(canvasRect.top) <= window.innerHeight/2 &&
+      canvasRect.right <= window.innerWidth
+    ) {
+      indexActiveCanvas = canvas.id;
+      break; // Sortir de la boucle dès que le canvas est trouvé
+    }}
+
+
+      let convasFabricActive = listCanvas[indexActiveCanvas-1];
+     // Create checkbox
+        const checkboxRect = new fabric.Circle({
+        left: 50,
+        top: 100,
+        radius: 10,
+        fill: '#f0f0f0',
+        strokeWidth: 1,
+        stroke: 'black',
+        });
+
+    convasFabricActive.add(checkboxRect);
+    convasFabricActive.setActiveObject(checkboxRect);
+
+  }
 
   fabric.Object.prototype.controls.deleteControl = new fabric.Control({
     x: 0.5,
@@ -438,7 +517,6 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
     cornerSize: 24
   });
 
-
   function deleteObject(eventData, transform) {
 		var target = transform.target;
 		var canvas = target.canvas;
@@ -446,7 +524,7 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
         canvas.requestRenderAll();
 	}
 
-      function cloneObject(eventData, transform) {
+  function cloneObject(eventData, transform) {
     var target = transform.target;
     var canvas = target.canvas;
     target.clone(function(cloned) {
@@ -455,7 +533,7 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
       canvas.add(cloned);
     });}
 
-function renderIcon(icon) {
+  function renderIcon(icon) {
     return function renderIcon(ctx, left, top, styleOverride, fabricObject) {
       var size = this.cornerSize;
       ctx.save();
@@ -466,8 +544,7 @@ function renderIcon(icon) {
     }
   }
 
-
-    $('#save-button').click(async function () {
+  $('#save-button').click(async function () {
 
               listObject = [];
               listObjetPage = [];
@@ -498,7 +575,7 @@ function renderIcon(icon) {
                 }
 
             }
-            else if (object.type ===  'i-text' || object.type === 'textbox') {
+            else if (object.type ===  'i-text' || object.type === 'textbox' || object.type === 'circle' || object.type === 'rect') {
                  listObject.push({ object, type, left, top, width, height });
                 listObjetPage.push(i+1);
 
@@ -520,7 +597,9 @@ function renderIcon(icon) {
         }
 
 let i = 1;
-         let textFieldIndex = 1;
+let textFieldIndex = 1;
+let radiodIndex = 1;
+let checkIndex = 1;
 for (let Monpage of copiedPages) {
     let j = 0;
     for (n of listObjetPage) {
@@ -552,6 +631,29 @@ for (let Monpage of copiedPages) {
                     height: listObject[j].height,
                 });
                textFieldIndex++;
+
+            } else if (listObject[j].type === 'circle'){
+                const form = modifiedPdfDoc.getForm();
+                const radioGroup = form.createRadioGroup(`cool.new.radioGroup${radiodIndex}`);
+
+                radioGroup.addOptionToPage('radio' ,Monpage,  {
+                    x: listObject[j].left,
+                    y: Monpage.getHeight() - listObject[j].top - listObject[j].height,
+                    width: listObject[j].width,
+                    height: listObject[j].height,
+                });
+                radiodIndex++;
+            } else if (listObject[j].type === 'rect') {
+                const form = modifiedPdfDoc.getForm();
+                const checkBox = form.createCheckBox(`cool.new.checkBox${checkIndex}`);
+
+                checkBox.addToPage(Monpage,  {
+                    x: listObject[j].left,
+                    y: Monpage.getHeight() - listObject[j].top - listObject[j].height,
+                    width: listObject[j].width,
+                    height: listObject[j].height,
+                });
+                checkIndex++;
 
             }
         }
