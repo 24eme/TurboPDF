@@ -88,6 +88,7 @@
 </svg> </button></li>
   </ul>
 </div>
+        <button type="button" class="btn btn-primary add-image" id="pageVide" onclick="addPageVide()" title="Ajoute une page vide à la fin de pdf">Page vide</button>
         <button type="button" name="save-button" id="save-button" disabled><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
   <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
   <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
@@ -115,6 +116,8 @@
   let file = null;
   let imageFile = null;
   let info;
+  let numberPageVide = 0;
+  let positionPageVide = [];
 
   const Base64Prefix = "data:application/pdf;base64,";
   function getPdfHandler() {
@@ -544,6 +547,30 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
     }
   }
 
+    function addPageVide(){
+      const canvasElements = document.querySelectorAll('canvas');
+      const canvasToRemove = document.getElementById('c');
+     const updatedCanvasElements = Array.from(canvasElements).filter(canvas => canvas !== canvasToRemove && !canvas.classList.contains('upper-canvas'));
+     const lastElement = updatedCanvasElements[updatedCanvasElements.length -1];
+     const id = lastElement.id;
+     const height = lastElement.height;
+     const width = lastElement.width;
+     const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.height = height;
+      canvas.width = width;
+      canvas.id = Number(id) + 1;
+      canvas.style.left = "50%";
+      document.getElementById("body").appendChild(canvas);
+      let canvas2 = this.__canvas = new fabric.Canvas(`${Number(id) + 1}`);
+      canvas2.getElement().style.left = "50%";
+      let upperCanvas = canvas2.upperCanvasEl;
+      upperCanvas.style.left = "50%";
+       listCanvas.push(canvas2);
+       numberPageVide ++;
+
+  }
+
   $('#save-button').click(async function () {
 
               listObject = [];
@@ -586,6 +613,10 @@ async function pdfPageToImage(pageIndex, canvas, pdfDataArray) {
         const typedArray = new Uint8Array(await file.arrayBuffer());
 
         const pdfDocLib = await PDFLib.PDFDocument.load(typedArray);
+        for (let i =0; i< numberPageVide; i++){
+            const page = pdfDocLib.addPage();
+        }
+
 
         const copiedPages = [];
         const modifiedPdfDoc = await PDFLib.PDFDocument.create();
